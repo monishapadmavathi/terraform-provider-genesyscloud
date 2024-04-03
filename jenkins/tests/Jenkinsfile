@@ -25,6 +25,7 @@ pipeline {
         
         stage('Install Dependencies & Build') {
             steps {
+                sh 'rm -rf ~/.terraform.d/*'
                 echo 'Installing dependencies'
                 sh 'go version'
                 sh 'go mod download'
