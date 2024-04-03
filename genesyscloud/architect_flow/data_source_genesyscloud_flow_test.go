@@ -43,6 +43,7 @@ func TestAccDataSourceFlow(t *testing.T) {
 				),
 			},
 		},
+		CheckDestroy: testVerifyFlowDestroyed,
 	})
 }
 
