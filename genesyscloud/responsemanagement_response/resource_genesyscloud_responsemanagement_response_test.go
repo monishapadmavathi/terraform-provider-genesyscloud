@@ -18,7 +18,6 @@ import (
 )
 
 func TestAccResourceResponseManagementResponseFooterField(t *testing.T) {
-	t.Parallel()
 	var (
 		// Responses initial values
 		responseResource          = "response-resource"
@@ -202,7 +201,6 @@ func TestAccResourceResponseManagementResponseFooterField(t *testing.T) {
 }
 
 func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
-	t.Parallel()
 	var (
 		// Responses initial values
 		responseResource          = "response-resource"
