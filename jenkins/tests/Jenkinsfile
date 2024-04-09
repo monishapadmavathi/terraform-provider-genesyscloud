@@ -26,6 +26,8 @@ pipeline {
         stage('Install Dependencies & Build') {
             steps {
                 sh 'rm -rf ~/.terraform.d/*'
+                sh 'go mod tidy'
+                sh 'go clean -i -r'
                 echo 'Installing dependencies'
                 sh 'go version'
                 sh 'go mod download'
@@ -54,7 +56,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
                     {
                         echo 'Loading Genesys OAuth Credentials'
-                        sh 'go test ./genesyscloud/... -run TestAcc -v -timeout 120m -parallel 20 -cover -coverprofile=coverageAcceptance.out'
+                        sh 'go test ./genesyscloud/... -run TestAcc -v -timeout 120m -parallel 10 -cover -coverprofile=coverageAcceptance.out'
                     }
                 }
             }
