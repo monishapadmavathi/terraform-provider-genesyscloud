@@ -37,6 +37,7 @@ func TestAccDataSourceAuthDivision(t *testing.T) {
 				),
 			},
 		},
+		CheckDestroy: testVerifyDivisionsDestroyed,
 	})
 }
 

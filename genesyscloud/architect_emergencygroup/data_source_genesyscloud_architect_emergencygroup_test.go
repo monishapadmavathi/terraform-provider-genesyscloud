@@ -38,6 +38,7 @@ func TestAccDataSourceEmergencyGroup(t *testing.T) {
 				),
 			},
 		},
+	CheckDestroy: testVerifyEmergencyGroupDestroyed,
 	})
 }
 
