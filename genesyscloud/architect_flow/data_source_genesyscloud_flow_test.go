@@ -42,6 +42,12 @@ func TestAccDataSourceFlow(t *testing.T) {
 					resource.TestCheckResourceAttrPair("data.genesyscloud_flow."+flowDataSource, "id", "genesyscloud_flow."+flowResource, "id"),
 				),
 			},
+			{ // Import/Read
+				ResourceName:            "genesyscloud_flow." + flowResource,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"filepath", "force_unlock", "file_content_hash"},
+			},
 		},
 		CheckDestroy: testVerifyFlowDestroyed,
 	})
