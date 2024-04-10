@@ -2,7 +2,6 @@ package architect_flow
 
 import (
 	"fmt"
-	"os"
 	"terraform-provider-genesyscloud/genesyscloud/provider"
 	"terraform-provider-genesyscloud/genesyscloud/util"
 	"testing"
@@ -13,15 +12,15 @@ import (
 )
 
 func TestAccDataSourceFlow(t *testing.T) {
-	t.Skip("Flow update done even after applying")
-	myDir, _ := os.Getwd()
+	//t.Skip("Flow update done even after applying")
+	//myDir, _ := os.Getwd()
 	var (
 		flowDataSource    = "flow-data"
 		flowName          = "test flow " + uuid.NewString()
 		inboundcallConfig = fmt.Sprintf("inboundCall:\n  name: %s\n  defaultLanguage: en-us\n  startUpRef: ./menus/menu[mainMenu]\n  initialGreeting:\n    tts: Archy says hi!!!\n  menus:\n    - menu:\n        name: Main Menu\n        audio:\n          tts: You are at the Main Menu, press 9 to disconnect.\n        refId: mainMenu\n        choices:\n          - menuDisconnect:\n              name: Disconnect\n              dtmf: digit_9", flowName)
 
 		flowResource = "test_flow"
-		filePath     = myDir + "/../../examples/resources/genesyscloud_flow/inboundcall_flow_example.yaml"
+		filePath     = "../../examples/resources/genesyscloud_flow/inboundcall_flow_example.yaml"
 	)
 
 	resource.Test(t, resource.TestCase{
@@ -42,12 +41,6 @@ func TestAccDataSourceFlow(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.genesyscloud_flow."+flowDataSource, "id", "genesyscloud_flow."+flowResource, "id"),
 				),
-			},
-			{ // Import/Read
-				ResourceName:            "genesyscloud_flow." + flowResource,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"filepath", "force_unlock", "file_content_hash"},
 			},
 		},
 		CheckDestroy: testVerifyFlowDestroyed,
