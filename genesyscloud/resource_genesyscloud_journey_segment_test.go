@@ -17,6 +17,7 @@ import (
 )
 
 func TestAccResourceJourneySegmentCustomer(t *testing.T) {
+	t.Skip("Customer segment not implemented")
 	runResourceJourneySegmentTestCase(t, "basic_customer_attributes")
 }
 
