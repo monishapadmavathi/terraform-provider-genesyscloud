@@ -50,13 +50,6 @@ func TestAccResourceResponseManagementResponseFooterField(t *testing.T) {
 		fullPath      = fmt.Sprintf("%s/%s", testFilesDir, fileName)
 	)
 
-	defer func() {
-		err := cleanupResponseAssets(testFilesDir)
-		if err != nil {
-			log.Printf("error cleaning up response assets: %v. Dangling assets may exist.", err)
-		}
-	}()
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { util.TestAccPreCheck(t) },
 		ProviderFactories: provider.GetProviderFactories(providerResources, providerDataSources),
