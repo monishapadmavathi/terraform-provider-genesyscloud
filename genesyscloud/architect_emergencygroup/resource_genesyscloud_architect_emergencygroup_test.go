@@ -17,7 +17,7 @@ import (
 
 func TestAccResourceArchitectEmergencyGroups(t *testing.T) {
 	//t.Parallel()
-	t.Skip("skipping flow tests")
+	//t.Skip("skipping flow tests")
 	var (
 		resourceType = "genesyscloud_architect_emergencygroup"
 		resourceName = "test_emergency_group"
@@ -72,6 +72,7 @@ func TestAccResourceArchitectEmergencyGroups(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceType+"."+resourceName, "emergency_call_flows.0.emergency_flow_id",
 						"genesyscloud_flow."+flowResource, "id"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				// Update
@@ -96,6 +97,7 @@ func TestAccResourceArchitectEmergencyGroups(t *testing.T) {
 						"genesyscloud_flow."+flowResource, "id"),
 					resource.TestCheckResourceAttr(resourceType+"."+resourceName, "emergency_call_flows.0.ivr_ids.0", ivrId),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				// Import/Read

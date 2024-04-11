@@ -30,14 +30,15 @@ func TestAccDataSourceResponseManagementResponseAsset(t *testing.T) {
 		ProviderFactories: provider.GetProviderFactories(providerResources, providerDataSources),
 		Steps: []resource.TestStep{
 			{
-				Config: generateResponseManagementResponseAssetDataSource(dataSourceId, fileName, "genesyscloud_responsemanagement_responseasset."+resourceId) +
-					GenerateResponseManagementResponseAssetResource(resourceId, fileName, util.NullValue),
+				Config: GenerateResponseManagementResponseAssetResource(resourceId, fileName, util.NullValue) +
+					generateResponseManagementResponseAssetDataSource(dataSourceId, fileName, "genesyscloud_responsemanagement_responseasset."+resourceId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.genesyscloud_responsemanagement_responseasset."+dataSourceId, "id",
 						"genesyscloud_responsemanagement_responseasset."+resourceId, "id"),
 				),
 			},
 		},
+		CheckDestroy: testVerifyResponseAssetDestroyed,
 	})
 }
 

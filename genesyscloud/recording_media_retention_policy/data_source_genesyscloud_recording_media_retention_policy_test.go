@@ -199,6 +199,7 @@ func TestAccDataSourceRecordingMediaRetentionPolicy(t *testing.T) {
 				),
 			},
 		},
+		CheckDestroy: testVerifyMediaRetentionPolicyDestroyed,
 	})
 }
 

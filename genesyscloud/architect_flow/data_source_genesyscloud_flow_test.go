@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccDataSourceFlow(t *testing.T) {
-	t.Skip("Flow update done even after applying")
+	//t.Skip("Flow update done even after applying")
 	//myDir, _ := os.Getwd()
 	var (
 		flowDataSource    = "flow-data"
@@ -38,9 +38,17 @@ func TestAccDataSourceFlow(t *testing.T) {
 					"genesyscloud_flow."+flowResource,
 					flowName,
 				),
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.genesyscloud_flow."+flowDataSource, "id", "genesyscloud_flow."+flowResource, "id"),
 				),
+			},
+			{
+				// Import/Read
+				ResourceName:            "genesyscloud_flow." + flowResource,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"filepath", "force_unlock", "file_content_hash"},
 			},
 		},
 		CheckDestroy: testVerifyFlowDestroyed,
