@@ -96,7 +96,6 @@ func TestAccResourceArchitectEmergencyGroups(t *testing.T) {
 						"genesyscloud_flow."+flowResource, "id"),
 					resource.TestCheckResourceAttr(resourceType+"."+resourceName, "emergency_call_flows.0.ivr_ids.0", ivrId),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 			{
 				// Import/Read
