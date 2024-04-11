@@ -92,6 +92,20 @@ func TestAccResourceAuthDivisionHome(t *testing.T) {
 				Config: GenerateAuthDivisionResource(
 					divHomeRes,
 					divHomeName,
+					strconv.Quote(homeDesc),
+					util.TrueValue, // Home division
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("genesyscloud_auth_division."+divHomeRes, "name", divHomeName),
+					resource.TestCheckResourceAttr("genesyscloud_auth_division."+divHomeRes, "description", homeDesc),
+					validateHomeDivisionID("genesyscloud_auth_division."+divHomeRes),
+				),
+			},
+			{
+				// Set home division description
+				Config: GenerateAuthDivisionResource(
+					divHomeRes,
+					divHomeName,
 					strconv.Quote(homeDesc2),
 					util.TrueValue, // Home division
 				),

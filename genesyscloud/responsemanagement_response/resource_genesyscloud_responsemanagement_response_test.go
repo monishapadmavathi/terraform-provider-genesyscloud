@@ -38,9 +38,9 @@ func TestAccResourceResponseManagementResponseFooterField(t *testing.T) {
 
 		// Library resources variables
 		libraryResource1 = "library-resource1"
-		libraryName1     = "Reference library1"
+		libraryName1     = "Reference library 1"
 		libraryResource2 = "library-resource2"
-		libraryName2     = "Reference library2"
+		libraryName2     = "Reference library 2"
 
 		// Asset resources variables
 		testFilesDir  = "test_responseasset_data"
