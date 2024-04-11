@@ -123,7 +123,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Integration Tests') {
             environment {
                 TF_ACC=1
@@ -230,7 +230,7 @@ pipeline {
                     echo 'Attempting to Run Remaining Tests'
                     withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
                         echo 'Loading Genesys OAuth Credentials'
-                        sh "go test ./genesyscloud/... -run '^TestAcc.*$' -skip 'Architect|Flow|Idp|Auth|Integration|Journey|Knowledge|Outbound|Routing|ResponseManagement|Export' -v -count=1 -timeout 120m -cover -coverprofile=coverageRemaining.out"
+                        sh "go test ./genesyscloud/... -run TestAcc -skip 'Architect|Flow|Idp|Auth|Integration|Journey|Knowledge|Outbound|Routing|ResponseManagement|Export' -v -count=1 -timeout 120m -cover -coverprofile=coverageRemaining.out"
 
                     }
                 }
