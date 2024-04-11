@@ -22,7 +22,7 @@ import (
 func TestAccResourceRoutingEmailRoute(t *testing.T) {
 	var (
 		domainRes          = "routing-domain1"
-		domainId           = fmt.Sprintf("terraform.%s.com", strings.Replace(uuid.NewString(), "-", "", -1))
+		domainId           = fmt.Sprintf("terraformroute.%s.com", strings.Replace(uuid.NewString(), "-", "", -1))
 		queueResource      = "email-queue"
 		queueName          = "Terraform Email Queue-" + uuid.NewString()
 		langResource       = "email-lang"
@@ -487,7 +487,7 @@ func CleanupRoutingEmailDomains() {
 		}
 
 		for _, routingEmailDomain := range *routingEmailDomains.Entities {
-			if routingEmailDomain.Id != nil && strings.HasPrefix(*routingEmailDomain.Id, "terraform") {
+			if routingEmailDomain.Id != nil && strings.HasPrefix(*routingEmailDomain.Id, "terraformroute") {
 				_, err := routingAPI.DeleteRoutingEmailDomain(*routingEmailDomain.Id)
 				if err != nil {
 					log.Printf("Failed to delete routing email domain %s: %s", *routingEmailDomain.Id, err)

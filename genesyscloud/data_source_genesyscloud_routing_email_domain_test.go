@@ -18,7 +18,7 @@ import (
 func TestAccDataSourceRoutingEmailDomain(t *testing.T) {
 	var (
 		emailDomainResourceId = "email_domain_test"
-		emailDomainId         = fmt.Sprintf("terraform.%s.com", strings.Replace(uuid.NewString(), "-", "", -1))
+		emailDomainId         = fmt.Sprintf("terraformdomain.%s.com", strings.Replace(uuid.NewString(), "-", "", -1))
 		emailDataResourceId   = "email_domain_data"
 	)
 
@@ -73,7 +73,7 @@ func CleanupRoutingEmailDomains() {
 		}
 
 		for _, routingEmailDomain := range *routingEmailDomains.Entities {
-			if routingEmailDomain.Id != nil && strings.HasPrefix(*routingEmailDomain.Id, "terraform") {
+			if routingEmailDomain.Id != nil && strings.HasPrefix(*routingEmailDomain.Id, "terraformdomain") {
 				_, err := routingAPI.DeleteRoutingEmailDomain(*routingEmailDomain.Id)
 				if err != nil {
 					log.Printf("Failed to delete routing email domain %s: %s", *routingEmailDomain.Id, err)

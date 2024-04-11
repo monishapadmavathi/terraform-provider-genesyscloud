@@ -21,7 +21,7 @@ tests for team.
 */
 
 func TestAccResourceMembers(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	var (
 		resourceId = "Teams" + uuid.NewString()
 		name1      = "Test Teams " + uuid.NewString()
