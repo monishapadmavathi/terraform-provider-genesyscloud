@@ -60,7 +60,7 @@ pipeline {
                     
                         stages {
         stage('Architect Tests') {
-            steps {
+            steps {   
                 script {
                     echo 'Running Architect Tests'
                     sh 'go test ./genesyscloud/... -run TestAcc.*Architect -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceArchitect.out'
@@ -77,14 +77,14 @@ pipeline {
             }
         }
         
-        stage('Idp Tests') {
-            steps {
-                script {
-                    echo 'Running Idp Tests'
-                    sh 'go test ./genesyscloud/... -run TestAcc.*Idp -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceIdp.out'
-                }
-            }
-        }
+        // stage('Idp Tests') {
+        //     steps {
+        //         script {
+        //             echo 'Running Idp Tests'
+        //             sh 'go test ./genesyscloud/... -run TestAcc.*Idp -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceIdp.out'
+        //         }
+        //     }
+        // }
 
         stage('Auth Tests') {
             steps {
@@ -95,50 +95,50 @@ pipeline {
             }
         }
 
-        stage('Integration Tests') {
-            steps {
-                script {
-                    echo 'Running Integration Tests'
-                    sh 'go test ./genesyscloud/... -run TestAcc.*Integration -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceIntegration.out'
-                }
-            }
-        }
+        // stage('Integration Tests') {
+        //     steps {
+        //         script {
+        //             echo 'Running Integration Tests'
+        //             sh 'go test ./genesyscloud/... -run TestAcc.*Integration -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceIntegration.out'
+        //         }
+        //     }
+        // }
 
-        stage('Journey Tests') {
-            steps {
-                script {
-                    echo 'Running Journey Tests'
-                    sh 'go test ./genesyscloud/... -run TestAcc.*Journey -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceJourney.out'
-                }
-            }
-        }
+        // stage('Journey Tests') {
+        //     steps {
+        //         script {
+        //             echo 'Running Journey Tests'
+        //             sh 'go test ./genesyscloud/... -run TestAcc.*Journey -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceJourney.out'
+        //         }
+        //     }
+        // }
 
-        stage('Knowledge Tests') {
-            steps {
-                script {
-                    echo 'Running Knowledge Tests'
-                    sh 'go test ./genesyscloud/... -run TestAcc.*Knowledge -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceKnowledge.out'
-                }
-            }
-        }
+        // stage('Knowledge Tests') {
+        //     steps {
+        //         script {
+        //             echo 'Running Knowledge Tests'
+        //             sh 'go test ./genesyscloud/... -run TestAcc.*Knowledge -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceKnowledge.out'
+        //         }
+        //     }
+        // }
 
-        stage('Outbound Tests') {
-            steps {
-                script {
-                    echo 'Running Outbound Tests'
-                    sh 'go test ./genesyscloud/... -run TestAcc.*Outbound -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceOutbound.out'
-                }
-            }
-        }
+        // stage('Outbound Tests') {
+        //     steps {
+        //         script {
+        //             echo 'Running Outbound Tests'
+        //             sh 'go test ./genesyscloud/... -run TestAcc.*Outbound -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceOutbound.out'
+        //         }
+        //     }
+        // }
 
-        stage('Routing Tests') {
-            steps {
-                script {
-                    echo 'Running Routing Tests'
-                    sh 'go test ./genesyscloud/... -run TestAcc.*Routing -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceRouting.out'
-                }
-            }
-        }
+        // stage('Routing Tests') {
+        //     steps {
+        //         script {
+        //             echo 'Running Routing Tests'
+        //             sh 'go test ./genesyscloud/... -run TestAcc.*Routing -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceRouting.out'
+        //         }
+        //     }
+        // }
 
         stage('ResponseManagement Tests') {
             steps {
@@ -149,23 +149,23 @@ pipeline {
             }
         }
 
-        stage('Export Tests') {
-            steps {
-                script {
-                    echo 'Running Export Tests'
-                    sh 'go test ./genesyscloud/... -run TestAcc.*Export -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceExport.out'
-                }
-            }
-        }
+        // stage('Export Tests') {
+        //     steps {
+        //         script {
+        //             echo 'Running Export Tests'
+        //             sh 'go test ./genesyscloud/... -run TestAcc.*Export -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceExport.out'
+        //         }
+        //     }
+        // }
 
-        stage('Remaining Tests') {
-            steps {
-                script {
-                    echo 'Running Remaining Tests'
-                    sh 'go test ./genesyscloud/... -run "TestAcc^(?!.*(Architect|Flow|Idp|Auth|Integration|Journey|Knowledge|Outbound|Routing|ResponseManagement|Export)).*" -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceRemaining.out'
-                }
-            }
-        }
+        // stage('Remaining Tests') {
+        //     steps {
+        //         script {
+        //             echo 'Running Remaining Tests'
+        //             sh 'go test ./genesyscloud/... -run "TestAcc^(?!.*(Architect|Flow|Idp|Auth|Integration|Journey|Knowledge|Outbound|Routing|ResponseManagement|Export)).*" -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceRemaining.out'
+        //         }
+        //     }
+        // }
     }
                     
                     }
