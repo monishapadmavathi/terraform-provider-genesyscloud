@@ -53,8 +53,8 @@ pipeline {
             steps {
             catchError(buildResult: 'SUCCESS', stageResult:'FAILURE'){
                 echo 'Attempting to Run Acceptance Tests'
-                withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
-                    {
+                //withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
+                   // {
                         echo 'Loading Genesys OAuth Credentials'
                         //sh 'go test ./genesyscloud/... -run TestAcc -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptance.out'
                     
@@ -63,8 +63,11 @@ pipeline {
             steps {   
                 script {
                     echo 'Running Architect Tests'
+                   withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
+            {
                     sh 'go test ./genesyscloud/... -run TestAcc.*Architect -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceArchitect.out'
-                }
+             
+               }   }
             }
         }
         
@@ -72,7 +75,10 @@ pipeline {
             steps {
                 script {
                     echo 'Running Flow Tests'
+                    withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
+                {
                     sh 'go test ./genesyscloud/... -run TestAcc.*Flow -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceFlow.out'
+                }
                 }
             }
         }
@@ -90,7 +96,10 @@ pipeline {
             steps {
                 script {
                     echo 'Running Auth Tests'
+                    withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
+                {
                     sh 'go test ./genesyscloud/... -run TestAcc.*Auth -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceAuth.out'
+                }
                 }
             }
         }
@@ -144,8 +153,10 @@ pipeline {
             steps {
                 script {
                     echo 'Running ResponseManagement Tests'
+                    withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
+                {
                     sh 'go test ./genesyscloud/... -run TestAcc.*ResponseManagement -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptanceResponseManagement.out'
-                }
+                }}
             }
         }
 
@@ -166,7 +177,7 @@ pipeline {
         //         }
         //     }
         // }
-    }
+   // }
                     
                     }
                 }
