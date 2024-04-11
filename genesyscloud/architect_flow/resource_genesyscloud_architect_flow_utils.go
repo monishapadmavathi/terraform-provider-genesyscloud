@@ -6,12 +6,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
-var lock = sync.Mutex{}
 
 func isForceUnlockEnabled(d *schema.ResourceData) bool {
 	forceUnlock := d.Get("force_unlock").(bool)
@@ -24,7 +21,6 @@ func isForceUnlockEnabled(d *schema.ResourceData) bool {
 }
 
 func GenerateFlowResource(resourceID, srcFile, fileContent string, forceUnlock bool, substitutions ...string) string {
-	lock.Lock()
 	fullyQualifiedPath, _ := filepath.Abs(srcFile)
 
 	if fileContent != "" {
@@ -38,7 +34,6 @@ func GenerateFlowResource(resourceID, srcFile, fileContent string, forceUnlock b
 		%s
 	}
 	`, resourceID, strconv.Quote(srcFile), strconv.Quote(fullyQualifiedPath), forceUnlock, strings.Join(substitutions, "\n"))
-	defer lock.Unlock()
 	return flowResourceStr
 }
 
