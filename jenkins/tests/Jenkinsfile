@@ -58,7 +58,7 @@ pipeline {
                         echo 'Loading Genesys OAuth Credentials'
                         //sh 'go test ./genesyscloud/... -run TestAcc -v -count=1 -timeout 120m -cover -coverprofile=coverageAcceptance.out'
                     
-                        stages {
+                      script {
         stage('Architect Tests') {
             steps {   
                 script {
