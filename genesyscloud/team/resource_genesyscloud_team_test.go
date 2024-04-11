@@ -24,7 +24,7 @@ func TestAccResourceMembers(t *testing.T) {
 	t.Parallel()
 	var (
 		resourceId = "Teams" + uuid.NewString()
-		name1      = "Test Teams Resource" + uuid.NewString()
+		name1      = "Test Teams " + uuid.NewString()
 
 		divResource = "test-division"
 		divName     = "terraform-" + uuid.NewString()
