@@ -2,6 +2,7 @@ package responsemanagement_response
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"terraform-provider-genesyscloud/genesyscloud/provider"
@@ -38,9 +39,9 @@ func TestAccResourceResponseManagementResponseFooterField(t *testing.T) {
 
 		// Library resources variables
 		libraryResource1 = "library-resource1"
-		libraryName1     = "Reference library 1"
+		libraryName1     = "Referencelibrary1"
 		libraryResource2 = "library-resource2"
-		libraryName2     = "Reference library 2"
+		libraryName2     = "Referencelibrary2"
 
 		// Asset resources variables
 		testFilesDir  = "test_responseasset_data"
@@ -48,6 +49,13 @@ func TestAccResourceResponseManagementResponseFooterField(t *testing.T) {
 		fileName      = "yeti-img.png"
 		fullPath      = fmt.Sprintf("%s/%s", testFilesDir, fileName)
 	)
+
+	defer func() {
+		err := cleanupResponseAssets(testFilesDir)
+		if err != nil {
+			log.Printf("error cleaning up response assets: %v. Dangling assets may exist.", err)
+		}
+	}()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { util.TestAccPreCheck(t) },
@@ -222,9 +230,9 @@ func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
 
 		// Library resources variables
 		libraryResource1 = "library-resource1"
-		libraryName1     = "Reference library1"
+		libraryName1     = "Referencelibrary1"
 		libraryResource2 = "library-resource2"
-		libraryName2     = "Reference library2"
+		libraryName2     = "Referencelibrary2"
 
 		// Asset resources variables
 		testFilesDir  = "test_responseasset_data"
@@ -391,6 +399,9 @@ func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
 				),
 			},
 			{
+				RefreshState: true,
+			},
+			{
 				// Import/Read
 				ResourceName:            "genesyscloud_responsemanagement_response." + responseResource,
 				ImportState:             true,
@@ -501,5 +512,44 @@ func testVerifyResponseManagementResponseDestroyed(state *terraform.State) error
 		}
 	}
 	// Success. All responses destroyed
+	return nil
+}
+
+func cleanupResponseAssets(folderName string) error {
+	var (
+		name    = "name"
+		fields  = []string{name}
+		varType = "STARTS_WITH"
+	)
+	config, err := provider.AuthorizeSdk()
+	if err != nil {
+		return err
+	}
+	respManagementApi := platformclientv2.NewResponseManagementApiWithConfig(config)
+
+	var filter = platformclientv2.Responseassetfilter{
+		Fields:  &fields,
+		Value:   &folderName,
+		VarType: &varType,
+	}
+
+	var body = platformclientv2.Responseassetsearchrequest{
+		Query:  &[]platformclientv2.Responseassetfilter{filter},
+		SortBy: &name,
+	}
+
+	responseData, _, err := respManagementApi.PostResponsemanagementResponseassetsSearch(body, nil)
+	if err != nil {
+		return err
+	}
+
+	if responseData.Results != nil && len(*responseData.Results) > 0 {
+		for _, result := range *responseData.Results {
+			_, err = respManagementApi.DeleteResponsemanagementResponseasset(*result.Id)
+			if err != nil {
+				log.Printf("Failed to delete response assets %s: %v", *result.Id, err)
+			}
+		}
+	}
 	return nil
 }

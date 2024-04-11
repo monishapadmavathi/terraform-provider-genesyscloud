@@ -29,11 +29,11 @@ func TestAccResourceMembers(t *testing.T) {
 		divResource = "test-division"
 		divName     = "terraform-" + uuid.NewString()
 
-		testUserResource1 = "user_resource 1"
+		testUserResource1 = "user_resource_1"
 		testUserName1     = "nameUser1" + uuid.NewString()
 		testUserEmail1    = fmt.Sprintf(randString(5) + "@" + randString(5) + ".com")
 
-		testUserResource2 = "user_resource 2"
+		testUserResource2 = "user_resource_2"
 		testUserName2     = "nameUser2" + uuid.NewString()
 		testUserEmail2    = fmt.Sprintf(randString(5) + "@" + randString(5) + ".com")
 	)

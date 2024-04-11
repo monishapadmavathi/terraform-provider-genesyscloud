@@ -40,6 +40,9 @@ func TestAccDataSourceFlow(t *testing.T) {
 				),
 				ExpectNonEmptyPlan: true,
 			},
+			{
+				RefreshState: true,
+			},
 			//Wait for flow to be created
 			{
 				Config: GenerateFlowResource(
