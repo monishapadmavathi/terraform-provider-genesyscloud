@@ -38,7 +38,6 @@ func TestAccDataSourceFlow(t *testing.T) {
 					"genesyscloud_flow."+flowResource,
 					flowName,
 				),
-				ExpectNonEmptyPlan: true,
 			},
 			//Wait for flow to be created
 			{
