@@ -86,6 +86,7 @@ func TestAccResourceAuthDivisionHome(t *testing.T) {
 					resource.TestCheckResourceAttr("genesyscloud_auth_division."+divHomeRes, "description", homeDesc),
 					validateHomeDivisionID("genesyscloud_auth_division."+divHomeRes),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				// Set home division description again
@@ -113,6 +114,7 @@ func TestAccResourceAuthDivisionHome(t *testing.T) {
 					resource.TestCheckResourceAttr("genesyscloud_auth_division."+divHomeRes, "name", divHomeName),
 					resource.TestCheckResourceAttr("genesyscloud_auth_division."+divHomeRes, "description", homeDesc2),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				// Set home division description again
