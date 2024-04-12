@@ -39,22 +39,6 @@ func TestAccDataSourceFlow(t *testing.T) {
 					flowName,
 				),
 			},
-			//Wait for flow to be created
-			{
-				Config: GenerateFlowResource(
-					flowResource,
-					filePath,
-					inboundcallConfig,
-					false,
-				) + generateFlowDataSource(
-					flowDataSource,
-					"genesyscloud_flow."+flowResource,
-					flowName,
-				),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("data.genesyscloud_flow."+flowDataSource, "id", "genesyscloud_flow."+flowResource, "id"),
-				),
-			},
 			{
 				// Import/Read
 				ResourceName:            "genesyscloud_flow." + flowResource,

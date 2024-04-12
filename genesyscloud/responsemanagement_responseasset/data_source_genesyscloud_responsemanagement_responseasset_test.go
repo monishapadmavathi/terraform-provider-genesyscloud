@@ -14,7 +14,7 @@ func TestAccDataSourceResponseManagementResponseAsset(t *testing.T) {
 	var (
 		resourceId   = "resp_asset"
 		testDirName  = "test_responseasset_data"
-		fileName     = fmt.Sprintf("%s/yeti-img.png", testDirName)
+		fileName     = fmt.Sprintf("%s/yeti-img-asset.png", testDirName)
 		dataSourceId = "resp_asset_data"
 	)
 
