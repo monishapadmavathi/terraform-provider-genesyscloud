@@ -40,6 +40,14 @@ func TestAccDataSourceFlow(t *testing.T) {
 				),
 			},
 			{
+				Config: GenerateFlowResource(
+					flowResource,
+					filePath,
+					inboundcallConfig,
+					false,
+				),
+			},
+			{
 				// Import/Read
 				ResourceName:            "genesyscloud_flow." + flowResource,
 				ImportState:             true,

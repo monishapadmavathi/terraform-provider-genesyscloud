@@ -571,6 +571,36 @@ func TestAccResourceRoutingQueueFlows(t *testing.T) {
 				),
 			},
 			{
+				// Create
+				Config: architect_flow.GenerateFlowResource(
+					queueFlowResource1,
+					queueFlowFilePath1,
+					queueFlowInboundcallConfig1,
+					false,
+				) + architect_flow.GenerateFlowResource(
+					emailInQueueFlowResource1,
+					queueFlowFilePath2,
+					emailInQueueFlowInboundcallConfig2,
+					false,
+				) + architect_flow.GenerateFlowResource(
+					messageInQueueFlowResource1,
+					queueFlowFilePath3,
+					messageInQueueFlowInboundcallConfig3,
+					false,
+				) + GenerateRoutingQueueResourceBasic(
+					queueResource1,
+					queueName1,
+					"queue_flow_id = genesyscloud_flow."+queueFlowResource1+".id",
+					"email_in_queue_flow_id = genesyscloud_flow."+emailInQueueFlowResource1+".id",
+					"message_in_queue_flow_id = genesyscloud_flow."+messageInQueueFlowResource1+".id",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("genesyscloud_routing_queue."+queueResource1, "queue_flow_id", "genesyscloud_flow."+queueFlowResource1, "id"),
+					resource.TestCheckResourceAttrPair("genesyscloud_routing_queue."+queueResource1, "email_in_queue_flow_id", "genesyscloud_flow."+emailInQueueFlowResource1, "id"),
+					resource.TestCheckResourceAttrPair("genesyscloud_routing_queue."+queueResource1, "message_in_queue_flow_id", "genesyscloud_flow."+messageInQueueFlowResource1, "id"),
+				),
+			},
+			{
 				// Update the flows
 				Config: architect_flow.GenerateFlowResource(
 					queueFlowResource2,
