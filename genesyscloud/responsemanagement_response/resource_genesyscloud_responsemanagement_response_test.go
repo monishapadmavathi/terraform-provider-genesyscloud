@@ -234,6 +234,7 @@ func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
 		fullPath      = fmt.Sprintf("%s/%s", testFilesDir, fileName)
 	)
 
+	cleanupResponseAssets(testFilesDir)
 	defer func() {
 		err := cleanupResponseAssets(testFilesDir)
 		if err != nil {
