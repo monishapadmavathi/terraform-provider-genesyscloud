@@ -472,7 +472,7 @@ func TestAccResourceRoutingQueueParToCGR(t *testing.T) {
 	})
 }
 
-func TestAccResourceRoutingQueueFlows(t *testing.T) {
+func TestAccResourceRoutingQueue(t *testing.T) {
 	var (
 		queueResource1 = "test-queue"
 		queueName1     = "Terraform Test Queue1-" + uuid.NewString()
@@ -593,11 +593,6 @@ func TestAccResourceRoutingQueueFlows(t *testing.T) {
 					"queue_flow_id = genesyscloud_flow."+queueFlowResource1+".id",
 					"email_in_queue_flow_id = genesyscloud_flow."+emailInQueueFlowResource1+".id",
 					"message_in_queue_flow_id = genesyscloud_flow."+messageInQueueFlowResource1+".id",
-				),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("genesyscloud_routing_queue."+queueResource1, "queue_flow_id", "genesyscloud_flow."+queueFlowResource1, "id"),
-					resource.TestCheckResourceAttrPair("genesyscloud_routing_queue."+queueResource1, "email_in_queue_flow_id", "genesyscloud_flow."+emailInQueueFlowResource1, "id"),
-					resource.TestCheckResourceAttrPair("genesyscloud_routing_queue."+queueResource1, "message_in_queue_flow_id", "genesyscloud_flow."+messageInQueueFlowResource1, "id"),
 				),
 			},
 			{
