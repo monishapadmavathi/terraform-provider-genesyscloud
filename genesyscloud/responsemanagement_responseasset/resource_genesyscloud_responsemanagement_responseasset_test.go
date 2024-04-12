@@ -116,7 +116,7 @@ func cleanupResponseAssets(folderName string) error {
 			}
 		}
 	}
-	defer mutex.UnLock()
+	defer mutex.Unlock()
 	return nil
 }
 
