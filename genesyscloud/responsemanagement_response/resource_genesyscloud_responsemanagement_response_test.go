@@ -235,6 +235,7 @@ func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
 	)
 
 	cleanupResponseAssets(testFilesDir)
+
 	defer func() {
 		err := cleanupResponseAssets(testFilesDir)
 		if err != nil {
