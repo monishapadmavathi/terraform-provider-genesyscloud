@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/google/uuid"
@@ -66,6 +67,7 @@ func TestAccResourceArchFlowForceUnlock(t *testing.T) {
 		inboundcallConfig2 = fmt.Sprintf("inboundCall:\n  name: %s\n  defaultLanguage: en-us\n  startUpRef: ./menus/menu[mainMenu]\n  initialGreeting:\n    tts: Archy says hi again!!!\n  menus:\n    - menu:\n        name: Main Menu\n        audio:\n          tts: You are at the Main Menu, press 9 to disconnect.\n        refId: mainMenu\n        choices:\n          - menuDisconnect:\n              name: Disconnect\n              dtmf: digit_9", flowName)
 	)
 
+	cleanupFlows("Terraform Flow")
 	//Create an anonymous function that closes around the flow name and flow Type
 	var flowLocFunc = func() {
 		lockFlow(flowName, flowType)
@@ -475,4 +477,31 @@ func testVerifyFlowDestroyed(state *terraform.State) error {
 	}
 	// Success. All Flows destroyed
 	return nil
+}
+
+func cleanupFlows(idPrefix string) {
+	architectApi := platformclientv2.NewArchitectApiWithConfig(sdkConfig)
+
+	for pageNum := 1; ; pageNum++ {
+		const pageSize = 50
+		flows, _, getErr := architectApi.GetFlows(nil, pageNum, pageSize, "", "", nil, "", "", "", "", "", "", "", "", false, true, "", "", nil)
+		if getErr != nil {
+			return
+		}
+
+		if flows.Entities == nil || len(*flows.Entities) == 0 {
+			break
+		}
+
+		for _, flow := range *flows.Entities {
+			if flow.Name != nil && strings.HasPrefix(*flow.Name, idPrefix) {
+				_, delErr := architectApi.DeleteFlow(*flow.Id)
+				if delErr != nil {
+					diag.Errorf("failed to delete flow %s (%s): %s", *flow.Id, *flow.Name, delErr)
+					return
+				}
+				log.Printf("Deleted flow %s (%s)", *flow.Id, *flow.Name)
+			}
+		}
+	}
 }
