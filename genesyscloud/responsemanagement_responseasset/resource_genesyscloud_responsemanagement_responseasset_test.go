@@ -3,6 +3,7 @@ package responsemanagement_responseasset
 import (
 	"fmt"
 	"log"
+	"sync"
 	gcloud "terraform-provider-genesyscloud/genesyscloud"
 	"terraform-provider-genesyscloud/genesyscloud/provider"
 	"terraform-provider-genesyscloud/genesyscloud/util"
@@ -12,6 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mypurecloud/platform-client-sdk-go/v125/platformclientv2"
+)
+
+var (
+	mutex sync.Mutex
 )
 
 func TestAccResourceResponseManagementResponseAsset(t *testing.T) {
@@ -75,6 +80,7 @@ func TestAccResourceResponseManagementResponseAsset(t *testing.T) {
 }
 
 func cleanupResponseAssets(folderName string) error {
+	mutex.Lock()
 	var (
 		name    = "name"
 		fields  = []string{name}
@@ -110,6 +116,7 @@ func cleanupResponseAssets(folderName string) error {
 			}
 		}
 	}
+	defer mutex.UnLock()
 	return nil
 }
 

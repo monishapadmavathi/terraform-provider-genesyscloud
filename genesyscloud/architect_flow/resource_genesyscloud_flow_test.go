@@ -21,6 +21,10 @@ import (
 	"github.com/mypurecloud/platform-client-sdk-go/v125/platformclientv2"
 )
 
+var (
+	sdkConfig *platformclientv2.Configuration
+)
+
 // lockFlow will search for a specific flow and then lock it.  This is to specifically test the force_unlock flag where I want to create a flow,  simulate some one locking it and then attempt to
 // do another CX as Code deploy.
 func lockFlow(flowName string, flowType string) {
