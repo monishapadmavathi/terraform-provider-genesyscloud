@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mypurecloud/platform-client-sdk-go/v125/platformclientv2"
@@ -1597,6 +1598,7 @@ func TestAccResourceRoutingQueueSkillGroups(t *testing.T) {
 		testUserEmail         = uuid.NewString() + "@example.com"
 	)
 
+	cleanupRoutingSkillGroup("")
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { util.TestAccPreCheck(t) },
 		ProviderFactories: provider.GetProviderFactories(providerResources, providerDataSources),
@@ -1633,4 +1635,31 @@ func TestAccResourceRoutingQueueSkillGroups(t *testing.T) {
 		},
 		CheckDestroy: testVerifyQueuesDestroyed,
 	})
+}
+
+func cleanupGroup(idPrefix string) {
+	GroupsApi := platformclientv2.NewGroupsApi()
+
+	for pageNum := 1; ; pageNum++ {
+		const pageSize = 100
+		groups, _, getErr := GroupsApi.GetGroups(pageSize, pageNum, nil, nil, "")
+		if getErr != nil {
+			return
+		}
+
+		if groups.Entities == nil || len(*groups.Entities) == 0 {
+			break
+		}
+
+		for _, group := range *groups.Entities {
+			if group.Name != nil && strings.HasPrefix(*group.Name, idPrefix) {
+				_, delErr := GroupsApi.DeleteGroup(*group.Id)
+				if delErr != nil {
+					diag.Errorf("failed to delete group %s", delErr)
+					return
+				}
+				log.Printf("Deleted group %s (%s)", *group.Id, *group.Name)
+			}
+		}
+	}
 }

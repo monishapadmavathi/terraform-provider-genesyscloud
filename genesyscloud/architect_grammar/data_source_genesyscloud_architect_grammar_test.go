@@ -75,10 +75,10 @@ func cleanupArchitectGrammar(idPrefix string) {
 			if grammar.Name != nil && strings.HasPrefix(*grammar.Name, idPrefix) {
 				_, _, delErr := architectApi.DeleteArchitectGrammar(*grammar.Id)
 				if delErr != nil {
-					diag.Errorf("failed to delete architect schedule %s", delErr)
+					diag.Errorf("failed to delete architect grammar %s", delErr)
 					return
 				}
-				log.Printf("Deleted architect schedule %s (%s)", *grammar.Id, *grammar.Name)
+				log.Printf("Deleted architect grammar %s (%s)", *grammar.Id, *grammar.Name)
 			}
 		}
 	}

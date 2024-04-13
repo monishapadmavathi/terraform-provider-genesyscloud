@@ -192,10 +192,10 @@ func cleanupResourceTeam(idPrefix string) {
 			if teams.Name != nil && strings.HasPrefix(*teams.Name, idPrefix) {
 				_, delErr := teamsAPI.DeleteTeam(*teams.Id)
 				if delErr != nil {
-					diag.Errorf("failed to delete architect schedule %s", delErr)
+					diag.Errorf("failed to delete resource team %s", delErr)
 					return
 				}
-				log.Printf("Deleted architect schedule %s (%s)", *teams.Id, *teams.Name)
+				log.Printf("Deleted resource team %s (%s)", *teams.Id, *teams.Name)
 			}
 		}
 	}
