@@ -229,7 +229,7 @@ func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
 
 		// Asset resources variables
 		testFilesDir  = "test_responseasset_data"
-		assetResource = "asset-resource"
+		assetResource = "asset-resource-response"
 		fileName      = "genesys-img.png"
 		fullPath      = fmt.Sprintf("%s/%s", testFilesDir, fileName)
 	)

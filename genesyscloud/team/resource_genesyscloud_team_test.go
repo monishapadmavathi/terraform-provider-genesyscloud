@@ -2,11 +2,14 @@ package team
 
 import (
 	"fmt"
+	"log"
+	"strings"
 	"terraform-provider-genesyscloud/genesyscloud/provider"
 	"terraform-provider-genesyscloud/genesyscloud/util"
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/mypurecloud/platform-client-sdk-go/v125/platformclientv2"
 
@@ -37,6 +40,8 @@ func TestAccResourceMembers(t *testing.T) {
 		testUserName2     = "nameUser2" + uuid.NewString()
 		testUserEmail2    = fmt.Sprintf(randString(5) + "@" + randString(5) + ".com")
 	)
+
+	cleanupResourceTeam(name1)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { util.TestAccPreCheck(t) },
@@ -167,4 +172,31 @@ func testVerifyTeamDestroyed(state *terraform.State) error {
 	}
 
 	return nil
+}
+
+func cleanupResourceTeam(idPrefix string) {
+	teamsAPI := platformclientv2.NewTeamsApi()
+
+	for pageNum := 1; ; pageNum++ {
+		const pageSize = 100
+		team, _, getErr := teamsAPI.GetTeams(pageSize, "", "", "", "")
+		if getErr != nil {
+			return
+		}
+
+		if team.Entities == nil || len(*team.Entities) == 0 {
+			break
+		}
+
+		for _, teams := range *team.Entities {
+			if teams.Name != nil && strings.HasPrefix(*teams.Name, idPrefix) {
+				_, delErr := teamsAPI.DeleteTeam(*teams.Id)
+				if delErr != nil {
+					diag.Errorf("failed to delete architect schedule %s", delErr)
+					return
+				}
+				log.Printf("Deleted architect schedule %s (%s)", *teams.Id, *teams.Name)
+			}
+		}
+	}
 }
