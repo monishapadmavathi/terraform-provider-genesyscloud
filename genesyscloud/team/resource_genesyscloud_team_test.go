@@ -41,7 +41,7 @@ func TestAccResourceMembers(t *testing.T) {
 		testUserEmail2    = fmt.Sprintf(randString(5) + "@" + randString(5) + ".com")
 	)
 
-	cleanupResourceTeam(name1)
+	//cleanupResourceTeam("Test Teams")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { util.TestAccPreCheck(t) },

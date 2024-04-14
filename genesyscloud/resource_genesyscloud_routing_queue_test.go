@@ -1598,7 +1598,8 @@ func TestAccResourceRoutingQueueSkillGroups(t *testing.T) {
 		testUserEmail         = uuid.NewString() + "@example.com"
 	)
 
-	cleanupRoutingSkillGroup("")
+	cleanupGroup("group")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { util.TestAccPreCheck(t) },
 		ProviderFactories: provider.GetProviderFactories(providerResources, providerDataSources),
