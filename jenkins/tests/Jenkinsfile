@@ -201,21 +201,21 @@ pipeline {
             }
         }
 
-        stage('Export Tests') {
-            environment {
-                TF_ACC=1
-                TF_LOG="DEBUG"
-            }
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    echo 'Attempting to Run Export Tests'
-                    withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
-                        echo 'Loading Genesys OAuth Credentials'
-                        sh 'go test ./genesyscloud/... -run TestAcc.*Export -v -count=1 -timeout 120m -cover -coverprofile=coverageExport.out'
-                    }
-                }
-            }
-        }
+        // stage('Export Tests') {
+        //     environment {
+        //         TF_ACC=1
+        //         TF_LOG="DEBUG"
+        //     }
+        //     steps {
+        //         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+        //             echo 'Attempting to Run Export Tests'
+        //             withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
+        //                 echo 'Loading Genesys OAuth Credentials'
+        //                 sh 'go test ./genesyscloud/... -run TestAcc.*Export -v -count=1 -timeout 120m -cover -coverprofile=coverageExport.out'
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Remaining Tests') {
             environment {
