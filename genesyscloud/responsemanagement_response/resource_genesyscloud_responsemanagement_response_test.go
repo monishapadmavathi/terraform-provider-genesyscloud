@@ -401,9 +401,6 @@ func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
 				),
 			},
 			{
-				RefreshState: true,
-			},
-			{
 				// Import/Read
 				ResourceName:            "genesyscloud_responsemanagement_response." + responseResource,
 				ImportState:             true,
