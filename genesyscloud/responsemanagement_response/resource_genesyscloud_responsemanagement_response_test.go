@@ -210,10 +210,10 @@ func TestAccResourceResponseManagementResponseFooterField(t *testing.T) {
 }
 
 func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	var (
 		// Responses initial values
-		responseResource          = "response-resourc-message"
+		responseResource          = "response-resource-message"
 		name1                     = "Response-message" + uuid.NewString()
 		textsContent1             = "Random text block content string"
 		textsContentTypes         = []string{"text/plain", "text/html"}
@@ -244,6 +244,7 @@ func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
 	)
 
 	cleanupResponseAssets("genesys")
+	cleanupResponseAssets("yeti")
 
 	defer func() {
 		err := cleanupResponseAssets("genesys")
