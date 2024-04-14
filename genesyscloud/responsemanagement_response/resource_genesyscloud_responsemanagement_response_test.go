@@ -202,10 +202,11 @@ func TestAccResourceResponseManagementResponseFooterField(t *testing.T) {
 }
 
 func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
+	t.Parallel()
 	var (
 		// Responses initial values
-		responseResource          = "response-resource"
-		name1                     = "Response-" + uuid.NewString()
+		responseResource          = "response-resourc-message"
+		name1                     = "Response-message" + uuid.NewString()
 		textsContent1             = "Random text block content string"
 		textsContentTypes         = []string{"text/plain", "text/html"}
 		interactionTypes          = []string{"chat", "email", "twitter"}
