@@ -236,11 +236,13 @@ pipeline {
 
         stage('Generate & Upload Report') {
             steps {
-             sh 'go tool cover -mode=set -var=mergedCoverage -o coverage_merged.out coverageArchitect.out coverageIdp.out coverageAuth.out coverageIntegration.out coverageFlow.out coverageJourney.out coverageKnowledge.out coverageOutbound.out coverageResponseManagement.out coverageRouting.out coverageExport.out coverageRemaining.out'
-                    // Merge the coverage profiles
-                    sh 'gocovmerge coverage_merged.out coverageIdp.out coverageAuth.out coverageIntegration.out coverageFlow.out coverageJourney.out coverageKnowledge.out coverageOutbound.out coverageResponseManagement.out coverageRouting.out coverageExport.out coverageRemaining.out > merged_coverage.out'
-                 sh 'go tool cover -html=merged_coverage.out -o coverage.html'
-                 archiveArtifacts artifacts: 'coverage.html', allowEmptyArchive: true
+ sh 'gocovmerge coverageArchitect.out coverageIdp.out coverageAuth.out coverageIntegration.out coverageFlow.out coverageJourney.out coverageKnowledge.out coverageOutbound.out coverageResponseManagement.out coverageRouting.out coverageExport.out coverageRemaining.out > merged_coverage.out'
+        
+        // Convert merged coverage report to HTML
+        sh 'gocov-html merged_coverage.out > coverage.html'
+
+        // Archive HTML coverage report
+        archiveArtifacts artifacts: 'coverage.html', allowEmptyArchive: true
 
             }
         }
