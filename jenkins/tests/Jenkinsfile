@@ -239,10 +239,11 @@ pipeline {
         sh 'go get -u github.com/wadey/gocovmerge'
 
         // Generate merged coverage report
-        sh 'gocovmerge coverageArchitect.out coverageIdp.out coverageAuth.out coverageIntegration.out coverageFlow.out coverageJourney.out coverageKnowledge.out coverageOutbound.out coverageResponseManagement.out coverageRouting.out coverageExport.out coverageRemaining.out > merged_coverage.out'
+        // Generate merged coverage report
+        sh '/home/jenkins/go/bin/gocovmerge coverageArchitect.out coverageIdp.out coverageAuth.out coverageIntegration.out coverageFlow.out coverageJourney.out coverageKnowledge.out coverageOutbound.out coverageResponseManagement.out coverageRouting.out coverageExport.out coverageRemaining.out > merged_coverage.out'
         
         // Convert merged coverage report to HTML
-        sh 'gocov-html merged_coverage.out > coverage.html'
+        sh '/home/jenkins/go/bin/gocov-html merged_coverage.out > coverage.html'
 
         // Archive HTML coverage report
         archiveArtifacts artifacts: 'coverage.html', allowEmptyArchive: true
