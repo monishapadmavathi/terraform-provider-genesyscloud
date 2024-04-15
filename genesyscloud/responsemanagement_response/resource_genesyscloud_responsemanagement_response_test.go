@@ -51,12 +51,6 @@ func TestAccResourceResponseManagementResponseFooterField(t *testing.T) {
 	)
 
 	cleanupResponseAssets("yeti")
-	defer func() {
-		err := cleanupResponseAssets("yeti")
-		if err != nil {
-			log.Printf("error cleaning up response assets: %v. Dangling assets may exist.", err)
-		}
-	}()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { util.TestAccPreCheck(t) },
@@ -245,13 +239,6 @@ func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
 
 	cleanupResponseAssets("genesys")
 	cleanupResponseAssets("yeti")
-
-	defer func() {
-		err := cleanupResponseAssets("genesys")
-		if err != nil {
-			log.Printf("error cleaning up response assets: %v. Dangling assets may exist.", err)
-		}
-	}()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { util.TestAccPreCheck(t) },
