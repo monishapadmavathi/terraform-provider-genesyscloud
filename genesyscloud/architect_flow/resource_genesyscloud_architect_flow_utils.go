@@ -33,6 +33,7 @@ func GenerateFlowResource(resourceID, srcFile, fileContent string, forceUnlock b
 		force_unlock = %v
 		%s
 	}
+	
 	`, resourceID, strconv.Quote(srcFile), strconv.Quote(fullyQualifiedPath), forceUnlock, strings.Join(substitutions, "\n"))
 	return flowResourceStr
 }

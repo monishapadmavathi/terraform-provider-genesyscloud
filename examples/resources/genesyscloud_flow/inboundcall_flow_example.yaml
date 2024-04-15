@@ -3,7 +3,7 @@ inboundCall:
   defaultLanguage: en-us
   startUpRef: ./menus/menu[mainMenu]
   initialGreeting:
-    tts: Archy says hi again!!!
+    tts: Archy says hi!!!
   menus:
     - menu:
         name: Main Menu

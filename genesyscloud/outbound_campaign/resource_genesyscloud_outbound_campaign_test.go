@@ -602,7 +602,6 @@ func TestAccResourceOutboundCampaignCampaignStatus(t *testing.T) {
 }
 
 func TestAccResourceOutboundCampaignStatusOn(t *testing.T) {
-	t.Skip("Skipping this test for now")
 	t.Parallel()
 	var (
 		resourceId            = "campaign3"

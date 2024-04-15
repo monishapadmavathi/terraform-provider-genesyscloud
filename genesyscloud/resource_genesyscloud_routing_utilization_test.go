@@ -297,7 +297,7 @@ func CleanupRoutingUtilizationLabel() {
 		}
 
 		for _, label := range *labels.Entities {
-			if label.Id != nil && strings.HasPrefix(*label.Id, "Terraform") {
+			if label.Id != nil && strings.HasPrefix(*label.Name, "Terraform") {
 				_, err := routingAPI.DeleteRoutingUtilizationLabel(*label.Id, true)
 				if err != nil {
 					log.Printf("Failed to delete routing email domain %s: %s", *label.Id, err)
