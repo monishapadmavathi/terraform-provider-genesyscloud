@@ -238,15 +238,14 @@ pipeline {
         stage('Generate & Upload Report') {
             steps {
         sh 'GOBIN=$HOME/bin go install github.com/wadey/gocovmerge@latest'
-        sh 'GOBIN=$HOME/bin go get github.com/XingyanLee/gocov-html'
         // Generate merged coverage report
         sh '$HOME/bin/gocovmerge coverageArchitect.out coverageIdp.out coverageAuth.out coverageIntegration.out coverageFlow.out coverageJourney.out coverageKnowledge.out coverageOutbound.out coverageResponseManagement.out coverageRouting.out coverageExport.out coverageRemaining.out > merged_coverage.out'
         
         // Convert merged coverage report to HTML
-        sh '$HOME/bin/gocov-html merged_coverage.out > coverage.html'
+        sh 'go tool cover -html merged_coverage.out -o coverageAcceptance.html'
 
         // Archive HTML coverage report
-        archiveArtifacts artifacts: 'coverage.html', allowEmptyArchive: true
+        archiveArtifacts artifacts: 'coverageAcceptance.html', allowEmptyArchive: true
             }
         }
     }

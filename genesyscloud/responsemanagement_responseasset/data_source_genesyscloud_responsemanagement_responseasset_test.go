@@ -16,7 +16,8 @@ func TestAccDataSourceResponseManagementResponseAsset(t *testing.T) {
 		fileName     = fmt.Sprintf("%s/yeti-img-asset.png", testDirName)
 		dataSourceId = "resp_asset_data"
 	)
-	cleanupResponseAssets(testDirName)
+	cleanupResponseAssets("yeti")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { util.TestAccPreCheck(t) },
 		ProviderFactories: provider.GetProviderFactories(providerResources, providerDataSources),

@@ -217,18 +217,18 @@ func TestAccResourceResponseManagementResponseMessaging(t *testing.T) {
 		substitutionsDefaultValue = "Substitutions default value"
 		substitutionsSchema       = "schema document"
 		responseTypes             = []string{`MessagingTemplate`, `CampaignSmsTemplate`, `CampaignEmailTemplate`}
-		templateName              = "Sample template name"
-		templateNamespace         = "Template namespace"
+		templateName              = "Sample template name message"
+		templateNamespace         = "Template namespace message"
 
 		// Responses Updated values
 		name2         = "Response-" + uuid.NewString()
 		textsContent2 = "Random text block content string new"
 
 		// Library resources variables
-		libraryResource1 = "library-resource1"
-		libraryName1     = "Referencelibrary1"
-		libraryResource2 = "library-resource2"
-		libraryName2     = "Referencelibrary2"
+		libraryResource1 = "library-resource1-message"
+		libraryName1     = "ReferencelibraryMessage1"
+		libraryResource2 = "library-resource2-message"
+		libraryName2     = "ReferencelibraryMessage2"
 
 		// Asset resources variables
 		testFilesDir  = "test_responseasset_data"
