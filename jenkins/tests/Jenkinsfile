@@ -246,7 +246,7 @@ pipeline {
         sh '$HOME/bin/gocov-html merged_coverage.out > coverage.html'
 
         // Archive HTML coverage report
-        archiveArtifacts artifacts: 'coverage.html', allowEmptyArechchive: true
+        archiveArtifacts artifacts: 'coverage.html', allowEmptyArchive: true
             }
         }
     }
