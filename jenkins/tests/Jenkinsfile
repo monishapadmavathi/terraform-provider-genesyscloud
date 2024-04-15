@@ -28,7 +28,7 @@ pipeline {
                 echo 'Installing dependencies'
                 sh 'go version'
                 sh 'go mod download'
-                go 'go clean -i -cache'
+                sh 'go clean -i -cache'
                 sh 'go build -v .'
             }
 	    }
