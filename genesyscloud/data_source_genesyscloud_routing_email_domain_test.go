@@ -69,15 +69,15 @@ func CleanupRoutingEmailDomains() {
 		}
 
 		if routingEmailDomains.Entities == nil || len(*routingEmailDomains.Entities) == 0 {
-			return
+			break
 		}
 
 		for _, routingEmailDomain := range *routingEmailDomains.Entities {
-			if routingEmailDomain.Id != nil && strings.HasPrefix(*routingEmailDomain.Name, "terraformdomain") {
+			if routingEmailDomain.Name != nil && strings.HasPrefix(*routingEmailDomain.Name, "terraformdomain") {
 				_, err := routingAPI.DeleteRoutingEmailDomain(*routingEmailDomain.Id)
 				if err != nil {
 					log.Printf("Failed to delete routing email domain %s: %s", *routingEmailDomain.Id, err)
-					continue
+					return
 				}
 				time.Sleep(5 * time.Second)
 			}

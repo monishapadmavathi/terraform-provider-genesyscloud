@@ -467,11 +467,6 @@ func testVerifyRoutingEmailRouteDestroyed(state *terraform.State) error {
 }
 
 func CleanupRoutingEmailDomains() {
-	sdkConfig, err := provider.AuthorizeSdk()
-	if err != nil {
-		log.Printf("failed to authorize sdk inside function CleanupRoutingEmailDomains: %v", err)
-		return
-	}
 	routingAPI := platformclientv2.NewRoutingApiWithConfig(sdkConfig)
 
 	for pageNum := 1; ; pageNum++ {
@@ -483,15 +478,15 @@ func CleanupRoutingEmailDomains() {
 		}
 
 		if routingEmailDomains.Entities == nil || len(*routingEmailDomains.Entities) == 0 {
-			return
+			break
 		}
 
 		for _, routingEmailDomain := range *routingEmailDomains.Entities {
-			if routingEmailDomain.Id != nil && strings.HasPrefix(*routingEmailDomain.Name, "terraformroute") {
+			if routingEmailDomain.Name != nil && strings.HasPrefix(*routingEmailDomain.Name, "terraformroute") {
 				_, err := routingAPI.DeleteRoutingEmailDomain(*routingEmailDomain.Id)
 				if err != nil {
 					log.Printf("Failed to delete routing email domain %s: %s", *routingEmailDomain.Id, err)
-					continue
+					return
 				}
 				time.Sleep(5 * time.Second)
 			}
