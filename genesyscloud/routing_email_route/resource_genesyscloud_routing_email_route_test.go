@@ -19,6 +19,10 @@ import (
 	"github.com/mypurecloud/platform-client-sdk-go/v125/platformclientv2"
 )
 
+var (
+	sdkConfig *platformclientv2.Configuration
+)
+
 func TestAccResourceRoutingEmailRoute(t *testing.T) {
 	var (
 		domainRes          = "routing-domain1"
