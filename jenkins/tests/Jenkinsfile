@@ -7,11 +7,11 @@ pipeline {
     }
 
     environment {
-        CREDENTIALS_ID  = "GENESYSCLOUD_OAUTHCLIENT_ID_AND_SECRET"
+        CREDENTIALS_ID  = "GENESYSCLOUD_OAUTHCLIENT_ID_AND_SECRET_TCA"
         GOPATH = "$HOME/go"
         TF_LOG = "DEBUG"
         TF_LOG_PATH = "../test.log"
-		GENESYSCLOUD_REGION = "us-east-1"
+		GENESYSCLOUD_REGION = "tca"
         GENESYSCLOUD_SDK_DEBUG =  "true"
         GENESYSCLOUD_TOKEN_POOL_SIZE =  20
     }
