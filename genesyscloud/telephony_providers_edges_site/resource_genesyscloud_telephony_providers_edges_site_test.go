@@ -3,6 +3,7 @@ package telephony_providers_edges_site
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"terraform-provider-genesyscloud/genesyscloud/provider"
@@ -18,6 +19,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mypurecloud/platform-client-sdk-go/v125/platformclientv2"
 )
+
+func assignregion() string {
+
+	var (
+		region string
+	)
+
+	if v := os.Getenv("GENESYSCLOUD_REGION"); v == "tca" {
+		region = "us-east-1"
+	} else if v == "us-east-1" {
+		region = "us-west-2"
+	}
+	regionJSON := "[" + strconv.Quote(region) + "]"
+	return regionJSON
+}
 
 func TestAccResourceSite(t *testing.T) {
 	t.Parallel()
@@ -75,7 +91,7 @@ func TestAccResourceSite(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					false,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing")) + location,
 				Check: resource.ComposeTestCheckFunc(
@@ -95,7 +111,7 @@ func TestAccResourceSite(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					true,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing")) + location,
 				Check: resource.ComposeTestCheckFunc(
@@ -115,7 +131,7 @@ func TestAccResourceSite(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					true,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					generateSiteEdgeAutoUpdateConfig(
@@ -139,7 +155,7 @@ func TestAccResourceSite(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					true,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					generateSiteEdgeAutoUpdateConfig(
@@ -205,7 +221,7 @@ func TestAccResourceSiteNumberPlans(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					false,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					generateSiteNumberPlansWithCustomAttrs(
@@ -263,7 +279,7 @@ func TestAccResourceSiteNumberPlans(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					false,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					generateSiteNumberPlansWithCustomAttrs(
@@ -306,7 +322,7 @@ func TestAccResourceSiteNumberPlans(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					false,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					generateSiteNumberPlansWithCustomAttrs(
@@ -424,7 +440,7 @@ func TestAccResourceSiteOutboundRoutes(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					false,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					generateSiteOutboundRoutesWithCustomAttrs(
@@ -466,7 +482,7 @@ func TestAccResourceSiteOutboundRoutes(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					false,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					generateSiteOutboundRoutesWithCustomAttrs(
@@ -508,7 +524,7 @@ func TestAccResourceSiteOutboundRoutes(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					false,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					generateSiteOutboundRoutesWithCustomAttrs(
@@ -597,7 +613,7 @@ func TestAccResourceSiteDefaultSite(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					false,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					"set_as_default_site = true") + location,
@@ -625,7 +641,7 @@ func TestAccResourceSiteDefaultSite(t *testing.T) {
 					"genesyscloud_location."+locationRes+".id",
 					mediaModel,
 					false,
-					"[\"us-west-2\"]",
+					assignregion(),
 					strconv.Quote("+19205551212"),
 					strconv.Quote("Wilco plumbing"),
 					"set_as_default_site = false") + location + gcloud.GenerateOrganizationMe(),
