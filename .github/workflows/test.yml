@@ -2,13 +2,8 @@
 # you can turn it on using a cron schedule for regular testing.
 #
 name: Tests
-on:
-  push:
-    paths-ignore:
       - 'README.md'
   # Run daily tests
-  schedule:
-    - cron: '0 10 * * *'
 jobs:
   # ensure the code builds...
   build:
