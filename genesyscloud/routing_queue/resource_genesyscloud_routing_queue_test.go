@@ -159,7 +159,7 @@ func TestAccResourceRoutingQueueBasic(t *testing.T) {
 					validateRoutingRules(queueResource1, 1, routingRuleOpAny, "45", "15"),
 				),
 				PreConfig: func() {
-					// Wait for a specified duration - to avoid multiple deletion taking place error
+					// Wait for a specified duration
 					time.Sleep(20 * time.Second)
 				},
 			},
