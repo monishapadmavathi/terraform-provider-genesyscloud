@@ -393,16 +393,16 @@ func TestAccResourceTfExportIncludeFilterResourcesByType(t *testing.T) {
 			{
 				// Generate a queue as well and export it
 				Config: config,
+				PreConfig: func() {
+					// Wait for a specified duration to avoid runtime error
+					time.Sleep(30 * time.Second)
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testQueueExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_queue", sanitizer.S.SanitizeResourceName(queueResources[0].Name), queueResources[0]),
 					testQueueExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_queue", sanitizer.S.SanitizeResourceName(queueResources[1].Name), queueResources[1]),
 					testQueueExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_queue", sanitizer.S.SanitizeResourceName(queueResources[2].Name), queueResources[2]),
 					testQueueExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_queue", sanitizer.S.SanitizeResourceName(queueResources[3].Name), queueResources[3]),
 				),
-				PreConfig: func() {
-					// Wait for a specified duration to avoid runtime error
-					time.Sleep(30 * time.Second)
-				},
 			},
 		},
 		CheckDestroy: testVerifyExportsDestroyedFunc(exportTestDir),
@@ -415,7 +415,7 @@ func TestAccResourceTfExportIncludeFilterResourcesByType(t *testing.T) {
 func TestAccResourceTfExportIncludeFilterResourcesByRegEx(t *testing.T) {
 	var (
 		exportTestDir  = "../.terraform" + uuid.NewString()
-		exportResource = "test-export2"
+		exportResource = "test-export3"
 
 		queueResources = []QueueExport{
 			{ResourceName: "test-queue-prod-1", Name: "test-queue-" + uuid.NewString() + "-prod", Description: "This is a test prod queue 1", AcwTimeoutMs: 200000},
@@ -480,7 +480,7 @@ func TestAccResourceTfExportIncludeFilterResourcesByRegEx(t *testing.T) {
 func TestAccResourceTfExportIncludeFilterResourcesByRegExExclusiveToResource(t *testing.T) {
 	var (
 		exportTestDir  = "../.terraform" + uuid.NewString()
-		exportResource = "test-export2"
+		exportResource = "test-export4"
 
 		queueResources = []QueueExport{
 			{ResourceName: "test-queue-prod", Name: "test-queue-" + uuid.NewString() + "-prod", Description: "This is the prod queue", AcwTimeoutMs: 200000},
@@ -524,6 +524,10 @@ func TestAccResourceTfExportIncludeFilterResourcesByRegExExclusiveToResource(t *
 			{
 				// Generate a queue as well and export it
 				Config: config,
+				PreConfig: func() {
+					// Wait for a specified duration to avoid runtime error
+					time.Sleep(30 * time.Second)
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testQueueExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_queue", sanitizer.S.SanitizeResourceName(queueResources[0].Name), queueResources[0]),
 					testWrapupcodeExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_wrapupcode", sanitizer.S.SanitizeResourceName(wrapupCodeResources[0].Name), wrapupCodeResources[0]),
@@ -541,7 +545,7 @@ func TestAccResourceTfExportIncludeFilterResourcesByRegExExclusiveToResource(t *
 func TestAccResourceTfExportExcludeFilterResourcesByRegEx(t *testing.T) {
 	var (
 		exportTestDir  = "../.terraform" + uuid.NewString()
-		exportResource = "test-export2"
+		exportResource = "test-export5"
 
 		queueResources = []QueueExport{
 			{ResourceName: "test-queue-prod-1", Name: "test-queue-" + uuid.NewString() + "-prod", Description: "This is a test prod queue 1", AcwTimeoutMs: 200000},
@@ -586,6 +590,10 @@ func TestAccResourceTfExportExcludeFilterResourcesByRegEx(t *testing.T) {
 			{
 				// Generate a queue as well and export it
 				Config: config,
+				PreConfig: func() {
+					// Wait for a specified duration to avoid runtime error
+					time.Sleep(30 * time.Second)
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testQueueExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_queue", sanitizer.S.SanitizeResourceName(queueResources[0].Name), queueResources[0]), //Want to make sure the prod queues are queue is there
 					testQueueExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_queue", sanitizer.S.SanitizeResourceName(queueResources[1].Name), queueResources[1]), //Want to make sure the prod queues are queue is there
@@ -605,7 +613,7 @@ func TestAccResourceTfExportExcludeFilterResourcesByRegEx(t *testing.T) {
 func TestAccResourceTfExportExcludeFilterResourcesByRegExExclusiveToResource(t *testing.T) {
 	var (
 		exportTestDir  = "../.terraform" + uuid.NewString()
-		exportResource = "test-export2"
+		exportResource = "test-export6"
 
 		queueResources = []QueueExport{
 			{ResourceName: "test-queue-prod", Name: "test-queue-" + uuid.NewString() + "-prod", Description: "This is a test prod queue", AcwTimeoutMs: 200000},
@@ -634,6 +642,7 @@ func TestAccResourceTfExportExcludeFilterResourcesByRegExExclusiveToResource(t *
 				strconv.Quote("genesyscloud_user"),
 				strconv.Quote("genesyscloud_user_roles"),
 				strconv.Quote("genesyscloud_flow"),
+				strconv.Quote("genesyscloud_routing_wrapupcode"),
 			},
 			util.FalseValue,
 			util.FalseValue,
@@ -655,6 +664,10 @@ func TestAccResourceTfExportExcludeFilterResourcesByRegExExclusiveToResource(t *
 			{
 				// Generate a queue as well and export it
 				Config: config,
+				PreConfig: func() {
+					// Wait for a specified duration to avoid runtime error
+					time.Sleep(30 * time.Second)
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testQueueExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_queue", sanitizer.S.SanitizeResourceName(queueResources[0].Name), queueResources[0]),
 					testWrapupcodeExportEqual(exportTestDir+"/"+defaultTfJSONFile, "genesyscloud_routing_wrapupcode", sanitizer.S.SanitizeResourceName(wrapupCodeResources[0].Name), wrapupCodeResources[0]),
@@ -670,7 +683,7 @@ func TestAccResourceTfExportExcludeFilterResourcesByRegExExclusiveToResource(t *
 
 func TestAccResourceTfExportFormAsHCL(t *testing.T) {
 
-	t.Parallel()
+	//t.Parallel()
 
 	var (
 		exportTestDir    = "../.terraform" + uuid.NewString()
@@ -809,7 +822,7 @@ func TestAccResourceTfExportFormAsHCL(t *testing.T) {
 
 func TestAccResourceTfExportQueueAsHCL(t *testing.T) {
 
-	t.Parallel()
+	//t.Parallel()
 
 	var (
 		exportTestDir  = "../.terraform" + uuid.NewString()
@@ -1413,13 +1426,31 @@ func testUserExport(filePath, resourceType, resourceName string, expectedUser *U
 	}
 }
 
+// var (
+// 	mccMutex sync.RWMutex
+// )
+
+// func init() {
+// 	mccMutex = sync.RWMutex{}
+// }
+
 // testQueueExportEqual  Checks to see if the queues passed match the expected value
 func testQueueExportEqual(filePath, resourceType, name string, expectedQueue QueueExport) resource.TestCheckFunc {
+	// // mccMutex.Lock()
+	// defer mccMutex.Unlock()
 	return func(state *terraform.State) error {
-		expectedQueue.ResourceName = "" //Setting the resource name to be empty because is it not needed
+		expectedQueue.ResourceName = "" //Setting the resource name to be empty because it is not needed
 		raw, err := getResourceDefinition(filePath, resourceType)
 		if err != nil {
 			return err
+		}
+
+		// Check if the raw data or name is nil
+		if raw == nil {
+			return fmt.Errorf("raw data is nil")
+		}
+		if _, ok := raw[name]; !ok {
+			return fmt.Errorf("resource name not found in raw data")
 		}
 
 		var r *json.RawMessage
@@ -1427,9 +1458,19 @@ func testQueueExportEqual(filePath, resourceType, name string, expectedQueue Que
 			return err
 		}
 
+		// Check if r is nil
+		if r == nil {
+			return fmt.Errorf("unmarshaled raw message is nil")
+		}
+
 		exportedQueue := &QueueExport{}
 		if err := json.Unmarshal(*r, exportedQueue); err != nil {
 			return err
+		}
+
+		// Check if exportedQueue is nil
+		if exportedQueue == nil {
+			return fmt.Errorf("exportedQueue is nil after unmarshaling")
 		}
 
 		if *exportedQueue != expectedQueue {
@@ -1509,14 +1550,32 @@ func testWrapupcodeExportEqual(filePath, resourceType, name string, expectedWrap
 			return err
 		}
 
+		// Check if the raw data or name is nil
+		if raw == nil {
+			return fmt.Errorf("raw data is nil")
+		}
+		if _, ok := raw[name]; !ok {
+			return fmt.Errorf("resource name not found in raw data")
+		}
+
 		var r *json.RawMessage
 		if err := json.Unmarshal(*raw[name], &r); err != nil {
 			return err
 		}
 
+		// Check if r is nil
+		if r == nil {
+			return fmt.Errorf("unmarshaled raw message is nil")
+		}
+
 		exportedWrapupcode := &WrapupcodeExport{}
 		if err := json.Unmarshal(*r, exportedWrapupcode); err != nil {
 			return err
+		}
+
+		// Check if exportedWrapupcode is nil
+		if exportedWrapupcode == nil {
+			return fmt.Errorf("exportedWrapupcode is nil after unmarshaling")
 		}
 
 		if *exportedWrapupcode != expectedWrapupcode {
