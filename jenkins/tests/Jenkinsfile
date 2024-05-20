@@ -45,7 +45,7 @@ pipeline {
                 sh 'pip3 install --user junit2html'
                 sh 'go install gotest.tools/gotestsum@latest'
                 sh 'go install github.com/nezorflame/junit-merger@latest'
-                sh 'yum install -y xmlstarlet'
+                sh 'yum install xmlstarlet'
             }
 	    }
         stage('Run Tests and Generate Report') {
