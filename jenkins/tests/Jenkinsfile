@@ -54,33 +54,35 @@ pipeline {
                 // Convert JUnit XML report to HTML
                 sh 'junit2html report.xml report.html'
                 
-                // Extract summary information from report.xml
-                def tests = sh(script: "xmlstarlet sel -t -v '/testsuites/@tests' report.xml", returnStdout: true).trim().toInteger()
-                def failed = sh(script: "xmlstarlet sel -t -v '/testsuites/@failures' report.xml", returnStdout: true).trim().toInteger()
-                def passed = tests - failed
-                
-                // Extract the first failure from report.xml
-                def firstFailure = sh(script: "xmlstarlet sel -t -v '/testsuites/testsuite[1]/testcase[1]/@classname' report.xml", returnStdout: true).trim()
-                
-                // Read the existing report.html content
-                def htmlContent = readFile('report.html').trim()
-                
-                // Create summary lines
-                def summaryLines = """
-                    <p>tests ${tests}</p>
-                    <p>failed ${failed}</p>
-                    <p>passed ${passed}</p>
-                    <p>First failure: ${firstFailure}</p>
-                """
-                
-                // Create updated HTML content
-                def updatedHtmlContent = summaryLines + '\n' + htmlContent
-                
-                // Write the updated content back to report.html
-                writeFile(file: 'report.html', text: updatedHtmlContent.trim())
-                
-                // Archive report.html as artifact
-                archiveArtifacts artifacts: 'report.html', allowEmptyArchive: true
+                script {
+                    // Extract summary information from report.xml
+                    def tests = sh(script: "xmlstarlet sel -t -v '/testsuites/@tests' report.xml", returnStdout: true).trim().toInteger()
+                    def failed = sh(script: "xmlstarlet sel -t -v '/testsuites/@failures' report.xml", returnStdout: true).trim().toInteger()
+                    def passed = tests - failed
+                    
+                    // Extract the first failure from report.xml
+                    def firstFailure = sh(script: "xmlstarlet sel -t -v '/testsuites/testsuite[1]/testcase[1]/@classname' report.xml", returnStdout: true).trim()
+                    
+                    // Read the existing report.html content
+                    def htmlContent = readFile('report.html').trim()
+                    
+                    // Create summary lines
+                    def summaryLines = """
+                        <p>tests ${tests}</p>
+                        <p>failed ${failed}</p>
+                        <p>passed ${passed}</p>
+                        <p>First failure: ${firstFailure}</p>
+                    """
+                    
+                    // Create updated HTML content
+                    def updatedHtmlContent = summaryLines + '\n' + htmlContent
+                    
+                    // Write the updated content back to report.html
+                    writeFile(file: 'report.html', text: updatedHtmlContent.trim())
+                    
+                    // Archive report.html as artifact
+                    archiveArtifacts artifacts: 'report.html', allowEmptyArchive: true
+                }
             }
         }
     }
