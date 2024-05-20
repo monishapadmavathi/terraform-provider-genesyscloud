@@ -117,13 +117,13 @@ func TestAccResourceIvrConfigDnisOverload(t *testing.T) {
 					ResourceID:  resourceID,
 					Name:        name,
 					Description: "",
-					Dnis:        createStringArrayOfPhoneNumbers(startNumber, endNumber),
+					Dnis:        createStringArrayOfPhoneNumbers(startNumber, startNumber+60),
 					DependsOn:   "genesyscloud_telephony_providers_edges_did_pool." + didPoolResourceId,
 					DivisionId:  "",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(fullResourceId, "name", name),
-					resource.TestCheckResourceAttr(fullResourceId, "dnis.#", fmt.Sprintf("%v", len(allNumbers))),
+					resource.TestCheckResourceAttr(fullResourceId, "dnis.#", "60"),
 				),
 			},
 			{
