@@ -30,84 +30,62 @@ pipeline {
         terraform 'Terraform 1.0.10'
     }
 
+
     stages {
-      
-        
-        stage('Install Dependencies & Build') {
-            steps {
-                echo 'Installing dependencies'
-                echo "${region}"
-                echo "${credentials}"
-                sh 'go version'
-                sh 'go mod download'
-                sh 'go clean -i -cache'
-                sh 'go build -v .'
-                sh 'pip3 install --user junit2html'
-                sh 'go install gotest.tools/gotestsum@latest'
-                sh 'go install github.com/nezorflame/junit-merger@latest'
-            }
-	    }
-
-        stage('Terraform Check') {
-            steps {
-                echo 'Check Terraform Installation'
-                sh 'terraform -version'
-
-            }
-        }
-
-
-        stage('IvrConfig Tests') {
+        stage('Run Tests and Generate Report') {
             environment {
                 TF_ACC=1
                 TF_LOG="DEBUG"
             }
             steps {
+                // Clean the Go module cache
                 sh 'go clean -i -cache'
+                
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     echo 'Attempting to Run Remaining Tests'
+                    
+                    // Run tests and generate JUnit XML report
                     withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
                         echo 'Loading Genesys OAuth Credentials'
-                          sh 'gotestsum --junitfile report.xml --format standard-verbose ./genesyscloud/... -run TestAcc.*Architect -v -count=1 -timeout 120m -cover -coverprofile=coverageivr.out'
+                        sh 'gotestsum --junitfile report.xml --format standard-verbose ./genesyscloud/... -run TestAcc.*Architect -v -count=1 -timeout 120m -cover -coverprofile=coverageivr.out'
                     }
                 }
-            }
-        }
-                stage(' Tests') {
-
-            steps{
-
-                    sh 'junit2html report.xml report.html'
-                    
-                    // Extract summary information from report.xml
-                    def tests = sh(script: "xmlstarlet sel -t -v '/testsuites/@tests' report.xml", returnStdout: true).trim().toInteger()
-                    def failed = sh(script: "xmlstarlet sel -t -v '/testsuites/@failures' report.xml", returnStdout: true).trim().toInteger()
-                    def passed = tests - failed
-                    
-                    // Extract the first failure from report.xml
-                    def firstFailure = sh(script: "xmlstarlet sel -t -v '/testsuites/testsuite[1]/testcase[1]/@classname' report.xml", returnStdout: true).trim()
-                    
-                    // Read the existing report.html content
-                    def htmlContent = readFile('report.html').trim()
-                    
-                    // Create summary lines
-                    def summaryLines = """
-                        <p>tests ${tests}</p>
-                        <p>failed ${failed}</p>
-                        <p>passed ${passed}</p>
-                        <p>First failure: ${firstFailure}</p>
-                    """
-                    
-                    // Create updated HTML content
-                    def updatedHtmlContent = summaryLines + '\n' + htmlContent
-                    
-                    // Write the updated content back to report.html
-                    writeFile(file: 'report.html', text: updatedHtmlContent.trim())
-             
-             archiveArtifacts artifacts: 'report.html', allowEmptyArchive: true
+                
+                // Convert JUnit XML report to HTML
+                sh 'junit2html report.xml report.html'
+                
+                // Extract summary information from report.xml
+                def tests = sh(script: "xmlstarlet sel -t -v '/testsuites/@tests' report.xml", returnStdout: true).trim().toInteger()
+                def failed = sh(script: "xmlstarlet sel -t -v '/testsuites/@failures' report.xml", returnStdout: true).trim().toInteger()
+                def passed = tests - failed
+                
+                // Extract the first failure from report.xml
+                def firstFailure = sh(script: "xmlstarlet sel -t -v '/testsuites/testsuite[1]/testcase[1]/@classname' report.xml", returnStdout: true).trim()
+                
+                // Read the existing report.html content
+                def htmlContent = readFile('report.html').trim()
+                
+                // Create summary lines
+                def summaryLines = """
+                    <p>tests ${tests}</p>
+                    <p>failed ${failed}</p>
+                    <p>passed ${passed}</p>
+                    <p>First failure: ${firstFailure}</p>
+                """
+                
+                // Create updated HTML content
+                def updatedHtmlContent = summaryLines + '\n' + htmlContent
+                
+                // Write the updated content back to report.html
+                writeFile(file: 'report.html', text: updatedHtmlContent.trim())
+                
+                // Archive report.html as artifact
+                archiveArtifacts artifacts: 'report.html', allowEmptyArchive: true
             }
         }
     }
 }
+
+
 
     
