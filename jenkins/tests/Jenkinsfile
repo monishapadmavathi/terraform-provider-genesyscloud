@@ -72,6 +72,8 @@ pipeline {
                     }
                 }
             }
+        }
+                stage('IvrConfig Tests') {
 
             steps{
 
