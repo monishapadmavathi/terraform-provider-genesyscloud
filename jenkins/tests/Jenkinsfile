@@ -96,16 +96,21 @@ script {
         </style>
         <div class="summary">
             <h1>Test Summary</h1>
-            <p>Total Tests: <span class="value">${tests}</span></p>
+            <p>Tests: <span class="value">${tests}</span></p>
             <p>Failures: <span class="value">${failures}</span></p>
             <p>Passed: <span class="value">${passed}</span></p>
         </div>
     """
 
-    // Create updated HTML content
-    def updatedHtmlContent = summaryLines + '\n' + htmlContent
+    // Insert summary lines after the line "Test Report : report.xml"
+    def updatedHtmlContent = htmlContent.replaceFirst("(?i)(Test Report : report.xml)", "\$1\n" + summaryLines)
 
-    // Write the updated content back to
+    // Write the updated content back to report.html
+    writeFile(file: env.HTML_REPORT, text: updatedHtmlContent.trim())
+
+    // Archive report.html as artifact
+    archiveArtifacts artifacts: env.HTML_REPORT, allowEmptyArchive: true
+}
 
 
 
