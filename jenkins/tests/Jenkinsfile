@@ -32,6 +32,21 @@ pipeline {
 
 
     stages {
+
+        stage('Install Dependencies & Build') {
+            steps {
+                echo 'Installing dependencies'
+                echo "${region}"
+                echo "${credentials}"
+                sh 'go version'
+                sh 'go mod download'
+                sh 'go clean -i -cache'
+                sh 'go build -v .'
+                sh 'pip3 install --user junit2html'
+                sh 'go install gotest.tools/gotestsum@latest'
+                sh 'go install github.com/nezorflame/junit-merger@latest'
+            }
+	    }
         stage('Run Tests and Generate Report') {
             environment {
                 TF_ACC=1
