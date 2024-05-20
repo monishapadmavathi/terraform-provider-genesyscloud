@@ -24,7 +24,7 @@ pipeline {
         GENESYSCLOUD_SDK_DEBUG =  "true"
         GENESYSCLOUD_TOKEN_POOL_SIZE =  20
         PATH = "${env.PATH}:${HOME}/go/bin:/home/jenkins/.local/bin"
-       XMLSTARLET_RPM_URL = 'http://mirror.centos.org/centos/7/os/x86_64/Packages/xmlstarlet-1.6.1-1.el7.x86_64.rpm'
+       XMLSTARLET_RPM_URL = 'https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/aarch64/os/Packages/x/xmlstarlet-1.6.1-24.fc40.aarch64.rpm'
   
     }
     tools {
@@ -47,8 +47,8 @@ pipeline {
                 sh 'pip3 install --user junit2html'
                 sh 'go install gotest.tools/gotestsum@latest'
                 sh 'go install github.com/nezorflame/junit-merger@latest'
-                                    sh "curl -LO ${env.XMLSTARLET_RPM_URL}"
-                    sh "rpm -ivh --nodeps xmlstarlet-*.rpm"
+                sh "curl -LO ${env.XMLSTARLET_RPM_URL}"
+                sh "rpm -ivh --nodeps xmlstarlet-*.rpm"
             }
 	    }
         stage('Run Tests and Generate Report') {
