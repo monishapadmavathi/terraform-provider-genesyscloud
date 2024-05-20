@@ -1,4 +1,0 @@
-feature: ['feature/*', 'feat/*']
-bug: ['fix/*', 'bug/*']
-refactor: ['refactor/*']
-hotfix: ['hotfix/*']

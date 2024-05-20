@@ -25,7 +25,8 @@ pipeline {
         GENESYSCLOUD_TOKEN_POOL_SIZE =  20
         PATH = "${env.PATH}:${HOME}/go/bin:/home/jenkins/.local/bin"
        XMLSTARLET_RPM_URL = 'https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/aarch64/os/Packages/x/xmlstarlet-1.6.1-24.fc40.aarch64.rpm'
-    INSTALL_DIR = "${env.HOME}/.local/xmlstarlet"
+    INSTALL_DIR = "${env.HOME}/xmlstarlet"
+    XMLSTARLET_RPM_FILE = 'xmlstarlet-1.6.1-24.fc40.aarch64.rpm'
     }
     tools {
         go 'Go 1.20'
