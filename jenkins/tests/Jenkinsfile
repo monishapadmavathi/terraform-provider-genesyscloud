@@ -73,7 +73,7 @@ pipeline {
                 }
             }
         }
-                stage('IvrConfig Tests') {
+                stage(' Tests') {
 
             steps{
 
