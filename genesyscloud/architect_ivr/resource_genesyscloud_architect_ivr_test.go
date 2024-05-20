@@ -72,12 +72,12 @@ func TestAccResourceIvrConfigDnisOverload(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: didPoolResource + GenerateIvrConfigResource(&IvrConfigStruct{
-					ResourceID:   resourceID,
-					Name:         name,
-					Descriptiond: "",
-					Dnis:         createStringArrayOfPhoneNumbers(startNumber, startNumber+20),
-					DependsOn:    "genesyscloud_telephony_providers_edges_did_pool." + didPoolResourceId,
-					DivisionId:   "",
+					ResourceID:  resourceID,
+					Name:        name,
+					Description: "",
+					Dnis:        createStringArrayOfPhoneNumbers(startNumber, startNumber+20),
+					DependsOn:   "genesyscloud_telephony_providers_edges_did_pool." + didPoolResourceId,
+					DivisionId:  "",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(fullResourceId, "name", name),
