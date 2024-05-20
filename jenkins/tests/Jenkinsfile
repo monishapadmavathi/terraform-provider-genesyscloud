@@ -82,28 +82,31 @@ script {
     def tests = parsedJson['testsuites']['@tests'].toInteger()
     def failures = parsedJson['testsuites']['@failures'].toInteger()
     def passed = tests - failures
-   
 
     // Read the existing report.html content
     def htmlContent = readFile(env.HTML_REPORT).trim()
 
-    // Create summary lines
+    // Create summary lines with CSS styling
     def summaryLines = """
-        <p>tests ${tests}</p>
-        <p>failures ${failures}</p>
-        <p>passed ${passed}</p>
-       
+        <style>
+            .summary { margin: 20px 0; }
+            .summary h1 { font-size: 2em; margin-bottom: 10px; }
+            .summary p { font-size: 1.5em; margin: 5px 0; }
+            .summary .value { font-weight: bold; }
+        </style>
+        <div class="summary">
+            <h1>Test Summary</h1>
+            <p>Total Tests: <span class="value">${tests}</span></p>
+            <p>Failures: <span class="value">${failures}</span></p>
+            <p>Passed: <span class="value">${passed}</span></p>
+        </div>
     """
 
     // Create updated HTML content
     def updatedHtmlContent = summaryLines + '\n' + htmlContent
 
-    // Write the updated content back to report.html
-    writeFile(file: env.HTML_REPORT, text: updatedHtmlContent.trim())
+    // Write the updated content back to
 
-    // Archive report.html as artifact
-    archiveArtifacts artifacts: env.HTML_REPORT, allowEmptyArchive: true
-}
 
 
             }
