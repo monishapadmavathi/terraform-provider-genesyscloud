@@ -44,8 +44,6 @@ func TestAccResourceIvrConfigDnisOverload(t *testing.T) {
 		log.Printf("Failed to get last did number for ivr tests: %v", err)
 	}
 
-	allNumbers := createStringArrayOfPhoneNumbers(startNumber, endNumber)
-
 	didPoolResource := didPool.GenerateDidPoolResource(&didPool.DidPoolStruct{
 		ResourceID:       didPoolResourceId,
 		StartPhoneNumber: startNumberStr,
