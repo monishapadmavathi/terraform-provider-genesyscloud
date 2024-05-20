@@ -75,13 +75,14 @@ sh 'pip install xmltodict --user'
 script {
     // Extract summary information from report.xml using xmltodict
     def xmlContent = readFile(env.XML_REPORT).trim()
-    def parsedXml = sh(script: "python -c 'import xmltodict, sys; print(xmltodict.parse(sys.stdin.read()))' <<< '${xmlContent}'", returnStdout: true).trim()
+    def parsedXml = sh(script: "python -c 'import xmltodict, sys, json; print(json.dumps(xmltodict.parse(sys.stdin.read())))' <<< '${xmlContent}'", returnStdout: true).trim()
+    def parsedJson = new groovy.json.JsonSlurperClassic().parseText(parsedXml)
 
-    // Extract tests and failures
-    def tests = parsedXml.testsuites.testsuite[0].@tests.toInteger()
-    def failed = parsedXml.testsuites.testsuite[0].@failures.toInteger()
-    def passed = tests - failed
-    def firstFailure = parsedXml.testsuites.testsuite[0].testcase[0].@classname
+    // Extract tests and failures from the first line of the XML
+    def tests = parsedJson['testsuites']['@tests'].toInteger()
+    def failures = parsedJson['testsuites']['@failures'].toInteger()
+    def passed = tests - failures
+   
 
     // Read the existing report.html content
     def htmlContent = readFile(env.HTML_REPORT).trim()
@@ -89,9 +90,9 @@ script {
     // Create summary lines
     def summaryLines = """
         <p>tests ${tests}</p>
-        <p>failed ${failed}</p>
+        <p>failures ${failures}</p>
         <p>passed ${passed}</p>
-        <p>First failure: ${firstFailure}</p>
+       
     """
 
     // Create updated HTML content
@@ -103,6 +104,7 @@ script {
     // Archive report.html as artifact
     archiveArtifacts artifacts: env.HTML_REPORT, allowEmptyArchive: true
 }
+
 
             }
         }
