@@ -10,7 +10,6 @@ import (
 	didPool "terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_did_pool"
 	util "terraform-provider-genesyscloud/genesyscloud/util"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -25,7 +24,7 @@ func TestAccResourceIvrConfigDnisOverload(t *testing.T) {
 
 		didRangeLength    = 200 // Should be at least 50 to avoid index out of bounds errors below
 		didPoolResourceId = "did_pool"
-		startNumber       = 35375550120
+		startNumber       = 35375540120
 		endNumber         = startNumber + didRangeLength
 		startNumberStr    = fmt.Sprintf("+%v", startNumber)
 		endNumberStr      = fmt.Sprintf("+%v", endNumber)
@@ -72,16 +71,13 @@ func TestAccResourceIvrConfigDnisOverload(t *testing.T) {
 		ProviderFactories: provider.GetProviderFactories(providerResources, providerDataSources),
 		Steps: []resource.TestStep{
 			{
-				PreConfig: func() {
-					time.Sleep(45 * time.Second)
-				},
 				Config: didPoolResource + GenerateIvrConfigResource(&IvrConfigStruct{
-					ResourceID:  resourceID,
-					Name:        name,
-					Description: "",
-					Dnis:        createStringArrayOfPhoneNumbers(startNumber, startNumber+20),
-					DependsOn:   "genesyscloud_telephony_providers_edges_did_pool." + didPoolResourceId,
-					DivisionId:  "",
+					ResourceID:   resourceID,
+					Name:         name,
+					Descriptiond: "",
+					Dnis:         createStringArrayOfPhoneNumbers(startNumber, startNumber+20),
+					DependsOn:    "genesyscloud_telephony_providers_edges_did_pool." + didPoolResourceId,
+					DivisionId:   "",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(fullResourceId, "name", name),
@@ -121,7 +117,7 @@ func TestAccResourceIvrConfigDnisOverload(t *testing.T) {
 					ResourceID:  resourceID,
 					Name:        name,
 					Description: "",
-					Dnis:        createStringArrayOfPhoneNumbers(startNumber, endNumber),
+					Dnis:        createStringArrayOfPhoneNumbers(startNumber, startNumber+14),
 					DependsOn:   "genesyscloud_telephony_providers_edges_did_pool." + didPoolResourceId,
 					DivisionId:  "",
 				}),
