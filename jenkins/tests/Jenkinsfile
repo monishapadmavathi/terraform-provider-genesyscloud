@@ -28,6 +28,7 @@ pipeline {
     tools {
         go 'Go 1.20'
         terraform 'Terraform 1.0.10'
+        xmlstarlet 'xmlstarlet 1.6.1'
     }
 
 
@@ -45,7 +46,6 @@ pipeline {
                 sh 'pip3 install --user junit2html'
                 sh 'go install gotest.tools/gotestsum@latest'
                 sh 'go install github.com/nezorflame/junit-merger@latest'
-                sh 'sudo yum install -y xmlstarlet'
             }
 	    }
         stage('Run Tests and Generate Report') {
