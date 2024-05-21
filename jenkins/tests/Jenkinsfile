@@ -32,9 +32,9 @@ pipeline {
         terraform 'Terraform 1.0.10'
     }
 
-
     stages {
-
+      
+        
         stage('Install Dependencies & Build') {
             steps {
                 echo 'Installing dependencies'
@@ -47,69 +47,55 @@ pipeline {
                 sh 'pip3 install --user junit2html'
                 sh 'go install gotest.tools/gotestsum@latest'
                 sh 'go install github.com/nezorflame/junit-merger@latest'
-sh 'pip install xmltodict --user'
+                sh 'pip install xmltodict --user'
             }
 	    }
-        stage('Run Tests and Generate Report') {
+
+        stage('Terraform Check') {
+            steps {
+                echo 'Check Terraform Installation'
+                sh 'terraform -version'
+
+            }
+        }
+        
+    stage('Architect Tests') {
             environment {
                 TF_ACC=1
                 TF_LOG="DEBUG"
             }
             steps {
-                // Clean the Go module cache
-                sh 'go clean -i -cache'
-                
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    echo 'Attempting to Run Remaining Tests'
-                    
-                    // Run tests and generate JUnit XML report
+                    echo 'Attempting to Run Architect Tests'
                     withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
                         echo 'Loading Genesys OAuth Credentials'
-                        sh 'gotestsum --junitfile report.xml --format standard-verbose ./genesyscloud/... -run TestAcc.*Architect -v -count=1 -timeout 120m -cover -coverprofile=coverageivr.out'
+                        sh 'gotestsum --junitfile report.xml --format standard-verbose ./genesyscloud/... -run "TestAcc.*Architect|IvrConfig" -v -count=1 -timeout 120m -cover -coverprofile=coverageArchitect.out'
                     }
                 }
-                
-                // Convert JUnit XML report to HTML
-                sh 'junit2html report.xml report.html'
-
-script {
-    // Read the XML report content
-    def xmlContent = readFile(env.XML_REPORT).trim()
-
-    // Parse the XML content using XmlSlurper
-    def xml = new XmlSlurper().parseText(xmlContent)
-
-    // Remove test cases with "PASS" in their logs
-    xml.testsuite.each { testsuite ->
-        def toRemove = []
-        testsuite.testcase.each { testcase ->
-            def testcaseLog = testcase.'system-out'.text()
-            if (testcaseLog.contains("PASS")) {
-                toRemove << testcase
             }
         }
-        toRemove.each { testsuite.remove(it) }
-    }
 
-    // Serialize the modified XML content
-    def writer = new StringWriter()
-    def xmlNodePrinter = new XmlNodePrinter(new PrintWriter(writer))
-    xmlNodePrinter.print(xml)
-    def modifiedXmlContent = writer.toString()
+       
+        stage('Generate & Upload Report') {
+            steps {
 
-    // Write the modified XML content back to the report file
-    writeFile(file: env.XML_REPORT, text: modifiedXmlContent)
+        sh 'junit2html report.xml report.html'
 
-    // Parse the modified XML to JSON
-    def parsedXml = sh(script: "python -c 'import xmltodict, sys, json; print(json.dumps(xmltodict.parse(sys.stdin.read())))' <<< '${modifiedXmlContent}'", returnStdout: true).trim()
+                sh 'junit2html report.xml report.html'
+
+
+script {
+    // Extract summary information from report.xml using xmltodict
+    def xmlContent = readFile(env.XML_REPORT).trim()
+    def parsedXml = sh(script: "python -c 'import xmltodict, sys, json; print(json.dumps(xmltodict.parse(sys.stdin.read())))' <<< '${xmlContent}'", returnStdout: true).trim()
     def parsedJson = new groovy.json.JsonSlurperClassic().parseText(parsedXml)
 
-    // Extract summary information
+    // Extract tests and failures from the first line of the XML
     def tests = parsedJson['testsuites']['@tests'].toInteger()
     def failures = parsedJson['testsuites']['@failures'].toInteger()
     def passed = tests - failures
 
-    // Read the existing HTML report content
+    // Read the existing report.html content
     def htmlContent = readFile(env.HTML_REPORT).trim()
 
     // Create summary lines with CSS styling
@@ -121,31 +107,25 @@ script {
             .summary .value { font-weight: bold; }
         </style>
         <div class="summary">
-            <p>Tests: <span class="value">${tests}</span></p>
-            <p>Failures: <span class="value">${failures}</span></p>
+            <p>Total Tests: <span class="value">${tests}</span></p>
+            <p>Failed: <span class="value">${failures}</span></p>
             <p>Passed: <span class="value">${passed}</span></p>
         </div>
     """
 
-    // Insert summary lines after the line "Test Report : report.xml"
+    // Insert summary lines after the line "Test Report : report.xml" and remove the specified lines
     def updatedHtmlContent = htmlContent.replaceFirst("(?i)(Test Report : report.xml\\s*)", summaryLines)
 
-    // Write the updated content back to the HTML report
+    // Write the updated content back to report.html
     writeFile(file: env.HTML_REPORT, text: updatedHtmlContent.trim())
 
-    // Archive the updated HTML report as an artifact
-    archiveArtifacts artifacts: env.HTML_REPORT, allowEmptyArchive: true
 }
-
-
-
-
-
+        archiveArtifacts artifacts: 'report.html', allowEmptyArchive: true
+        
             }
         }
     }
 }
-
-
+ 
 
     
