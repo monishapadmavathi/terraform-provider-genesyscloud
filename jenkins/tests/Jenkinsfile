@@ -8,6 +8,170 @@ final def CREDENTIALS_MAP = [
 final def region = REGION
 def credentials = CREDENTIALS_MAP.get(region, 'GENESYSCLOUD_OAUTHCLIENT_ID_AND_SECRET')
 
+@NonCPS
+def parseTestResults(xmlFile) {
+    def results = []
+    def xmlParser = new XmlParser()
+    def testsuites = xmlParser.parse(xmlFile)
+
+    testsuites.testsuite.each { testsuite ->
+        testsuite.testcase.each { testcase ->
+            def result = [:]
+            result.name = testcase.@name
+            result.classname = testcase.@classname
+            result.time = testcase.@time
+            result.status = 'Passed'
+            result.reason = ''
+            result.log = testcase.text()
+
+            if (testcase.failure.size() > 0) {
+                result.status = 'Failed'
+                result.reason = testcase.failure[0].@message ?: 'No message'
+                result.log = testcase.failure[0].text()
+            } else if (testcase.skipped.size() > 0) {
+                result.status = 'Skipped'
+                result.reason = testcase.skipped[0].@message ?: 'No message'
+            }
+            
+            results << result
+        }
+    }
+    return results
+}
+
+@NonCPS
+def generateHtmlReport(testResults) {
+    def totalTests = testResults.size()
+    def totalPassed = testResults.count { it.status == 'Passed' }
+    def totalFailed = testResults.count { it.status == 'Failed' }
+    def totalSkipped = testResults.count { it.status == 'Skipped' }
+
+    def html = new StringBuilder()
+    html << """
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .passed { background-color: #d4edda; }
+            .failed { background-color: #f8d7da; }
+            .skipped { background-color: #fff3cd; }
+            .summary { margin-bottom: 20px; }
+            .summary div { margin: 5px 0; }
+            .link { color: #007bff; text-decoration: none; }
+        </style>
+    </head>
+    <body>
+        <h2>Test Results</h2>
+        <div class="summary">
+            <div>Total Tests: ${totalTests}</div>
+            <div style="color: green;">Total Passed: ${totalPassed}</div>
+            <div style="color: red;">Total Failed: ${totalFailed}</div>
+            <div style="color: orange;">Total Skipped: ${totalSkipped}</div>
+        </div>
+
+        <h3>Failed Tests</h3>
+        <table>
+            <tr>
+                <th>Status</th>
+                <th>Class Name</th>
+                <th>Test Name</th>
+                <th>Duration (s)</th>
+                <th>Reason</th>
+            </tr>
+    """
+
+    testResults.findAll { it.status == 'Failed' }.each { result ->
+        def statusClass = result.status.toLowerCase()
+        html << """
+        <tr class="${statusClass}">
+            <td>${result.status}</td>
+            <td>${result.classname}</td>
+            <td><a href="#${result.name}" class="link">${result.name}</a></td>
+            <td>${result.time}</td>
+            <td>${result.reason}</td>
+        </tr>
+        """
+    }
+
+    html << """
+        </table>
+
+        <h3>Skipped Tests</h3>
+        <table>
+            <tr>
+                <th>Status</th>
+                <th>Class Name</th>
+                <th>Test Name</th>
+                <th>Reason</th>
+            </tr>
+    """
+
+    testResults.findAll { it.status == 'Skipped' }.each { result ->
+        def statusClass = result.status.toLowerCase()
+        html << """
+        <tr class="${statusClass}">
+            <td>${result.status}</td>
+            <td>${result.classname}</td>
+            <td>${result.name}</td>
+            <td>${result.reason}</td>
+        </tr>
+        """
+    }
+
+    html << """
+        </table>
+
+        <h3>Passed Tests</h3>
+        <table>
+            <tr>
+                <th>Status</th>
+                <th>Class Name</th>
+                <th>Test Name</th>
+                <th>Duration (s)</th>
+            </tr>
+    """
+
+    testResults.findAll { it.status == 'Passed' }.each { result ->
+        def statusClass = result.status.toLowerCase()
+        html << """
+        <tr class="${statusClass}">
+            <td>${result.status}</td>
+            <td>${result.classname}</td>
+            <td><a href="#${result.name}" class="link">${result.name}</a></td>
+            <td>${result.time}</td>
+        </tr>
+        """
+    }
+
+    html << """
+        </table>
+
+        <h3>Test Details</h3>
+    """
+
+    testResults.each { result ->
+        html << """
+        <div id="${result.name}" style="margin-top: 20px;">
+            <h4>${result.classname}.${result.name}</h4>
+            <p>Status: ${result.status}</p>
+            <p>Duration: ${result.time}s</p>
+            <p>Reason: ${result.reason}</p>
+            <pre>${result.log}</pre>
+        </div>
+        """
+    }
+
+    html << """
+    </body>
+    </html>
+    """
+    
+    return html.toString()
+}
+
 pipeline {
     agent {
         node {
@@ -79,50 +243,23 @@ pipeline {
         stage('Generate & Upload Report') {
             steps {
 
-        sh 'junit2html report.xml report.html'
-
-                sh 'junit2html report.xml report.html'
-
-
 script {
-    // Extract summary information from report.xml using xmltodict
-    def xmlContent = readFile(env.XML_REPORT).trim()
-    def parsedXml = sh(script: "python -c 'import xmltodict, sys, json; print(json.dumps(xmltodict.parse(sys.stdin.read())))' <<< '${xmlContent}'", returnStdout: true).trim()
-    def parsedJson = new groovy.json.JsonSlurperClassic().parseText(parsedXml)
+                    // Assume the JUnit XML report is generated and saved as 'test-results.xml'
+                    def testResults = parseTestResults('report.xml')
+                    def htmlReport = generateHtmlReport(testResults)
+                    
+                    // Save the HTML report to a file
+                    writeFile file: 'test-report.html', text: htmlReport
 
-    // Extract tests and failures from the first line of the XML
-    def tests = parsedJson['testsuites']['@tests'].toInteger()
-    def failures = parsedJson['testsuites']['@failures'].toInteger()
-    def passed = tests - failures
+                    // Archive the HTML report as a build artifact
+                    archiveArtifacts artifacts: 'test-report.html', allowEmptyArchive: false
 
-    // Read the existing report.html content
-    def htmlContent = readFile(env.HTML_REPORT).trim()
+                    // Optionally, print the location of the HTML report
+                    echo "HTML report generated: ${env.WORKSPACE}/test-report.html"
+                }
 
-    // Create summary lines with CSS styling
-    def summaryLines = """
-        <style>
-            .summary { margin: 20px 0; }
-            .summary h1 { font-size: 2em; margin-bottom: 10px; }
-            .summary p { font-size: 1.5em; margin: 5px 0; }
-            .summary .value { font-weight: bold; }
-        </style>
-        <div class="summary">
-            <p>Total Tests: <span class="value">${tests}</span></p>
-            <p>Failed: <span class="value">${failures}</span></p>
-            <p>Passed: <span class="value">${passed}</span></p>
-        </div>
-    """
 
-    // Insert summary lines after the line "Test Report : report.xml" and remove the specified lines
-    def updatedHtmlContent = htmlContent.replaceFirst("(?i)(Test Report : report.xml\\s*)", summaryLines)
 
-    // Write the updated content back to report.html
-    writeFile(file: env.HTML_REPORT, text: updatedHtmlContent.trim())
-
-}
-        archiveArtifacts artifacts: 'report.html', allowEmptyArchive: true
-        
-            }
         }
     }
 }
