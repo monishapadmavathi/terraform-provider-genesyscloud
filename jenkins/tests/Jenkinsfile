@@ -8,170 +8,6 @@ final def CREDENTIALS_MAP = [
 final def region = REGION
 def credentials = CREDENTIALS_MAP.get(region, 'GENESYSCLOUD_OAUTHCLIENT_ID_AND_SECRET')
 
-@NonCPS
-def parseTestResults(xmlFile) {
-    def results = []
-    def xmlParser = new XmlParser()
-    def testsuites = xmlParser.parse(xmlFile)
-
-    testsuites.testsuite.each { testsuite ->
-        testsuite.testcase.each { testcase ->
-            def result = [:]
-            result.name = testcase.@name
-            result.classname = testcase.@classname
-            result.time = testcase.@time
-            result.status = 'Passed'
-            result.reason = ''
-            result.log = testcase.text()
-
-            if (testcase.failure.size() > 0) {
-                result.status = 'Failed'
-                result.reason = testcase.failure[0].@message ?: 'No message'
-                result.log = testcase.failure[0].text()
-            } else if (testcase.skipped.size() > 0) {
-                result.status = 'Skipped'
-                result.reason = testcase.skipped[0].@message ?: 'No message'
-            }
-            
-            results << result
-        }
-    }
-    return results
-}
-
-@NonCPS
-def generateHtmlReport(testResults) {
-    def totalTests = testResults.size()
-    def totalPassed = testResults.count { it.status == 'Passed' }
-    def totalFailed = testResults.count { it.status == 'Failed' }
-    def totalSkipped = testResults.count { it.status == 'Skipped' }
-
-    def html = new StringBuilder()
-    html << """
-    <html>
-    <head>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-            .passed { background-color: #d4edda; }
-            .failed { background-color: #f8d7da; }
-            .skipped { background-color: #fff3cd; }
-            .summary { margin-bottom: 20px; }
-            .summary div { margin: 5px 0; }
-            .link { color: #007bff; text-decoration: none; }
-        </style>
-    </head>
-    <body>
-        <h2>Test Results</h2>
-        <div class="summary">
-            <div>Total Tests: ${totalTests}</div>
-            <div style="color: green;">Total Passed: ${totalPassed}</div>
-            <div style="color: red;">Total Failed: ${totalFailed}</div>
-            <div style="color: orange;">Total Skipped: ${totalSkipped}</div>
-        </div>
-
-        <h3>Failed Tests</h3>
-        <table>
-            <tr>
-                <th>Status</th>
-                <th>Class Name</th>
-                <th>Test Name</th>
-                <th>Duration (s)</th>
-                <th>Reason</th>
-            </tr>
-    """
-
-    testResults.findAll { it.status == 'Failed' }.each { result ->
-        def statusClass = result.status.toLowerCase()
-        html << """
-        <tr class="${statusClass}">
-            <td>${result.status}</td>
-            <td>${result.classname}</td>
-            <td><a href="#${result.name}" class="link">${result.name}</a></td>
-            <td>${result.time}</td>
-            <td>${result.reason}</td>
-        </tr>
-        """
-    }
-
-    html << """
-        </table>
-
-        <h3>Skipped Tests</h3>
-        <table>
-            <tr>
-                <th>Status</th>
-                <th>Class Name</th>
-                <th>Test Name</th>
-                <th>Reason</th>
-            </tr>
-    """
-
-    testResults.findAll { it.status == 'Skipped' }.each { result ->
-        def statusClass = result.status.toLowerCase()
-        html << """
-        <tr class="${statusClass}">
-            <td>${result.status}</td>
-            <td>${result.classname}</td>
-            <td>${result.name}</td>
-            <td>${result.reason}</td>
-        </tr>
-        """
-    }
-
-    html << """
-        </table>
-
-        <h3>Passed Tests</h3>
-        <table>
-            <tr>
-                <th>Status</th>
-                <th>Class Name</th>
-                <th>Test Name</th>
-                <th>Duration (s)</th>
-            </tr>
-    """
-
-    testResults.findAll { it.status == 'Passed' }.each { result ->
-        def statusClass = result.status.toLowerCase()
-        html << """
-        <tr class="${statusClass}">
-            <td>${result.status}</td>
-            <td>${result.classname}</td>
-            <td><a href="#${result.name}" class="link">${result.name}</a></td>
-            <td>${result.time}</td>
-        </tr>
-        """
-    }
-
-    html << """
-        </table>
-
-        <h3>Test Details</h3>
-    """
-
-    testResults.each { result ->
-        html << """
-        <div id="${result.name}" style="margin-top: 20px;">
-            <h4>${result.classname}.${result.name}</h4>
-            <p>Status: ${result.status}</p>
-            <p>Duration: ${result.time}s</p>
-            <p>Reason: ${result.reason}</p>
-            <pre>${result.log}</pre>
-        </div>
-        """
-    }
-
-    html << """
-    </body>
-    </html>
-    """
-    
-    return html.toString()
-}
-
 pipeline {
     agent {
         node {
@@ -239,17 +75,166 @@ pipeline {
             }
         }
 
-       
-        stage('Generate & Upload Report') {
+       stages {
+        stage('Generate Report') {
             steps {
+                script {
+                    // Read the XML file content
+                    def xmlContent = readFile 'test-results.xml'
+                    
+                    // Extract test case information using regular expressions
+                    def testCases = []
+                    def testCasePattern = ~/<testcase\s+classname="([^"]+)"\s+name="([^"]+)"\s+time="([^"]+)"[^>]*>(.*?)<\/testcase>/s
+                    def failurePattern = ~/<failure\s+message="([^"]*)">(.*?)<\/failure>/s
+                    def skippedPattern = ~/<skipped\s+message="([^"]*)">(.*?)<\/skipped>/s
+                    
+                    xmlContent.eachMatch(testCasePattern) { match, classname, name, time, details ->
+                        def result = [
+                            name: name,
+                            classname: classname,
+                            time: time,
+                            status: 'Passed',
+                            reason: '',
+                            log: details
+                        ]
+                        
+                        def failureMatch = details =~ failurePattern
+                        def skippedMatch = details =~ skippedPattern
+                        if (failureMatch) {
+                            result.status = 'Failed'
+                            result.reason = failureMatch[0][1]
+                            result.log = failureMatch[0][2]
+                        } else if (skippedMatch) {
+                            result.status = 'Skipped'
+                            result.reason = skippedMatch[0][1]
+                        }
+                        
+                        testCases << result
+                    }
 
-script {
-                    // Assume the JUnit XML report is generated and saved as 'test-results.xml'
-                    def testResults = parseTestResults('report.xml')
-                    def htmlReport = generateHtmlReport(testResults)
+                    // Generate HTML report
+                    def html = new StringBuilder()
+                    html << """
+                    <html>
+                    <head>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background-color: #f2f2f2; }
+                            .passed { background-color: #d4edda; }
+                            .failed { background-color: #f8d7da; }
+                            .skipped { background-color: #fff3cd; }
+                            .summary { margin-bottom: 20px; }
+                            .summary div { margin: 5px 0; }
+                            .link { color: #007bff; text-decoration: none; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Test Results</h2>
+                        <div class="summary">
+                            <div>Total Tests: ${testCases.size()}</div>
+                            <div style="color: green;">Total Passed: ${testCases.count { it.status == 'Passed' }}</div>
+                            <div style="color: red;">Total Failed: ${testCases.count { it.status == 'Failed' }}</div>
+                            <div style="color: orange;">Total Skipped: ${testCases.count { it.status == 'Skipped' }}</div>
+                        </div>
+
+                        <h3>Failed Tests</h3>
+                        <table>
+                            <tr>
+                                <th>Status</th>
+                                <th>Class Name</th>
+                                <th>Test Name</th>
+                                <th>Duration (s)</th>
+                                <th>Reason</th>
+                            </tr>
+                    """
+
+                    testCases.findAll { it.status == 'Failed' }.each { result ->
+                        html << """
+                        <tr class="failed">
+                            <td>${result.status}</td>
+                            <td>${result.classname}</td>
+                            <td><a href="#${result.name}" class="link">${result.name}</a></td>
+                            <td>${result.time}</td>
+                            <td>${result.reason}</td>
+                        </tr>
+                        """
+                    }
+
+                    html << """
+                        </table>
+
+                        <h3>Skipped Tests</h3>
+                        <table>
+                            <tr>
+                                <th>Status</th>
+                                <th>Class Name</th>
+                                <th>Test Name</th>
+                                <th>Reason</th>
+                            </tr>
+                    """
+
+                    testCases.findAll { it.status == 'Skipped' }.each { result ->
+                        html << """
+                        <tr class="skipped">
+                            <td>${result.status}</td>
+                            <td>${result.classname}</td>
+                            <td>${result.name}</td>
+                            <td>${result.reason}</td>
+                        </tr>
+                        """
+                    }
+
+                    html << """
+                        </table>
+
+                        <h3>Passed Tests</h3>
+                        <table>
+                            <tr>
+                                <th>Status</th>
+                                <th>Class Name</th>
+                                <th>Test Name</th>
+                                <th>Duration (s)</th>
+                            </tr>
+                    """
+
+                    testCases.findAll { it.status == 'Passed' }.each { result ->
+                        html << """
+                        <tr class="passed">
+                            <td>${result.status}</td>
+                            <td>${result.classname}</td>
+                            <td><a href="#${result.name}" class="link">${result.name}</a></td>
+                            <td>${result.time}</td>
+                        </tr>
+                        """
+                    }
+
+                    html << """
+                        </table>
+
+                        <h3>Test Details</h3>
+                    """
+
+                    testCases.each { result ->
+                        html << """
+                        <div id="${result.name}" style="margin-top: 20px;">
+                            <h4>${result.classname}.${result.name}</h4>
+                            <p>Status: ${result.status}</p>
+                            <p>Duration: ${result.time}s</p>
+                            <p>Reason: ${result.reason}</p>
+                            <pre>${result.log}</pre>
+                        </div>
+                        """
+                    }
+
+                    html << """
+                    </body>
+                    </html>
+                    """
                     
                     // Save the HTML report to a file
-                    writeFile file: 'test-report.html', text: htmlReport
+                    writeFile file: 'test-report.html', text: html.toString()
 
                     // Archive the HTML report as a build artifact
                     archiveArtifacts artifacts: 'test-report.html', allowEmptyArchive: false
@@ -257,14 +242,15 @@ script {
                     // Optionally, print the location of the HTML report
                     echo "HTML report generated: ${env.WORKSPACE}/test-report.html"
                 }
-
-
-
+            }
         }
     }
+}
+
+
 
 }
-}
+
  
 
     
