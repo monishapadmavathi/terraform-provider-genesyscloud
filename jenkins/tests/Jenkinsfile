@@ -75,7 +75,6 @@ pipeline {
             }
         }
 
-
         stage('Generate Report') {
             steps {
                 script {
@@ -108,14 +107,21 @@ pipeline {
                         ]
 
                         // Check for failure or skipped
-                        if (details =~ failurePattern) {
+                        def failureMatcher = details =~ failurePattern
+                        def skippedMatcher = details =~ skippedPattern
+                        if (failureMatcher.find()) {
                             result.status = 'Failed'
-                            result.log = failurePattern.matcher(details).replaceAll('')
-                            result.reason = failurePattern.matcher(details).group(1).trim()
-                        } else if (details =~ skippedPattern) {
+                            result.log = failureMatcher.group(1).trim()
+                        } else if (skippedMatcher.find()) {
                             result.status = 'Skipped'
-                            result.log = skippedPattern.matcher(details).replaceAll('')
-                            result.reason = skippedPattern.matcher(details).group(1).trim()
+                            result.log = skippedMatcher.group(1).trim()
+                        }
+
+                        // Extract reason
+                        if (result.status == 'Failed') {
+                            result.reason = extractReason(result.log)
+                        } else if (result.status == 'Skipped') {
+                            result.reason = extractReason(result.log)
                         }
 
                         testCases << result
@@ -268,6 +274,16 @@ pipeline {
             }
         }
     }
+}
+def extractReason(String log) {
+    // Extract reason from the log
+    def reason = ""
+    def reasonPattern = /message="([^"]*)">/
+    def matcher = log =~ reasonPattern
+    if (matcher.find()) {
+        reason = matcher.group(1).trim()
+    }
+    return reason
 }
 
 
