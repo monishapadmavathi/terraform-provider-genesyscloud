@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="14" failures="1" errors="0" time="50.985358">
+	<testsuite tests="2" failures="0" time="11.254000" name="terraform-provider-genesyscloud/genesyscloud" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud" name="TestAccDataSourceArchitectSchedule" time="3.910000"></testcase>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud" name="TestAccResourceArchitectSchedules" time="7.100000"></testcase>
+	</testsuite>
+	<testsuite tests="2" failures="0" time="5.689000" name="terraform-provider-genesyscloud/genesyscloud/architect_datatable" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_datatable" name="TestAccDataSourceArchitectDatatable" time="2.510000"></testcase>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_datatable" name="TestAccResourceArchitectDatatable" time="3.170000"></testcase>
+	</testsuite>
+	<testsuite tests="1" failures="0" time="14.658000" name="terraform-provider-genesyscloud/genesyscloud/architect_datatable_row" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_datatable_row" name="TestAccResourceArchitectDatatableRow" time="14.640000"></testcase>
+	</testsuite>
+	<testsuite tests="2" failures="0" time="5.973000" name="terraform-provider-genesyscloud/genesyscloud/architect_emergencygroup" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_emergencygroup" name="TestAccResourceArchitectEmergencyGroups" time="0.000000">
+			<skipped message="=== RUN   TestAccResourceArchitectEmergencyGroups&#xA;    resource_genesyscloud_architect_emergencygroup_test.go:19: simply&#xA;--- SKIP: TestAccResourceArchitectEmergencyGroups (0.00s)&#xA;"></skipped>
+		</testcase>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_emergencygroup" name="TestAccDataSourceArchitectEmergencyGroup" time="5.950000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.020000" name="terraform-provider-genesyscloud/genesyscloud/architect_flow" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="2" failures="1" time="6.315000" name="terraform-provider-genesyscloud/genesyscloud/architect_grammar" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_grammar" name="TestAccResourceArchitectGrammar" time="1.950000">
+			<failure message="Failed" type="">=== RUN   TestAccResourceArchitectGrammar&#xA;    resource_genesyscloud_architect_grammar_test.go:24: Step 1/3 error: Check failed: Check 1/2 error: genesyscloud_architect_grammar.grammar5007caf2-78e0-4c3c-b62c-df747d4ba42e: Attribute &#39;name&#39; expected &#34;cdfed&#34;, got &#34;Test grammar 27d27e4d-a5c8-4a28-a326-31193fe0d214&#34;&#xA;--- FAIL: TestAccResourceArchitectGrammar (1.95s)&#xA;</failure>
+		</testcase>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_grammar" name="TestAccDataSourceArchitectGrammar" time="4.350000"></testcase>
+	</testsuite>
+	<testsuite tests="1" failures="0" time="10.485000" name="terraform-provider-genesyscloud/genesyscloud/architect_grammar_language" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_grammar_language" name="TestAccResourceArchitectGrammarLanguage" time="10.470000"></testcase>
+	</testsuite>
+	<testsuite tests="1" failures="0" time="3.328000" name="terraform-provider-genesyscloud/genesyscloud/architect_ivr" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_ivr" name="TestAccDataSourceArchitectIvr" time="3.300000"></testcase>
+	</testsuite>
+	<testsuite tests="2" failures="0" time="13.109000" name="terraform-provider-genesyscloud/genesyscloud/architect_schedulegroups" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_schedulegroups" name="TestAccDataSourceArchitectScheduleGroups" time="4.450000"></testcase>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_schedulegroups" name="TestAccResourceArchitectScheduleGroups" time="8.610000"></testcase>
+	</testsuite>
+	<testsuite tests="1" failures="0" time="4.260000" name="terraform-provider-genesyscloud/genesyscloud/architect_user_prompt" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+		<testcase classname="terraform-provider-genesyscloud/genesyscloud/architect_user_prompt" name="TestAccDataSourceArchitectUserPrompt" time="4.230000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.009000" name="terraform-provider-genesyscloud/genesyscloud/auth_role" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.018000" name="terraform-provider-genesyscloud/genesyscloud/authorization_product" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/consistency_checker" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/dependent_consumers" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.025000" name="terraform-provider-genesyscloud/genesyscloud/employeeperformance_externalmetrics_definitions" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.048000" name="terraform-provider-genesyscloud/genesyscloud/external_contacts" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.041000" name="terraform-provider-genesyscloud/genesyscloud/flow_loglevel" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.058000" name="terraform-provider-genesyscloud/genesyscloud/flow_milestone" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.037000" name="terraform-provider-genesyscloud/genesyscloud/flow_outcome" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.025000" name="terraform-provider-genesyscloud/genesyscloud/group" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.045000" name="terraform-provider-genesyscloud/genesyscloud/group_roles" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.020000" name="terraform-provider-genesyscloud/genesyscloud/idp_salesforce" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.031000" name="terraform-provider-genesyscloud/genesyscloud/integration" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.018000" name="terraform-provider-genesyscloud/genesyscloud/integration_action" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.017000" name="terraform-provider-genesyscloud/genesyscloud/integration_credential" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.040000" name="terraform-provider-genesyscloud/genesyscloud/integration_custom_auth_action" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.051000" name="terraform-provider-genesyscloud/genesyscloud/journey_outcome_predictor" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.036000" name="terraform-provider-genesyscloud/genesyscloud/oauth_client" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.026000" name="terraform-provider-genesyscloud/genesyscloud/organization_authentication_settings" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.039000" name="terraform-provider-genesyscloud/genesyscloud/orgauthorization_pairing" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.070000" name="terraform-provider-genesyscloud/genesyscloud/outbound" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.022000" name="terraform-provider-genesyscloud/genesyscloud/outbound_attempt_limit" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.070000" name="terraform-provider-genesyscloud/genesyscloud/outbound_callabletimeset" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.056000" name="terraform-provider-genesyscloud/genesyscloud/outbound_callanalysisresponseset" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.150000" name="terraform-provider-genesyscloud/genesyscloud/outbound_campaign" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.037000" name="terraform-provider-genesyscloud/genesyscloud/outbound_campaignrule" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.028000" name="terraform-provider-genesyscloud/genesyscloud/outbound_contact_list" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.032000" name="terraform-provider-genesyscloud/genesyscloud/outbound_contactlistfilter" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.054000" name="terraform-provider-genesyscloud/genesyscloud/outbound_dnclist" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.015000" name="terraform-provider-genesyscloud/genesyscloud/outbound_filespecificationtemplate" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.064000" name="terraform-provider-genesyscloud/genesyscloud/outbound_ruleset" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.189000" name="terraform-provider-genesyscloud/genesyscloud/outbound_sequence" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.035000" name="terraform-provider-genesyscloud/genesyscloud/outbound_settings" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.044000" name="terraform-provider-genesyscloud/genesyscloud/outbound_wrapupcode_mappings" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.033000" name="terraform-provider-genesyscloud/genesyscloud/process_automation_trigger" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.014000" name="terraform-provider-genesyscloud/genesyscloud/provider" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.137000" name="terraform-provider-genesyscloud/genesyscloud/recording_media_retention_policy" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.020000" name="terraform-provider-genesyscloud/genesyscloud/resource_cache" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.019000" name="terraform-provider-genesyscloud/genesyscloud/resource_exporter" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/resource_register" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.023000" name="terraform-provider-genesyscloud/genesyscloud/responsemanagement_library" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.055000" name="terraform-provider-genesyscloud/genesyscloud/responsemanagement_response" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.091000" name="terraform-provider-genesyscloud/genesyscloud/responsemanagement_responseasset" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.084000" name="terraform-provider-genesyscloud/genesyscloud/routing_email_route" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.050000" name="terraform-provider-genesyscloud/genesyscloud/routing_queue" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.077000" name="terraform-provider-genesyscloud/genesyscloud/routing_queue_conditional_group_routing" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.026000" name="terraform-provider-genesyscloud/genesyscloud/routing_queue_outbound_email_address" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.041000" name="terraform-provider-genesyscloud/genesyscloud/routing_sms_addresses" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.038000" name="terraform-provider-genesyscloud/genesyscloud/scripts" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.201000" name="terraform-provider-genesyscloud/genesyscloud/station" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.078000" name="terraform-provider-genesyscloud/genesyscloud/task_management_workbin" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.071000" name="terraform-provider-genesyscloud/genesyscloud/task_management_workitem" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.033000" name="terraform-provider-genesyscloud/genesyscloud/task_management_workitem_schema" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.079000" name="terraform-provider-genesyscloud/genesyscloud/task_management_worktype" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.070000" name="terraform-provider-genesyscloud/genesyscloud/team" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.027000" name="terraform-provider-genesyscloud/genesyscloud/telephony" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.057000" name="terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_did" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.085000" name="terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_did_pool" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.057000" name="terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_edge_group" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.065000" name="terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_extension_pool" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.028000" name="terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_linebasesettings" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.195000" name="terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_phone" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.038000" name="terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_phonebasesettings" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.200000" name="terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_site" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.103000" name="terraform-provider-genesyscloud/genesyscloud/telephony_providers_edges_trunk" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.045000" name="terraform-provider-genesyscloud/genesyscloud/tfexporter" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/tfexporter_state" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.022000" name="terraform-provider-genesyscloud/genesyscloud/user_roles" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.012000" name="terraform-provider-genesyscloud/genesyscloud/util" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/util/architectlanguages" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.004000" name="terraform-provider-genesyscloud/genesyscloud/util/chunks" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/util/constants" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/util/feature_toggles" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.011000" name="terraform-provider-genesyscloud/genesyscloud/util/files" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/util/fileserver" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.006000" name="terraform-provider-genesyscloud/genesyscloud/util/lists" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/util/resourcedata" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.010000" name="terraform-provider-genesyscloud/genesyscloud/util/stringmap" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/util/testrunner" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.003000" name="terraform-provider-genesyscloud/genesyscloud/util/typeconv" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/validators" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.017000" name="terraform-provider-genesyscloud/genesyscloud/webdeployments_configuration" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="terraform-provider-genesyscloud/genesyscloud/webdeployments_configuration/utils" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.021000" name="terraform-provider-genesyscloud/genesyscloud/webdeployments_deployment" timestamp="2024-05-23T09:07:54Z">
+		<properties>
+			<property name="go.version" value="go1.20 linux/amd64"></property>
+		</properties>
+	</testsuite>
+</testsuites>
