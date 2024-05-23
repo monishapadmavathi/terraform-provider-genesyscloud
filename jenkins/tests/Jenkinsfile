@@ -59,6 +59,7 @@ pipeline {
             }
         }
         
+
         stage('Generate Report') {
             steps {
                 script {
@@ -151,24 +152,35 @@ pipeline {
                             </tr>
                     """)
 
-                    testCases.findAll { it.status == 'Failed' }.each { result ->
-                        html.append("""
-                        <tr class="failed">
-                            <td>${result.status}</td>
-                            <td>${result.classname}</td>
-                            <td>
-                                <a href="#${result.name}" class="link">${result.name}</a>
-                            </td>
-                            <td>${result.time}</td>
-                        </tr>
-                        <tr id="${result.name}" class="reason-detail">
-                            <td colspan="4">
-                                <div class="reason-content">
-                                    <pre>${result.log}</pre>
-                                </div>
-                            </td>
-                        </tr>
-                        """)
+                    testCases.each { result ->
+                        if (result.status == 'Failed') {
+                            html.append("""
+                            <tr class="failed">
+                                <td>${result.status}</td>
+                                <td>${result.classname}</td>
+                                <td>
+                                    <a href="#${result.name}" class="link">${result.name}</a>
+                                </td>
+                                <td>${result.time}</td>
+                            </tr>
+                            <tr id="${result.name}" class="reason-detail">
+                                <td colspan="4">
+                                    <div class="reason-content">
+                                        <pre>${result.log}</pre>
+                                    </div>
+                                </td>
+                            </tr>
+                            """)
+                        } else {
+                            html.append("""
+                            <tr class="${result.status.toLowerCase()}">
+                                <td>${result.status}</td>
+                                <td>${result.classname}</td>
+                                <td>${result.name}</td>
+                                <td>${result.time}</td>
+                            </tr>
+                            """)
+                        }
                     }
 
                     html.append("""
@@ -249,6 +261,7 @@ def extractReason(String log) {
     }
     return reason
 }
+
 
 
 
