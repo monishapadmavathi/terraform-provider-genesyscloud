@@ -75,8 +75,6 @@ pipeline {
             }
         }
 
-
-
         stage('Generate Report') {
             steps {
                 script {
@@ -86,7 +84,7 @@ pipeline {
                     // Extract test case information using regular expressions
                     def testCases = []
                     def testCasePattern = /<testcase\s+classname="([^"]+)"\s+name="([^"]+)"\s+time="([^"]+)"/
-                    def failurePattern = /<failure\s+message="([^"]*)">(.*?)<\/failures>/
+                    def failurePattern = /<failure\s+message="([^"]*)">(.*?)<\/failure>/
                     def skippedPattern = /<skipped\s+message="([^"]*)">(.*?)<\/skipped>/
 
                     def matcher = xmlContent =~ testCasePattern
@@ -103,7 +101,7 @@ pipeline {
                             name: name,
                             classname: classname,
                             time: time,
-                            status: 'Passed',
+                            status: 'Passed', // Default to Passed
                             reason: '',
                             log: details
                         ]
@@ -270,6 +268,7 @@ pipeline {
         }
     }
 }
+
 
 
 
