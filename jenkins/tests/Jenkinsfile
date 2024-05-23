@@ -117,7 +117,7 @@ pipeline {
                     </head>
                     <body>
                         <h2>Coverage Report</h2>
-                        <div>Total Coverage: ${String.format("%.2f", coverageJson.totalCoverage)}%</div>
+                        <div>Total Coverage: ${String.format("%.2f", coverageJson.totalCoverage as float)}%</div>
                         <table>
                             <tr>
                                 <th>Package</th>
@@ -129,7 +129,7 @@ pipeline {
                         html.append("""
                         <tr class="package" onclick="togglePackage('${pkg}')">
                             <td>${pkg}</td>
-                            <td>${String.format("%.2f", data.coverage)}%</td>
+                            <td>${String.format("%.2f", data.coverage as float)}%</td>
                         </tr>
                         <tr id="${pkg}" class="hidden">
                             <td colspan="2">
@@ -144,7 +144,7 @@ pipeline {
                             html.append("""
                             <tr>
                                 <td><a href="${fileCoverageUrl}">${file}</a></td>
-                                <td>${String.format("%.2f", fileData.coverage)}%</td>
+                                <td>${String.format("%.2f", fileData.coverage as float)}%</td>
                             </tr>
                             """)
                         }
@@ -171,9 +171,6 @@ pipeline {
         }
     }
 }
-
-
-
  
 
     
