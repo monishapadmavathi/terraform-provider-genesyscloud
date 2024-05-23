@@ -59,7 +59,6 @@ pipeline {
             }
         }
         
-
         stage('Generate Report') {
             steps {
                 script {
@@ -216,12 +215,16 @@ pipeline {
                             <h4>${result.classname}.${result.name}</h4>
                             <p>Status: ${result.status}</p>
                             <p>Duration: ${result.time}s</p>
+                        """)
+                        if (result.status == 'Failed') {
+                            html.append("""
                             <div class="reason-detail">
                                 <pre>${result.reason}</pre>
                                 <pre>${result.log}</pre>
                             </div>
-                        </div>
-                        """)
+                            """)
+                        }
+                        html.append("</div>")
                     }
 
                     html.append("""
