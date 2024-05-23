@@ -1,4 +1,4 @@
-@Library('pipeline-library') _
+@Library('pipeline-library') 
 
 final def CREDENTIALS_MAP = [
   'tca': 'GENESYSCLOUD_OAUTHCLIENT_ID_AND_SECRET_TCA',
