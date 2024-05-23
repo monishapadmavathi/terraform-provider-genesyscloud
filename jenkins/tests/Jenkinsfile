@@ -15,6 +15,11 @@ pipeline {
         }
     }
 
+    tools {
+        go 'Go 1.20'
+        terraform 'Terraform 1.0.10'
+        groovy 'Groovy 2.4.9'
+    }
     environment {
         CREDENTIALS_ID  = "${credentials}"
         GOPATH = "$HOME/go"
@@ -26,12 +31,10 @@ pipeline {
         PATH = "${env.PATH}:${HOME}/go/bin:/home/jenkins/.local/bin"
         XML_REPORT = 'report.xml'
         HTML_REPORT = 'report.html'
+        GROOVY_HOME = tool 'Groovy 2.4.9'
+        PATH = "${env.PATH}:${env.GROOVY_HOME}/bin"
     }
-    tools {
-        go 'Go 1.20'
-        terraform 'Terraform 1.0.10'
-        groovy 'Groovy 2.4.9'
-    }
+
 
     stages {
       
