@@ -128,7 +128,6 @@ pipeline {
                             .summary { margin-bottom: 20px; }
                             .summary div { margin: 5px 0; }
                             .link { color: #007bff; text-decoration: none; }
-                            .reason-detail { display: none; }
                             .reason-content { margin-top: 10px; padding: 10px; border: 1px solid #ccc; background-color: #f9f9f9; }
                             .test-case { border-left: 4px solid #28a745; padding-left: 10px; margin-top: 20px; }
                         </style>
@@ -162,13 +161,6 @@ pipeline {
                                     <a href="#${result.name}" class="link">${result.name}</a>
                                 </td>
                                 <td>${result.time}</td>
-                            </tr>
-                            <tr id="${result.name}" class="reason-detail">
-                                <td colspan="4">
-                                    <div class="reason-content">
-                                        <pre>${result.log}</pre>
-                                    </div>
-                                </td>
                             </tr>
                             """)
                         } else {
@@ -233,6 +225,28 @@ pipeline {
 
                     html.append("""
                         </table>
+
+                        <h3>Test Details</h3>
+                    """)
+
+                    testCases.each { result ->
+                        if (result.status == 'Failed') {
+                            html.append("""
+                            <div id="${result.name}" class="reason-detail">
+                                <div class="test-case failed">
+                                    <h4>${result.classname}.${result.name}</h4>
+                                    <p>Status: ${result.status}</p>
+                                    <p>Duration: ${result.time}s</p>
+                                    <div class="reason-content">
+                                        <pre>${result.log}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            """)
+                        }
+                    }
+
+                    html.append("""
                     </body>
                     </html>
                     """)
@@ -261,7 +275,6 @@ def extractReason(String log) {
     }
     return reason
 }
-
 
 
 
