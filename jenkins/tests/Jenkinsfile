@@ -86,7 +86,7 @@ pipeline {
                     // Extract test case information using regular expressions
                     def testCases = []
                     def testCasePattern = /<testcase\s+classname="([^"]+)"\s+name="([^"]+)"\s+time="([^"]+)"/
-                    def failurePattern = /<failure\s+message="([^"]*)">(.*?)<\/failure>/
+                    def failurePattern = /<failure\s+message="([^"]*)">(.*?)<\/failures>/
                     def skippedPattern = /<skipped\s+message="([^"]*)">(.*?)<\/skipped>/
 
                     def matcher = xmlContent =~ testCasePattern
@@ -142,8 +142,9 @@ pipeline {
                             .expand-reason::after { content: "\\25BC"; cursor: pointer; }
                             .expand-reason.open::after { content: "\\25B2"; }
                             .reason-content { margin-top: 10px; }
-                            .passed-test { color: green; }
-                            .failed-test { color: red; }
+                            .passed-test { background-color: #d4edda; }
+                            .failed-test { background-color: #f8d7da; }
+                            .test-case { border-left: 4px solid #28a745; padding-left: 10px; margin-top: 20px; }
                         </style>
                     </head>
                     <body>
@@ -237,9 +238,10 @@ pipeline {
                     """)
 
                     testCases.each { result ->
+                        def statusClass = result.status == 'Passed' ? 'passed-test' : 'failed-test'
                         html.append("""
-                        <div id="${result.name}" style="margin-top: 20px;">
-                            <h4 class="${result.status.toLowerCase()}-test">${result.classname}.${result.name}</h4>
+                        <div class="test-case ${statusClass}">
+                            <h4>${result.classname}.${result.name}</h4>
                             <p>Status: ${result.status}</p>
                             <p>Duration: ${result.time}s</p>
                             <p>Reason: ${result.reason}</p>
@@ -268,6 +270,7 @@ pipeline {
         }
     }
 }
+
 
 
     
