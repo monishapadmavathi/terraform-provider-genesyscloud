@@ -151,28 +151,17 @@ pipeline {
                             </tr>
                     """)
 
-                    testCases.each { result ->
-                        if (result.status == 'Failed') {
-                            html.append("""
-                            <tr class="failed">
-                                <td>${result.status}</td>
-                                <td>${result.classname}</td>
-                                <td>
-                                    <a href="#${result.name}" class="link">${result.name}</a>
-                                </td>
-                                <td>${result.time}</td>
-                            </tr>
-                            """)
-                        } else {
-                            html.append("""
-                            <tr class="${result.status.toLowerCase()}">
-                                <td>${result.status}</td>
-                                <td>${result.classname}</td>
-                                <td>${result.name}</td>
-                                <td>${result.time}</td>
-                            </tr>
-                            """)
-                        }
+                    testCases.findAll { it.status == 'Failed' }.each { result ->
+                        html.append("""
+                        <tr class="failed">
+                            <td>${result.status}</td>
+                            <td>${result.classname}</td>
+                            <td>
+                                <a href="#${result.name}" class="link">${result.name}</a>
+                            </td>
+                            <td>${result.time}</td>
+                        </tr>
+                        """)
                     }
 
                     html.append("""
@@ -275,7 +264,6 @@ def extractReason(String log) {
     }
     return reason
 }
-
 
 
 
