@@ -89,11 +89,15 @@ pipeline {
                     def failurePattern = /<failure\s+message="([^"]*)">(.*?)<\/failure>/
                     def skippedPattern = /<skipped\s+message="([^"]*)">(.*?)<\/skipped>/
 
-                    xmlContent.eachMatch(testCasePattern) { match, remainingText ->
-                        def classname = match[1]
-                        def name = match[2]
-                        def time = match[3]
-                        def details = remainingText.substring(0, remainingText.indexOf('</testcase>'))
+                    def matcher = xmlContent =~ testCasePattern
+                    while (matcher.find()) {
+                        def classname = matcher.group(1)
+                        def name = matcher.group(2)
+                        def time = matcher.group(3)
+                        def remainingText = xmlContent.substring(matcher.end())
+
+                        def endIndex = remainingText.indexOf('</testcase>')
+                        def details = endIndex != -1 ? remainingText.substring(0, endIndex) : ""
 
                         def result = [
                             name: name,
@@ -104,15 +108,15 @@ pipeline {
                             log: details
                         ]
 
-                        def failureMatch = details =~ failurePattern
-                        def skippedMatch = details =~ skippedPattern
-                        if (failureMatch) {
+                        def failureMatcher = details =~ failurePattern
+                        def skippedMatcher = details =~ skippedPattern
+                        if (failureMatcher.find()) {
                             result.status = 'Failed'
-                            result.reason = failureMatch[0][1]
-                            result.log = failureMatch[0][2]
-                        } else if (skippedMatch) {
+                            result.reason = failureMatcher.group(1)
+                            result.log = failureMatcher.group(2)
+                        } else if (skippedMatcher.find()) {
                             result.status = 'Skipped'
-                            result.reason = skippedMatch[0][1]
+                            result.reason = skippedMatcher.group(1)
                         }
 
                         testCases << result
@@ -252,6 +256,8 @@ pipeline {
         }
     }
 }
+
+    
 
 
 
