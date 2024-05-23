@@ -120,10 +120,9 @@ pipeline {
                             .summary { margin-bottom: 20px; }
                             .summary div { margin: 5px 0; }
                             .link { color: #007bff; text-decoration: none; }
-                            .reason-detail { display: block; white-space: pre-wrap; word-wrap: break-word; }
-                            .test-case { border-left: 4px solid #dc3545; padding: 10px; margin-top: 20px; background-color: #f8d7da; }
-                            .test-case h4 { margin: 0 0 10px 0; }
-                            .test-case pre { white-space: pre-wrap; word-wrap: break-word; }
+                            .reason-detail { display: none; }
+                            .reason-content { margin-top: 10px; overflow-wrap: break-word; }
+                            .test-case { border-left: 4px solid #dc3545; padding-left: 10px; margin-top: 20px; background-color: #f8d7da; padding: 10px; border-radius: 5px; }
                         </style>
                     </head>
                     <body>
@@ -145,7 +144,8 @@ pipeline {
                             </tr>
                     """)
 
-                    testCases.findAll { it.status == 'Failed' }.each { result ->
+                    def failedTests = testCases.findAll { it.status == 'Failed' }
+                    failedTests.each { result ->
                         html.append("""
                         <tr class="failed">
                             <td>${result.status}</td>
@@ -208,23 +208,18 @@ pipeline {
                         <h3>Test Details</h3>
                     """)
 
-                    testCases.each { result ->
-                        def statusClass = result.status == 'Passed' ? 'passed-test' : result.status == 'Failed' ? 'failed-test' : 'skipped-test'
+                    failedTests.each { result ->
                         html.append("""
-                        <div id="${result.name}" class="test-case ${statusClass}">
+                        <div class="test-case" id="${result.name}">
                             <h4>${result.classname}.${result.name}</h4>
                             <p>Status: ${result.status}</p>
                             <p>Duration: ${result.time}s</p>
-                        """)
-                        if (result.status == 'Failed') {
-                            html.append("""
-                            <div class="reason-detail">
-                                <pre>${result.reason}</pre>
+                            <p>Reason:</p>
+                            <div class="reason-content">
                                 <pre>${result.log}</pre>
                             </div>
-                            """)
-                        }
-                        html.append("</div>")
+                        </div>
+                        """)
                     }
 
                     html.append("""
