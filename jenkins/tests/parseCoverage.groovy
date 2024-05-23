@@ -1,27 +1,57 @@
-import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
 
-def parseCoverage(coverageFile) {
-    def coverageData = new File(coverageFile).text
-    def packages = [:]
-    
-    coverageData.eachLine { line ->
-        if (line.startsWith("mode:")) return // Skip mode line
+def parseCoverageData(String filePath) {
+    def coverageData = [:]
+    def currentPackage = ""
+    def currentPackageFiles = []
+    def totalStatements = 0
+    def totalCovered = 0
 
-        def parts = line.split(" ")
-        def filePath = parts[0]
-        def packageName = filePath.substring(0, filePath.lastIndexOf("/"))
-        def coverage = parts[1..-1].join(" ")
+    new File(filePath).eachLine { line ->
+        if (line.startsWith("mode:")) {
+            // Skip the mode line
+        } else if (line.contains(".go:")) {
+            def parts = line.split("\\s+")
+            def packageFile = parts[0].substring(0, parts[0].lastIndexOf(":"))
+            def coverageInfo = parts[1]
+            def coverageParts = coverageInfo.split("/")
+            def statements = Integer.parseInt(coverageParts[1])
+            def covered = Integer.parseInt(coverageParts[0])
 
-        if (!packages.containsKey(packageName)) {
-            packages[packageName] = []
+            def packageName = packageFile.substring(0, packageFile.lastIndexOf("/"))
+            def fileName = packageFile.substring(packageFile.lastIndexOf("/") + 1)
+
+            if (!coverageData.containsKey(packageName)) {
+                coverageData[packageName] = [
+                    files: [:],
+                    statements: 0,
+                    covered: 0
+                ]
+            }
+
+            coverageData[packageName].files[fileName] = [
+                statements: statements,
+                covered: covered
+            ]
+            coverageData[packageName].statements += statements
+            coverageData[packageName].covered += covered
+
+            totalStatements += statements
+            totalCovered += covered
         }
-        packages[packageName] << [file: filePath, coverage: coverage]
     }
-    
-    return packages
+
+    coverageData.each { packageName, data ->
+        data.coverage = data.covered / data.statements * 100
+        data.files.each { fileName, fileData ->
+            fileData.coverage = fileData.covered / fileData.statements * 100
+        }
+    }
+
+    return [coverageData: coverageData, totalCoverage: totalCovered / totalStatements * 100]
 }
 
-def packages = parseCoverage('coverage.out')
+def coverageReport = parseCoverageData("coverage.out")
+def jsonOutput = JsonOutput.toJson(coverageReport)
 
-def json = new JsonBuilder(packages).toPrettyString()
-new File('coverage.json').write(json)
+new File("coverage.json").write(jsonOutput)
