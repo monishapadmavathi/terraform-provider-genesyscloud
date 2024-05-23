@@ -77,7 +77,6 @@ pipeline {
 
 
 
-
         stage('Generate Report') {
             steps {
                 script {
@@ -139,6 +138,12 @@ pipeline {
                             .summary { margin-bottom: 20px; }
                             .summary div { margin: 5px 0; }
                             .link { color: #007bff; text-decoration: none; }
+                            .reason-detail { display: none; }
+                            .expand-reason::after { content: "\\25BC"; cursor: pointer; }
+                            .expand-reason.open::after { content: "\\25B2"; }
+                            .reason-content { margin-top: 10px; }
+                            .passed-test { color: green; }
+                            .failed-test { color: red; }
                         </style>
                     </head>
                     <body>
@@ -166,9 +171,13 @@ pipeline {
                         <tr class="failed">
                             <td>${result.status}</td>
                             <td>${result.classname}</td>
-                            <td><a href="#${result.name}" class="link">${result.name}</a></td>
+                            <td><a href="#${result.name}" class="expand-reason link">${result.name}</a></td>
                             <td>${result.time}</td>
-                            <td>${result.reason}</td>
+                            <td class="reason-content">
+                                <div class="reason-detail">
+                                    <pre>${result.log}</pre>
+                                </div>
+                            </td>
                         </tr>
                         """)
                     }
@@ -230,11 +239,13 @@ pipeline {
                     testCases.each { result ->
                         html.append("""
                         <div id="${result.name}" style="margin-top: 20px;">
-                            <h4>${result.classname}.${result.name}</h4>
+                            <h4 class="${result.status.toLowerCase()}-test">${result.classname}.${result.name}</h4>
                             <p>Status: ${result.status}</p>
                             <p>Duration: ${result.time}s</p>
                             <p>Reason: ${result.reason}</p>
-                            <pre>${result.log}</pre>
+                            <div class="reason-content">
+                                <pre>${result.log}</pre>
+                            </div>
                         </div>
                         """)
                     }
@@ -257,6 +268,7 @@ pipeline {
         }
     }
 }
+
 
     
 
