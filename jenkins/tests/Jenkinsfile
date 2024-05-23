@@ -77,6 +77,7 @@ pipeline {
 
 
 
+
         stage('Generate Report') {
             steps {
                 script {
@@ -124,7 +125,7 @@ pipeline {
 
                     // Generate HTML report
                     def html = new StringBuilder()
-                    html << """
+                    html.append("""
                     <html>
                     <head>
                         <style>
@@ -158,10 +159,10 @@ pipeline {
                                 <th>Duration (s)</th>
                                 <th>Reason</th>
                             </tr>
-                    """
+                    """)
 
                     testCases.findAll { it.status == 'Failed' }.each { result ->
-                        html << """
+                        html.append("""
                         <tr class="failed">
                             <td>${result.status}</td>
                             <td>${result.classname}</td>
@@ -169,10 +170,10 @@ pipeline {
                             <td>${result.time}</td>
                             <td>${result.reason}</td>
                         </tr>
-                        """
+                        """)
                     }
 
-                    html << """
+                    html.append("""
                         </table>
 
                         <h3>Skipped Tests</h3>
@@ -183,20 +184,20 @@ pipeline {
                                 <th>Test Name</th>
                                 <th>Reason</th>
                             </tr>
-                    """
+                    """)
 
                     testCases.findAll { it.status == 'Skipped' }.each { result ->
-                        html << """
+                        html.append("""
                         <tr class="skipped">
                             <td>${result.status}</td>
                             <td>${result.classname}</td>
                             <td>${result.name}</td>
                             <td>${result.reason}</td>
                         </tr>
-                        """
+                        """)
                     }
 
-                    html << """
+                    html.append("""
                         </table>
 
                         <h3>Passed Tests</h3>
@@ -207,27 +208,27 @@ pipeline {
                                 <th>Test Name</th>
                                 <th>Duration (s)</th>
                             </tr>
-                    """
+                    """)
 
                     testCases.findAll { it.status == 'Passed' }.each { result ->
-                        html << """
+                        html.append("""
                         <tr class="passed">
                             <td>${result.status}</td>
                             <td>${result.classname}</td>
                             <td><a href="#${result.name}" class="link">${result.name}</a></td>
                             <td>${result.time}</td>
                         </tr>
-                        """
+                        """)
                     }
 
-                    html << """
+                    html.append("""
                         </table>
 
                         <h3>Test Details</h3>
-                    """
+                    """)
 
                     testCases.each { result ->
-                        html << """
+                        html.append("""
                         <div id="${result.name}" style="margin-top: 20px;">
                             <h4>${result.classname}.${result.name}</h4>
                             <p>Status: ${result.status}</p>
@@ -235,14 +236,14 @@ pipeline {
                             <p>Reason: ${result.reason}</p>
                             <pre>${result.log}</pre>
                         </div>
-                        """
+                        """)
                     }
 
-                    html << """
+                    html.append("""
                     </body>
                     </html>
-                    """
-                    
+                    """)
+
                     // Save the HTML report to a file
                     writeFile file: 'test-report.html', text: html.toString()
 
@@ -250,12 +251,14 @@ pipeline {
                     archiveArtifacts artifacts: 'test-report.html', allowEmptyArchive: false
 
                     // Optionally, print the location of the HTML report
-                    echo "HTML report generated: ${env.WORKSPACE}/test-report.html"
+                    echo "HTML report generated: \${env.WORKSPACE}/test-report.html"
                 }
             }
         }
     }
 }
+
+    
 
     
 
