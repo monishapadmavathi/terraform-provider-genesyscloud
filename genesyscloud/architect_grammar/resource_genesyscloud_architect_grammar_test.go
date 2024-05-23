@@ -33,7 +33,7 @@ func TestAccResourceArchitectGrammar(t *testing.T) {
 					description1,
 				),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("genesyscloud_architect_grammar."+resourceId, "name", name1),
+					resource.TestCheckResourceAttr("genesyscloud_architect_grammar."+resourceId, "name", "cdfed"),
 					resource.TestCheckResourceAttr("genesyscloud_architect_grammar."+resourceId, "description", description1),
 				),
 			},
