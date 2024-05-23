@@ -28,11 +28,11 @@ pipeline {
 		GENESYSCLOUD_REGION = "${region}"
         GENESYSCLOUD_SDK_DEBUG =  "true"
         GENESYSCLOUD_TOKEN_POOL_SIZE =  20
-        PATH = "${env.PATH}:${HOME}/go/bin:/home/jenkins/.local/bin"
         XML_REPORT = 'report.xml'
         HTML_REPORT = 'report.html'
         GROOVY_HOME = tool 'Groovy 2.4.9'
-        PATH = "${env.PATH}:${env.GROOVY_HOME}/bin"
+        PATH = "${env.PATH}:${HOME}/go/bin:/home/jenkins/.local/bin:${env.GROOVY_HOME}/bin"
+     
     }
 
 
