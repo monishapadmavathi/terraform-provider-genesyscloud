@@ -85,8 +85,8 @@ pipeline {
                     // Extract test case information using regular expressions
                     def testCases = []
                     def testCasePattern = /<testcase\s+classname="([^"]+)"\s+name="([^"]+)"\s+time="([^"]+)"/
-                    def failurePattern = /<testcase.*?<failure\s+message="([^"]*)">([\s\S]*?)<\/failure>/
-                    def skippedPattern = /<testcase.*?<skipped\s+message="([^"]*)">([\s\S]*?)<\/skipped>/
+                    def failurePattern = /<failure[^>]*>([\s\S]*?)<\/failure>/
+                    def skippedPattern = /<skipped[^>]*>([\s\S]*?)<\/skipped>/
 
                     def matcher = xmlContent =~ testCasePattern
                     while (matcher.find()) {
@@ -107,15 +107,15 @@ pipeline {
                             log: details
                         ]
 
-                        def failureMatcher = details =~ failurePattern
-                        def skippedMatcher = details =~ skippedPattern
-                        if (failureMatcher.find()) {
+                        // Check for failure or skipped
+                        if (details =~ failurePattern) {
                             result.status = 'Failed'
-                            result.reason = failureMatcher.group(1)
-                            result.log = failureMatcher.group(2)
-                        } else if (skippedMatcher.find()) {
+                            result.log = failurePattern.matcher(details).replaceAll('')
+                            result.reason = failurePattern.matcher(details).group(1).trim()
+                        } else if (details =~ skippedPattern) {
                             result.status = 'Skipped'
-                            result.reason = skippedMatcher.group(1)
+                            result.log = skippedPattern.matcher(details).replaceAll('')
+                            result.reason = skippedPattern.matcher(details).group(1).trim()
                         }
 
                         testCases << result
@@ -239,7 +239,7 @@ pipeline {
                     testCases.each { result ->
                         def statusClass = result.status == 'Passed' ? 'passed-test' : 'failed-test'
                         html.append("""
-                        <div class="test-case ${statusClass}">
+                        <div id="${result.name}" class="test-case ${statusClass}">
                             <h4>${result.classname}.${result.name}</h4>
                             <p>Status: ${result.status}</p>
                             <p>Duration: ${result.time}s</p>
@@ -260,7 +260,7 @@ pipeline {
                     writeFile file: 'test-report.html', text: html.toString()
 
                     // Archive the HTML report as a build artifact
-                    archiveArtifacts artifacts: 'test-report.html, test-results.xml', allowEmptyArchive: false
+                    archiveArtifacts artifacts: 'test-report.html', allowEmptyArchive: false
 
                     // Optionally, print the location of the HTML report
                     echo "HTML report generated: \${env.WORKSPACE}/test-report.html"
