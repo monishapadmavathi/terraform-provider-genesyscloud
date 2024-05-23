@@ -48,13 +48,23 @@ def parseCoverageData(String filePath) {
     }
 
     coverageData.each { packageName, data ->
-        data.coverage = data.covered / data.statements * 100
+        if (data.statements > 0) {
+            data.coverage = data.covered / data.statements * 100
+        } else {
+            data.coverage = 0
+        }
         data.files.each { fileName, fileData ->
-            fileData.coverage = fileData.covered / fileData.statements * 100
+            if (fileData.statements > 0) {
+                fileData.coverage = fileData.covered / fileData.statements * 100
+            } else {
+                fileData.coverage = 0
+            }
         }
     }
 
-    return [coverageData: coverageData, totalCoverage: totalCovered / totalStatements * 100]
+    def totalCoverage = totalStatements > 0 ? totalCovered / totalStatements * 100 : 0
+
+    return [coverageData: coverageData, totalCoverage: totalCoverage]
 }
 
 try {
