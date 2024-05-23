@@ -73,6 +73,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
                         echo 'Loading Genesys OAuth Credentials'
                         sh 'gotestsum --junitfile architect.xml --format standard-verbose ./genesyscloud/... -run "TestAcc.*Architect" -v -count=1 -timeout 120m -cover -coverprofile=coverage.out'
+                          archiveArtifacts artifacts: 'coverage.out'
                     }
                 }
             }
@@ -82,7 +83,7 @@ pipeline {
             steps {
                 script {
                     // Generate JSON coverage summary
-                    sh 'groovy parseCoverage.groovy'
+                    sh 'groovy ./parseCoverage.groovy'
                 }
             }
         }
@@ -91,7 +92,7 @@ pipeline {
             steps {
                 script {
                     // Generate HTML coverage report
-                    sh 'groovy generateCoverageReport.groovy'
+                    sh 'groovy ./generateCoverageReport.groovy'
 
                     // Archive the HTML report as a build artifact
                     archiveArtifacts artifacts: 'coverage-report.html', allowEmptyArchive: false
