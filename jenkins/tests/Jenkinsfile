@@ -69,8 +69,8 @@ pipeline {
                     // Extract test case information using regular expressions
                     def testCases = []
                     def testCasePattern = /<testcase\s+classname="([^"]+)"\s+name="([^"]+)"\s+time="([^"]+)"/
-                    def failurePattern = /<failure[^>]*>([\s\S]*?)<\/failure>/
-                    def skippedPattern = /<skipped[^>]*>([\s\S]*?)<\/skipped>/
+                    def failurePattern = /<failure\s+message="([^"]*)">(.*?)<\/failure>/
+                    def skippedPattern = /<skipped\s+message="([^"]*)">(.*?)<\/skipped>/
 
                     def matcher = xmlContent =~ testCasePattern
                     while (matcher.find()) {
@@ -86,27 +86,20 @@ pipeline {
                             name: name,
                             classname: classname,
                             time: time,
-                            status: 'Passed', // Default to Passed
+                            status: 'Passed',
                             reason: '',
                             log: details
                         ]
 
-                        // Check for failure or skipped
                         def failureMatcher = details =~ failurePattern
                         def skippedMatcher = details =~ skippedPattern
                         if (failureMatcher.find()) {
                             result.status = 'Failed'
-                            result.log = failureMatcher.group(1).trim()
+                            result.reason = failureMatcher.group(1)
+                            result.log = failureMatcher.group(2)
                         } else if (skippedMatcher.find()) {
                             result.status = 'Skipped'
-                            result.log = skippedMatcher.group(1).trim()
-                        }
-
-                        // Extract reason
-                        if (result.status == 'Failed') {
-                            result.reason = extractReason(result.log)
-                        } else if (result.status == 'Skipped') {
-                            result.reason = extractReason(result.log)
+                            result.reason = skippedMatcher.group(1)
                         }
 
                         testCases << result
@@ -128,8 +121,10 @@ pipeline {
                             .summary { margin-bottom: 20px; }
                             .summary div { margin: 5px 0; }
                             .link { color: #007bff; text-decoration: none; }
-                            .reason-content { margin-top: 10px; padding: 10px; border: 1px solid #ccc; background-color: #f9f9f9; }
-                            .test-case { border-left: 4px solid #28a745; padding-left: 10px; margin-top: 20px; }
+                            .reason-detail { display: block; white-space: pre-wrap; word-wrap: break-word; }
+                            .test-case { border-left: 4px solid #dc3545; padding: 10px; margin-top: 20px; background-color: #f8d7da; }
+                            .test-case h4 { margin: 0 0 10px 0; }
+                            .test-case pre { white-space: pre-wrap; word-wrap: break-word; }
                         </style>
                     </head>
                     <body>
@@ -156,9 +151,7 @@ pipeline {
                         <tr class="failed">
                             <td>${result.status}</td>
                             <td>${result.classname}</td>
-                            <td>
-                                <a href="#${result.name}" class="link">${result.name}</a>
-                            </td>
+                            <td><a href="#${result.name}" class="link">${result.name}</a></td>
                             <td>${result.time}</td>
                         </tr>
                         """)
@@ -173,7 +166,6 @@ pipeline {
                                 <th>Status</th>
                                 <th>Class Name</th>
                                 <th>Test Name</th>
-                                <th>Reason</th>
                             </tr>
                     """)
 
@@ -183,7 +175,6 @@ pipeline {
                             <td>${result.status}</td>
                             <td>${result.classname}</td>
                             <td>${result.name}</td>
-                            <td>${result.reason}</td>
                         </tr>
                         """)
                     }
@@ -206,7 +197,7 @@ pipeline {
                         <tr class="passed">
                             <td>${result.status}</td>
                             <td>${result.classname}</td>
-                            <td>${result.name}</td>
+                            <td><a href="#${result.name}" class="link">${result.name}</a></td>
                             <td>${result.time}</td>
                         </tr>
                         """)
@@ -219,20 +210,18 @@ pipeline {
                     """)
 
                     testCases.each { result ->
-                        if (result.status == 'Failed') {
-                            html.append("""
-                            <div id="${result.name}" class="reason-detail">
-                                <div class="test-case failed">
-                                    <h4>${result.classname}.${result.name}</h4>
-                                    <p>Status: ${result.status}</p>
-                                    <p>Duration: ${result.time}s</p>
-                                    <div class="reason-content">
-                                        <pre>${result.log}</pre>
-                                    </div>
-                                </div>
+                        def statusClass = result.status == 'Passed' ? 'passed-test' : result.status == 'Failed' ? 'failed-test' : 'skipped-test'
+                        html.append("""
+                        <div id="${result.name}" class="test-case ${statusClass}">
+                            <h4>${result.classname}.${result.name}</h4>
+                            <p>Status: ${result.status}</p>
+                            <p>Duration: ${result.time}s</p>
+                            <div class="reason-detail">
+                                <pre>${result.reason}</pre>
+                                <pre>${result.log}</pre>
                             </div>
-                            """)
-                        }
+                        </div>
+                        """)
                     }
 
                     html.append("""
@@ -252,17 +241,6 @@ pipeline {
             }
         }
     }
-}
-
-def extractReason(String log) {
-    // Extract reason from the log
-    def reason = ""
-    def reasonPattern = /message="([^"]*)">/
-    def matcher = log =~ reasonPattern
-    if (matcher.find()) {
-        reason = matcher.group(1).trim()
-    }
-    return reason
 }
 
 
