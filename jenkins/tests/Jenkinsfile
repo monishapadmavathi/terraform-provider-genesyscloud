@@ -76,24 +76,25 @@ pipeline {
         }
 
 
+
         stage('Generate Report') {
             steps {
                 script {
                     // Read the XML file content
                     def xmlContent = readFile 'test-results.xml'
-                    
+
                     // Extract test case information using regular expressions
                     def testCases = []
-                    def testCasePattern = ~/<testcase\s+classname="([^"]+)"\s+name="([^"]+)"\s+time="([^"]+)"[^>]*>(.*?)<\/testcase>/m
-                    def failurePattern = ~/<failure\s+message="([^"]*)">(.*?)<\/failure>/m
-                    def skippedPattern = ~/<skipped\s+message="([^"]*)">(.*?)<\/skipped>/m
-                    
-                    xmlContent.eachMatch(testCasePattern) { match ->
+                    def testCasePattern = /<testcase\s+classname="([^"]+)"\s+name="([^"]+)"\s+time="([^"]+)"/
+                    def failurePattern = /<failure\s+message="([^"]*)">(.*?)<\/failure>/
+                    def skippedPattern = /<skipped\s+message="([^"]*)">(.*?)<\/skipped>/
+
+                    xmlContent.eachMatch(testCasePattern) { match, remainingText ->
                         def classname = match[1]
                         def name = match[2]
                         def time = match[3]
-                        def details = match[4]
-                        
+                        def details = remainingText.substring(0, remainingText.indexOf('</testcase>'))
+
                         def result = [
                             name: name,
                             classname: classname,
@@ -102,7 +103,7 @@ pipeline {
                             reason: '',
                             log: details
                         ]
-                        
+
                         def failureMatch = details =~ failurePattern
                         def skippedMatch = details =~ skippedPattern
                         if (failureMatch) {
@@ -113,7 +114,7 @@ pipeline {
                             result.status = 'Skipped'
                             result.reason = skippedMatch[0][1]
                         }
-                        
+
                         testCases << result
                     }
 
@@ -251,6 +252,8 @@ pipeline {
         }
     }
 }
+
+
 
 
 
