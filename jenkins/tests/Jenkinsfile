@@ -75,8 +75,8 @@ pipeline {
         }
         stage('Generate Report') {
             steps {
-                go tool cover -func=coverage.out
-go tool cover -html=coverage.out -o coverage.html
+                sh 'go tool cover -func=coverage.out'
+sh 'go tool cover -html=coverage.out -o coverage.html'
 
                 script {
                     // Read the XML file content
