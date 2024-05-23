@@ -74,25 +74,19 @@ pipeline {
             }
         }
 
-         stage('Generate Coverage Summary') {
+  stage('Generate Coverage Summary') {
             steps {
                 script {
                     // Generate JSON coverage summary
-                    writeFile file: 'parseCoverage.groovy', text: '''
-                    // Paste the Groovy script to parse and aggregate coverage data here
-                    '''
                     sh 'groovy parseCoverage.groovy'
                 }
             }
         }
 
-                stage('Generate HTML Report') {
+        stage('Generate HTML Report') {
             steps {
                 script {
                     // Generate HTML coverage report
-                    writeFile file: 'generateCoverageReport.groovy', text: '''
-                    // Paste the Groovy script to generate the HTML report here
-                    '''
                     sh 'groovy generateCoverageReport.groovy'
 
                     // Archive the HTML report as a build artifact
@@ -105,111 +99,6 @@ pipeline {
         }
     }
 }
-
-import groovy.json.JsonBuilder
-
-def parseCoverage(coverageFile) {
-    def coverageData = new File(coverageFile).text
-    def packages = [:]
-    
-    coverageData.eachLine { line ->
-        if (line.startsWith("mode:")) return // Skip mode line
-
-        def parts = line.split(" ")
-        def filePath = parts[0]
-        def packageName = filePath.substring(0, filePath.lastIndexOf("/"))
-        def coverage = parts[1..-1].join(" ")
-
-        if (!packages.containsKey(packageName)) {
-            packages[packageName] = []
-        }
-        packages[packageName] << [file: filePath, coverage: coverage]
-    }
-    
-    return packages
-}
-
-def packages = parseCoverage('coverage.out')
-
-def json = new JsonBuilder(packages).toPrettyString()
-new File('coverage.json').write(json)
-
-import groovy.json.JsonSlurper
-
-def packages = new JsonSlurper().parse(new File('coverage.json'))
-
-def html = new StringBuilder()
-html.append("""
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .package { cursor: pointer; }
-        .file { display: none; }
-        .coverage-details { margin-left: 20px; padding: 10px; border: 1px solid #ccc; background-color: #f9f9f9; }
-    </style>
-    <script>
-        function toggleFiles(packageName) {
-            var files = document.querySelectorAll('.' + packageName);
-            files.forEach(function(file) {
-                file.style.display = file.style.display === 'none' ? 'table-row' : 'none';
-            });
-        }
-        
-        function toggleCoverage(fileName) {
-            var coverageDetails = document.getElementById(fileName);
-            coverageDetails.style.display = coverageDetails.style.display === 'none' ? 'block' : 'none';
-        }
-    </script>
-</head>
-<body>
-    <h2>Coverage Report</h2>
-    <table>
-        <tr>
-            <th>Package</th>
-            <th>Coverage</th>
-        </tr>
-""")
-
-packages.each { packageName, files ->
-    def packageCoverage = files.size() // Calculate package coverage percentage if needed
-    html.append("""
-    <tr class="package" onclick="toggleFiles('${packageName}')">
-        <td>${packageName}</td>
-        <td>${packageCoverage}%</td>
-    </tr>
-    """)
-    
-    files.each { file ->
-        html.append("""
-        <tr class="file ${packageName}">
-            <td>${file.file}</td>
-            <td>${file.coverage}</td>
-        </tr>
-        <tr class="file ${packageName}">
-            <td colspan="2">
-                <div id="${file.file}" class="coverage-details" style="display: none;">
-                    <!-- Placeholder for coverage details -->
-                    Coverage details for ${file.file} will go here.
-                </div>
-            </td>
-        </tr>
-        """)
-    }
-}
-
-html.append("""
-    </table>
-</body>
-</html>
-""")
-
-new File('coverage-report.html').write(html.toString())
-
-    
 
 
 
