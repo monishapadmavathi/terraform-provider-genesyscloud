@@ -2,8 +2,6 @@ import groovy.json.JsonOutput
 
 def parseCoverageData(String filePath) {
     def coverageData = [:]
-    def currentPackage = ""
-    def currentPackageFiles = []
     def totalStatements = 0
     def totalCovered = 0
 
@@ -12,9 +10,17 @@ def parseCoverageData(String filePath) {
             // Skip the mode line
         } else if (line.contains(".go:")) {
             def parts = line.split("\\s+")
+            if (parts.size() < 2) {
+                println "Skipping invalid line: ${line}"
+                return
+            }
             def packageFile = parts[0].substring(0, parts[0].lastIndexOf(":"))
             def coverageInfo = parts[1]
             def coverageParts = coverageInfo.split("/")
+            if (coverageParts.size() < 2) {
+                println "Skipping invalid coverage info: ${coverageInfo}"
+                return
+            }
             def statements = Integer.parseInt(coverageParts[1])
             def covered = Integer.parseInt(coverageParts[0])
 
@@ -51,7 +57,12 @@ def parseCoverageData(String filePath) {
     return [coverageData: coverageData, totalCoverage: totalCovered / totalStatements * 100]
 }
 
-def coverageReport = parseCoverageData("coverage.out")
-def jsonOutput = JsonOutput.toJson(coverageReport)
-
-new File("coverage.json").write(jsonOutput)
+try {
+    def coverageReport = parseCoverageData("coverage.out")
+    def jsonOutput = JsonOutput.toJson(coverageReport)
+    new File("coverage.json").write(jsonOutput)
+    println "Coverage report generated successfully."
+} catch (Exception e) {
+    e.printStackTrace()
+    println "Failed to generate coverage report: ${e.message}"
+}

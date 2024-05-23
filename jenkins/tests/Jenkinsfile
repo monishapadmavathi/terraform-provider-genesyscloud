@@ -73,6 +73,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
                         echo 'Loading Genesys OAuth Credentials'
                         sh 'gotestsum --junitfile architect.xml --format standard-verbose ./genesyscloud/... -run "TestAcc.*Architect" -v -count=1 -timeout 120m -cover -coverprofile=coverage.out'
+                     archiveArtifacts artifacts: 'coverage.out', allowEmptyArchive: false
                     }
                 }
             }
@@ -87,7 +88,7 @@ pipeline {
             }
         }
 
-          stage('Generate Coverage Report') {
+stage('Generate Coverage Report') {
             steps {
                 script {
                     def coverageJson = readJSON file: 'coverage.json'
@@ -162,7 +163,7 @@ pipeline {
 
                     writeFile file: 'coverage-report.html', text: html.toString()
                     archiveArtifacts artifacts: 'coverage-report.html', allowEmptyArchive: false
-                    archiveArtifacts artifacts: 'coverage.json,coverage.out', allowEmptyArchive: false
+                    archiveArtifacts artifacts: 'coverage.json', allowEmptyArchive: false
 
                     echo "Coverage report generated: ${env.WORKSPACE}/coverage-report.html"
                 }
@@ -170,7 +171,6 @@ pipeline {
         }
     }
 }
-
 
 
 
