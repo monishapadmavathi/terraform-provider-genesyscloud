@@ -1,4 +1,3 @@
-@Grab('org.jsoup:jsoup:1.13.1')
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -14,7 +13,7 @@ def dropdownMenu = document.select('select#coverage-dropdown').first()
 dropdownMenu.append('<option value="package">Package Wise Coverage Report</option>')
 
 // Calculate package-wise coverage percentages
-def coverageData = parseCoverageData('coverage.out')
+def coverageData = parseCoverageData('merged_coverage.out')
 def packageWiseCoverage = calculatePackageWiseCoverage(coverageData)
 
 // Function to parse coverage data
