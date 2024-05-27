@@ -128,7 +128,15 @@ pipeline {
                         ''',
                         returnStdout: true
                     ).trim()
-                    htmlContent += fileCoverageHtml.substring(fileCoverageHtml.indexOf("<body>") + 6, fileCoverageHtml.indexOf("</body>"))
+
+                    // Check if fileCoverageHtml contains the expected <body> tags
+                    if (fileCoverageHtml.contains("<body>") && fileCoverageHtml.contains("</body>")) {
+                        def bodyContentStart = fileCoverageHtml.indexOf("<body>") + 6
+                        def bodyContentEnd = fileCoverageHtml.indexOf("</body>")
+                        htmlContent += fileCoverageHtml.substring(bodyContentStart, bodyContentEnd)
+                    } else {
+                        htmlContent += '<p>No file-wise coverage details available.</p>'
+                    }
                     
                     // Close the HTML file
                     htmlContent += '</body></html>'
@@ -143,6 +151,7 @@ pipeline {
         }
     }
 }
+
 
 
  
