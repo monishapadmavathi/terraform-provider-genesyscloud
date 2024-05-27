@@ -81,15 +81,15 @@ pipeline {
             steps {
                   archiveArtifacts artifacts: 'coverage.out', allowEmptyArchive: true
                         sh 'go tool cover -html coverage.out -o coverageAcceptance.html'
- script {
-                     modifyCoverageReport()
-                }
+
+                     sh './modify_coverage.sh'
+                
                  publishHTML(target: [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
                     reportDir: '.',
-                    reportFiles: 'modified_coverageAcceptance.html',
+                    reportFiles: 'coverageAcceptance.html',
                     reportName: 'Coverage Report'
                 ])
             }
