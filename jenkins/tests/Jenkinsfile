@@ -77,12 +77,11 @@ pipeline {
                 }
             }
         }
-
         stage('Test and Coverage') {
             steps {
                 script {
                     // Step 1: Run tests and generate coverageAcceptance.html
-                
+             
                     sh 'go tool cover -html=coverage.out -o coverageAcceptance.html'
 
                     // Step 2: Read the generated HTML file
@@ -146,9 +145,22 @@ pipeline {
                         </script>
                     """.stripIndent()
 
-                    // Step 5: Insert the new option and table into the HTML file
+                    // Define the CSS classes
+                    def cssStyles = """
+                        <style>
+                            .light-green {
+                                background-color: #c8e6c9; /* light green */
+                            }
+                            .light-red {
+                                background-color: #ffcdd2; /* light red */
+                            }
+                        </style>
+                    """.stripIndent()
+
+                    // Step 5: Insert the new option, table, and styles into the HTML file
                     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" onchange="handleSelection()">\n' + packageCoverageHtml)
-                    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '</body>')
+                    updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
+                    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
                     writeFile file: 'coverageAcceptance.html', text: updatedHtmlFile
 
