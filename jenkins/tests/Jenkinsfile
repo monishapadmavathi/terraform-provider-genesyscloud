@@ -81,69 +81,42 @@ pipeline {
         stage('Test and Coverage') {
             steps {
                 script {
-                    // Run tests and generate coverage.out
+                    // Step 1: Run tests and generate coverageAcceptance.html
                     sh 'go test -coverprofile=coverage.out ./...'
+                    sh 'go tool cover -html=coverage.out -o coverageAcceptance.html'
 
-                    // Generate package-wise coverage data
+                    // Step 2: Parse the generated HTML file to calculate package-wise coverage
+                    def htmlFile = readFile 'coverageAcceptance.html'
+                    def selectStart = htmlFile.indexOf('<select id="files">')
+                    def selectEnd = htmlFile.indexOf('</select>', selectStart)
+                    def fileCoverageSection = htmlFile.substring(selectStart, selectEnd)
+
                     def packageCoverage = [:]
-                    def totalLines = [:]
-                    def coveredLines = [:]
+                    def packageFiles = [:]
 
-                    // Read coverage.out and calculate package-wise coverage
-                    readFile('coverage.out').split('\n').each { line ->
-                        if (line.startsWith('mode:')) return
-                        def parts = line.split('\\s+')
-                        def path = parts[0]
-                        def statements = parts[1].split('/').collect { it as int }
-                        def covered = statements[0]
-                        def total = statements[1]
-                        def packageName = path.replaceFirst('terraform-provider-genesyscloud/genesyscloud/[^/]+$', '')
-
-                        totalLines[packageName] = (totalLines[packageName] ?: 0) + total
-                        coveredLines[packageName] = (coveredLines[packageName] ?: 0) + covered
+                    fileCoverageSection.findAll(/<option value="[^"]*">([^<]*) \((\d+\.\d+)%\)<\/option>/).each { match ->
+                        def (filePath, percentage) = match[1, 2]
+                        def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
+                        packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
+                        packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage.toFloat()
                     }
 
-                    // Generate package-wise coverage report
-                    packageCoverage.each { packageName, total ->
-                        def covered = coveredLines[packageName]
-                        def coveragePercent = covered / total * 100
-                        packageCoverage[packageName] = coveragePercent
+                    def packageCoverageHtml = new StringBuilder('<select id="packages">\n')
+                    packageCoverage.each { packageName, totalPercentage ->
+                        def averagePercentage = totalPercentage / packageFiles[packageName]
+                        packageCoverageHtml.append("<option value=\"filepackage\">${packageName} (${averagePercentage}%)</option>\n")
                     }
+                    packageCoverageHtml.append('</select>\n')
 
-                    // Create initial HTML structure
-                    writeFile(file: 'coverageAcceptance.html', text: '''
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <title>Package-wise Coverage Report</title>
-                        </head>
-                        <body>
-                            <h1>Package-wise Coverage Report</h1>
-                            <h2>Package-wise Coverage</h2>
-                    ''')
+                    // Step 3: Append the package-wise coverage information to the HTML file
+                    def updatedHtmlFile = htmlFile.replace('</body>', packageCoverageHtml.toString() + '</body>')
+                    writeFile file: 'coverageAcceptance.html', text: updatedHtmlFile
 
-                    // Add package-wise coverage to HTML
-                    packageCoverage.each { packageName, coveragePercent ->
-                        appendFile(file: 'coverageAcceptance.html', text: "<p>${packageName}: ${coveragePercent}% of statements covered</p>\n")
-                    }
-
-                    // Add file-wise coverage details
-                    appendFile(file: 'coverageAcceptance.html', text: '<h2>File-wise Coverage</h2>\n')
-                    sh 'go tool cover -html=coverage.out >> coverageAcceptance.html'
-
-                    // Close HTML file
-                    appendFile(file: 'coverageAcceptance.html', text: '</body></html>\n')
+                    // Step 4: Archive the HTML file as a Jenkins artifact
+                
                 }
-                 archiveArtifacts artifacts: 'coverageAcceptance.html', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'coverageAcceptance.html', allowEmptyArchive: true
             }
         }
     }
 }
-
-
-
-
-                   
- 
-
-    
