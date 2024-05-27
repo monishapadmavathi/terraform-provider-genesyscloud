@@ -77,27 +77,71 @@ pipeline {
                 }
             }
         }
-  stage('Generate Coverage Report') {
-            steps {
-                
-                        sh 'go tool cover -html coverage.out -o coverageAcceptance.html'
-                    sh 'chmod +x jenkins/tests/modify_coverage.sh'
-                     sh 'jenkins/tests/modify_coverage.sh'
-                
-                 publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: '.',
-                    reportFiles: 'coverageAcceptance.html',
-                    reportName: 'Coverage Report'
-                ])
-  archiveArtifacts artifacts: 'coverage.out,coverageAcceptance.html', allowEmptyArchive: true
 
+
+        stage('Generate Coverage Report') {
+            steps {
+                script {
+                    // Create an initial HTML structure
+                    def htmlContent = '''
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Package-wise Coverage Report</title>
+                    </head>
+                    <body>
+                        <h1>Package-wise Coverage Report</h1>
+                        <h2>Package-wise Coverage</h2>
+                    '''
+                    
+                    // Find and generate package-wise coverage for all relevant packages
+                    def packageCoverage = sh (
+                        script: '''
+                        go tool cover -func=coverage.out | grep -E '^terraform-provider-genesyscloud/genesyscloud/' | awk '
+                        {
+                            split($1, arr, "/");
+                            package = arr[1] "/" arr[2] "/" arr[3] "/" arr[4];
+                            packages[package]++;
+                            total[package] += $3;
+                            covered[package] += $2;
+                        }
+                        END {
+                            for (package in packages) {
+                                printf("<p>%s: %.1f%% of statements covered</p>\\n", package, (covered[package]/total[package])*100);
+                            }
+                        }'
+                        ''',
+                        returnStdout: true
+                    ).trim()
+                    
+                    // Append package coverage to HTML content
+                    htmlContent += packageCoverage
+                    
+                    // Add file-wise coverage details
+                    htmlContent += '<h2>File-wise Coverage</h2>'
+                    def fileCoverageHtml = sh (
+                        script: '''
+                        go tool cover -html=coverage.out
+                        ''',
+                        returnStdout: true
+                    ).trim()
+                    htmlContent += fileCoverageHtml.substring(fileCoverageHtml.indexOf("<body>") + 6, fileCoverageHtml.indexOf("</body>"))
+                    
+                    // Close the HTML file
+                    htmlContent += '</body></html>'
+                    
+                    // Write the HTML content to a file
+                    writeFile file: 'coverage.html', text: htmlContent
+                    
+                    // Archive the HTML file as a Jenkins artifact
+                    archiveArtifacts artifacts: 'coverage.html', allowEmptyArchive: true
+                }
             }
         }
     }
 }
+
+
  
 
     
