@@ -82,9 +82,10 @@ pipeline {
             steps {
                 script {
                     // Step 1: Run tests and generate coverageAcceptance.html
+                   
                     sh 'go tool cover -html=coverage.out -o coverageAcceptance.html'
 
-                    // Step 2: Parse the generated HTML file to calculate package-wise coverage
+                    // Step 2: Read the generated HTML file
                     def htmlFile = readFile 'coverageAcceptance.html'
                     def selectStart = htmlFile.indexOf('<select id="files">')
                     def selectEnd = htmlFile.indexOf('</select>', selectStart)
@@ -93,6 +94,7 @@ pipeline {
                     def packageCoverage = [:]
                     def packageFiles = [:]
 
+                    // Step 3: Parse the existing options to calculate package-wise coverage
                     fileCoverageSection.split('\n').each { line ->
                         if (line.contains('<option value=')) {
                             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
@@ -103,21 +105,58 @@ pipeline {
                         }
                     }
 
-                    def packageCoverageHtml = new StringBuilder('<select id="packages">\n')
-                    packageCoverage.each { packageName, totalPercentage ->
+                    // Step 4: Generate the package-wise coverage table
+                    def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
                         def averagePercentage = totalPercentage / packageFiles[packageName]
-                        packageCoverageHtml.append("<option value=\"filepackage\">${packageName} (${String.format('%.1f', averagePercentage)}%)</option>\n")
-                    }
-                    packageCoverageHtml.append('</select>\n')
+                        def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
+                        return "<tr class='${colorClass}'><td>${packageName}</td><td>${String.format('%.1f', averagePercentage)}%</td></tr>"
+                    }.join('\n')
 
-                    // Step 3: Append the package-wise coverage information to the HTML file
-                    def updatedHtmlFile = htmlFile.replace('</body>', packageCoverageHtml.toString() + '</body>')
+                    def packageCoverageHtml = """
+                        <option value="packageCoverage">Package-wise Coverage</option>
+                    """.stripIndent()
+
+                    def tableHtml = """
+                        <div id="packageCoverageTable" style="display:none;">
+                            <table border="1">
+                                <thead>
+                                    <tr>
+                                        <th>Package</th>
+                                        <th>Coverage (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="packageCoverageBody">
+                                    ${packageCoverageRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    """.stripIndent()
+
+                    def scriptHtml = """
+                        <script>
+                            function handleSelection() {
+                                const select = document.getElementById('files');
+                                const packageCoverageTable = document.getElementById('packageCoverageTable');
+                                if (select.value === 'packageCoverage') {
+                                    packageCoverageTable.style.display = 'block';
+                                } else {
+                                    packageCoverageTable.style.display = 'none';
+                                }
+                            }
+                        </script>
+                    """.stripIndent()
+
+                    // Step 5: Insert the new option and table into the HTML file
+                    def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" onchange="handleSelection()">\n' + packageCoverageHtml)
+                    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '</body>')
+
                     writeFile file: 'coverageAcceptance.html', text: updatedHtmlFile
 
-                    // Step 4: Archive the HTML file as a Jenkins artifact
+                    // Step 6: Archive the HTML file as a Jenkins artifact
                     archiveArtifacts artifacts: 'coverageAcceptance.html', allowEmptyArchive: true
                 }
             }
         }
     }
 }
+
