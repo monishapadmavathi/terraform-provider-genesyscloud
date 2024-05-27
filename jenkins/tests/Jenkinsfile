@@ -77,10 +77,12 @@ pipeline {
                 }
             }
         }
+
         stage('Test and Coverage') {
             steps {
                 script {
                     // Step 1: Run tests and generate coverageAcceptance.html
+                
                     sh 'go tool cover -html=coverage.out -o coverageAcceptance.html'
 
                     // Step 2: Read the generated HTML file
@@ -157,5 +159,6 @@ pipeline {
         }
     }
 }
+
 
 
