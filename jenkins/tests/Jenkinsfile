@@ -79,6 +79,7 @@ pipeline {
         }
   stage('Generate Coverage Report') {
             steps {
+                  archiveArtifacts artifacts: 'coverage.out', allowEmptyArchive: true
                         sh 'go tool cover -html coverage.out -o coverageAcceptance.html'
  script {
                     def modifyScript = load 'jenkins/tests/modifyCoverageReport.groovy'
