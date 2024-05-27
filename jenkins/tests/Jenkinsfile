@@ -88,22 +88,25 @@ pipeline {
                     def htmlFile = readFile 'coverageAcceptance.html'
                     def selectStart = htmlFile.indexOf('<select id="files">')
                     def selectEnd = htmlFile.indexOf('</select>', selectStart)
-                    def fileCoverageSection = htmlFile.substring(selectStart, selectEnd)
+                    def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select>
 
                     def packageCoverage = [:]
                     def packageFiles = [:]
 
-                    fileCoverageSection.findAll(/<option value="[^"]*">([^<]*) \((\d+\.\d+)%\)<\/option>/).each { match ->
-                        def (filePath, percentage) = match[1, 2]
-                        def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
-                        packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
-                        packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage.toFloat()
+                    fileCoverageSection.split('\n').each { line ->
+                        if (line.contains('<option value=')) {
+                            def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
+                            def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
+                            def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
+                            packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
+                            packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
+                        }
                     }
 
                     def packageCoverageHtml = new StringBuilder('<select id="packages">\n')
                     packageCoverage.each { packageName, totalPercentage ->
                         def averagePercentage = totalPercentage / packageFiles[packageName]
-                        packageCoverageHtml.append("<option value=\"filepackage\">${packageName} (${averagePercentage}%)</option>\n")
+                        packageCoverageHtml.append("<option value=\"filepackage\">${packageName} (${String.format('%.1f', averagePercentage)}%)</option>\n")
                     }
                     packageCoverageHtml.append('</select>\n')
 
@@ -112,9 +115,8 @@ pipeline {
                     writeFile file: 'coverageAcceptance.html', text: updatedHtmlFile
 
                     // Step 4: Archive the HTML file as a Jenkins artifact
-                
-                }
                     archiveArtifacts artifacts: 'coverageAcceptance.html', allowEmptyArchive: true
+                }
             }
         }
     }
