@@ -14,7 +14,7 @@ def dropdownMenu = document.select('select#coverage-dropdown').first()
 dropdownMenu.append('<option value="package">Package Wise Coverage Report</option>')
 
 // Calculate package-wise coverage percentages
-def coverageData = parseCoverageData('merged_coverage.out')
+def coverageData = parseCoverageData('coverage.out')
 def packageWiseCoverage = calculatePackageWiseCoverage(coverageData)
 
 // Function to parse coverage data

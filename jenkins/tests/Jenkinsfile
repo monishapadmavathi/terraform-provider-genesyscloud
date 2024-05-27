@@ -78,16 +78,6 @@ pipeline {
                 }
             }
         }
-
-  stage('Generate Coverage Summary') {
-            steps {
-                script {
-                    // Generate JSON coverage summary
-                    sh 'groovy jenkins/tests/parseCoverage.groovy'
-                }
-            }
-        }
-
   stage('Generate Coverage Report') {
             steps {
  script {
