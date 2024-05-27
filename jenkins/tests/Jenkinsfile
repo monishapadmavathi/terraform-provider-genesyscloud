@@ -82,7 +82,7 @@ pipeline {
                   archiveArtifacts artifacts: 'coverage.out', allowEmptyArchive: true
                         sh 'go tool cover -html coverage.out -o coverageAcceptance.html'
  script {
-                    def modifyScript = load 'jenkins/tests/modifyCoverageReport.groovy'
+                    def modifyScript = load 'jenkins/tests/test/modifyCoverageReport.groovy'
                     modifyScript.run()
                 }
                  publishHTML(target: [
