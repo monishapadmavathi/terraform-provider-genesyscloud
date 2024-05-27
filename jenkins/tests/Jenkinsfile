@@ -81,7 +81,7 @@ pipeline {
             steps {
                   archiveArtifacts artifacts: 'coverage.out', allowEmptyArchive: true
                         sh 'go tool cover -html coverage.out -o coverageAcceptance.html'
-
+                    sh 'chmod +x modify_coverage.sh'
                      sh 'jenkins/tests/modify_coverage.sh'
                 
                  publishHTML(target: [
