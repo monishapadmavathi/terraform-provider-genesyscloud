@@ -82,7 +82,6 @@ pipeline {
             steps {
                 script {
                     // Step 1: Run tests and generate coverageAcceptance.html
-                    sh 'go test -coverprofile=coverage.out ./...'
                     sh 'go tool cover -html=coverage.out -o coverageAcceptance.html'
 
                     // Step 2: Parse the generated HTML file to calculate package-wise coverage
