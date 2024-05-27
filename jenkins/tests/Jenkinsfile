@@ -78,7 +78,6 @@ pipeline {
             }
         }
 
-
         stage('Generate Coverage Report') {
             steps {
                 script {
@@ -107,7 +106,11 @@ pipeline {
                         }
                         END {
                             for (package in packages) {
-                                printf("<p>%s: %.1f%% of statements covered</p>\\n", package, (covered[package]/total[package])*100);
+                                if (total[package] > 0) {
+                                    printf("<p>%s: %.1f%% of statements covered</p>\\n", package, (covered[package]/total[package])*100);
+                                } else {
+                                    printf("<p>%s: 0.0%% of statements covered</p>\\n", package);
+                                }
                             }
                         }'
                         ''',
