@@ -135,7 +135,7 @@ script {
                 packageCoverageTable.style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 document.querySelectorAll('pre[id^="file"]').forEach(file => file.style.display = 'none');
-                document.getElementById('file' + fileId).style.display = 'block';
+                document.getElementById(fileId).style.display = 'block';
                 document.getElementById('backButton').style.display = 'block';
             }
 
@@ -180,16 +180,6 @@ script {
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
-
-
-
-
-
-
-
-
-
-
 
                 archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
