@@ -98,9 +98,14 @@ stage('Generate & Upload Report') {
                                 def fileContent = htmlFile.substring(fileContentStart, fileContentEnd)
                                 fileContents[fileId] = fileContent
                             } else {
-                                fileContents[fileId] = "File content not found for ${filePath}"
+                                fileContents[fileId] = "<pre id='${fileId}'>File content not found for ${filePath}</pre>"
                             }
                         }
+                    }
+
+                    // Debugging output to verify file IDs and contents
+                    fileContents.each { id, content ->
+                        println "File ID: ${id}, Content: ${content.take(100)}..." // Only print first 100 chars for brevity
                     }
 
                     // Step 4: Generate the package-wise coverage table with embedded file contents
@@ -203,6 +208,8 @@ stage('Generate & Upload Report') {
 
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
+  
+
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
