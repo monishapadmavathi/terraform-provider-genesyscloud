@@ -90,39 +90,28 @@ stage('Generate & Upload Report') {
                             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
                             filesInPackage[packageName] = (filesInPackage[packageName] ?: []) << filePath
 
-                            // Extract file content
+                            // Extract file content for initial display (not used in final solution)
                             def fileId = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
                             def fileContentStart = htmlFile.indexOf('<pre class="file" id="' + fileId + '"')
                             if (fileContentStart != -1) {
                                 def fileContentEnd = htmlFile.indexOf('</pre>', fileContentStart) + 6
                                 def fileContent = htmlFile.substring(fileContentStart, fileContentEnd)
                                 fileContents[fileId] = fileContent
-                                println "File content found for ${filePath} with ID ${fileId}"
                             } else {
-                                fileContents[fileId] = "<pre id='${fileId}'>File content not found for ${filePath}</pre>"
-                                println "File content not found for ${filePath} with ID ${fileId}"
+                                fileContents[fileId] = "File content not found for ${filePath}"
                             }
                         }
                     }
 
-                    // Debugging output to verify file IDs and contents
-                    fileContents.each { id, content ->
-                        println "File ID: ${id}, Content: ${content.take(100)}..." // Only print first 100 chars for brevity
-                    }
-
-                    // Generate the package-wise coverage table with embedded file contents
+                    // Generate the package-wise coverage table with links to fetch file contents dynamically
                     def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
                         def averagePercentage = totalPercentage / packageFiles[packageName]
                         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
                         def filesLinks = filesInPackage[packageName].collect { file ->
                             def fileId = file.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
-                            return "<li><a href='#' onclick='showFileCoverage(\"${fileId}\")'>${file}</a></li>"
+                            return "<li><a href='#' onclick='showFileCoverage(\"${file}\")'>${file}</a></li>"
                         }.join('\n')
-                        def filesContents = filesInPackage[packageName].collect { file ->
-                            def fileId = file.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
-                            return fileContents[fileId]
-                        }.join('\n')
-                        return "<tr class='${colorClass}'><td><a href='#' onclick='toggleFileList(\"${packageName}\")'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr><tr class='file-list' id='${packageName}' style='display: none'><td colspan='2'><ul>${filesLinks}</ul>${filesContents}</td></tr>"
+                        return "<tr class='${colorClass}'><td><a href='#' onclick='toggleFileList(\"${packageName}\")'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr><tr class='file-list' id='${packageName}' style='display: none'><td colspan='2'><ul>${filesLinks}</ul></td></tr>"
                     }.join('\n')
 
                     // Prepare the HTML content
@@ -140,43 +129,44 @@ stage('Generate & Upload Report') {
                                 </tbody>
                             </table>
                         </div>
+                        <div id="content" style="display: none;">
+                            <pre id="fileContent"></pre>
+                            <button id="backButton" style="display: none;" onclick="goBack()">Back</button>
+                        </div>
                     """.stripIndent()
 
                     def scriptHtml = """
                         <script>
-                            function handleSelection() {
-                                const packageCoverageTable = document.getElementById('packageCoverageTable');
-                                packageCoverageTable.style.display = 'block';
-                                document.querySelectorAll('div[id^="fileTable"]').forEach(table => table.style.display = 'none');
-                            }
-
                             function toggleFileList(packageName) {
                                 const fileList = document.getElementById(packageName);
                                 fileList.style.display = fileList.style.display === 'none' ? 'block' : 'none';
                             }
 
-                            function showFileCoverage(fileId) {
-                                const packageCoverageTable = document.getElementById('packageCoverageTable');
-                                packageCoverageTable.style.display = 'none';
-                                document.getElementById('content').style.display = 'block';
-                                document.querySelectorAll('pre[id^="file"]').forEach(file => file.style.display = 'none');
-                                const fileElement = document.getElementById(fileId);
-                                if (fileElement) {
-                                    fileElement.style.display = 'block';
-                                } else {
-                                    console.error('File element not found for ID:', fileId);
-                                }
-                                document.getElementById('backButton').style.display = 'block';
+                            function showFileCoverage(filePath) {
+                                fetch(filePath)
+                                    .then(response => response.text())
+                                    .then(data => {
+                                        document.getElementById('fileContent').innerText = data;
+                                        document.getElementById('packageCoverageTable').style.display = 'none';
+                                        document.getElementById('content').style.display = 'block';
+                                        document.getElementById('backButton').style.display = 'block';
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching file:', error);
+                                        document.getElementById('fileContent').innerText = 'Error fetching file content';
+                                    });
                             }
 
                             function goBack() {
-                                const packageCoverageTable = document.getElementById('packageCoverageTable');
-                                packageCoverageTable.style.display = 'block';
+                                document.getElementById('packageCoverageTable').style.display = 'block';
                                 document.getElementById('content').style.display = 'none';
                                 document.getElementById('backButton').style.display = 'none';
                             }
 
-                            document.addEventListener("DOMContentLoaded", handleSelection);
+                            document.addEventListener("DOMContentLoaded", () => {
+                                document.getElementById('packageCoverageTable').style.display = 'block';
+                                document.getElementById('content').style.display = 'none';
+                            });
                         </script>
                     """.stripIndent()
 
@@ -205,13 +195,11 @@ stage('Generate & Upload Report') {
                     // Insert the new option, table, and styles into the HTML file
                     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none" onchange="handleSelection()">\n')
                     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
-                    updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;">')
                     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
-      
-
+         
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
         }
