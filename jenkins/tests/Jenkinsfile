@@ -101,10 +101,6 @@ script {
     }.join('\n')
 
     // Step 4: Prepare the HTML content
-    def packageCoverageHtml = """
-        <option value="packageCoverage" selected>Package-wise Coverage</option>
-    """.stripIndent()
-
     def tableHtml = """
         <div id="packageCoverageTable">
             <table border="1">
@@ -174,13 +170,14 @@ script {
     """.stripIndent()
 
     // Step 5: Insert the new option, table, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none" onchange="handleSelection()">\n' + packageCoverageHtml)
+    def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none" onchange="handleSelection()">\n')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
-    updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;">' + tableHtml + '\n')
-    updatedHtmlFile = updatedHtmlFile.replace('</body>', scriptHtml + '\n</body>')
+    updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;">')
+    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
 
 
