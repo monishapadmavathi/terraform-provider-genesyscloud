@@ -111,16 +111,13 @@ script {
             
             // Read the file content and store it
             def fileId = filePath.replaceAll('[-./]', '_')
-            def fileContent = {
-                def fileContentStart = htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\"")
-                if (fileContentStart != -1) {
-                    def fileContentEnd = htmlFile.indexOf("</pre>", fileContentStart) + 6
-                    return htmlFile.substring(fileContentStart, fileContentEnd)
-                } else {
-                    return "File content not found for ${filePath}"
-                }
-            }()
-            fileContents[fileId] = fileContent
+            def fileContentStart = htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\"")
+            if (fileContentStart != -1) {
+                def fileContentEnd = htmlFile.indexOf("</pre>", fileContentStart) + 6
+                fileContents[fileId] = htmlFile.substring(fileContentStart, fileContentEnd)
+            } else {
+                fileContents[fileId] = "File content not found for ${filePath}"
+            }
         }
     }
 
@@ -212,11 +209,11 @@ script {
     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none" onchange="handleSelection()">\n')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;"><div id="fileContent"></div></div>')
+    updatedHtmlFile = updatedHtmlFile.replace('File content not found for file0', '')
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
-
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
