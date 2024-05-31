@@ -69,10 +69,10 @@ stage('Generate & Upload Report') {
 script {
     // Step 1: Read the generated HTML file
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
-    def selectStart = htmlFile.indexOf('<select id="files">')
+    def selectStart = htmlFile.indexOf('<select id="files" onchange="handleSelection()">')
 
     if (selectStart == -1) {
-        error("Could not find the start of the <select id='files'> element in the HTML file.")
+        error("Could not find the start of the <select id="files"> element in the HTML file.")
     }
 
     def selectEnd = htmlFile.indexOf('</select>', selectStart)
