@@ -137,6 +137,7 @@ script {
             function showFileCoverage(fileId) {
                 const packageCoverageTable = document.getElementById('packageCoverageTable');
                 packageCoverageTable.style.display = 'none';
+                document.getElementById('content').style.display = 'block';
                 document.querySelectorAll('div[id^="fileTable"]').forEach(table => table.style.display = 'none');
                 document.getElementById('file' + fileId).style.display = 'block';
             }
@@ -167,10 +168,12 @@ script {
     // Step 5: Insert the new option, table, and styles into the HTML file
     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none" onchange="handleSelection()">\n' + packageCoverageHtml)
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
-    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
+    updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', tableHtml + '\n<div id="content" style="display: none;">')
+    updatedHtmlFile = updatedHtmlFile.replace('</body>', scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
 
 
