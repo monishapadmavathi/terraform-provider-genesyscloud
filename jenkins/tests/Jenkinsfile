@@ -134,7 +134,7 @@ script {
                 const packageCoverageTable = document.getElementById('packageCoverageTable');
                 packageCoverageTable.style.display = 'none';
                 document.getElementById('content').style.display = 'block';
-                document.querySelectorAll('div[id^="fileTable"]').forEach(table => table.style.display = 'none');
+                document.querySelectorAll('pre[id^="file"]').forEach(file => file.style.display = 'none');
                 document.getElementById('file' + fileId).style.display = 'block';
                 document.getElementById('backButton').style.display = 'block';
             }
@@ -177,6 +177,7 @@ script {
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
 
 
