@@ -182,9 +182,31 @@ stage('Generate & Upload Report') {
                         </div>
                     """.stripIndent()
 
+                    // Define the CSS styles
+                    def cssStyles = """
+                        <style>
+                            .light-green {
+                                background-color: #c8e6c9; /* light green */
+                            }
+                            .light-red {
+                                background-color: #ffcdd2; /* light red */
+                            }
+                            .file-list ul {
+                                list-style-type: none;
+                                padding: 0;
+                            }
+                            .file-list li {
+                                margin: 5px 0;
+                            }
+                            #backButton {
+                                margin-bottom: 10px;
+                            }
+                        </style>
+                    """.stripIndent()
+
                     // Modify the existing HTML file
                     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none" onchange="handleSelection()">\n')
-                    updatedHtmlFile = updatedHtmlFile.replace('</head>', '\n${scriptHtml}\n</head>')
+                    updatedHtmlFile = updatedHtmlFile.replace('</head>', '\n${cssStyles}\n${scriptHtml}\n</head>')
                     updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '${backButtonHtml}\n<div id="content" style="display: none;">')
 
                     // Write the updated HTML file
@@ -193,7 +215,7 @@ stage('Generate & Upload Report') {
                     // Print a success message
                     println "HTML report generated successfully."
                 }
-           
+         
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
