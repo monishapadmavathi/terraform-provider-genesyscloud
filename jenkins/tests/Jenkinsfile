@@ -166,6 +166,9 @@ script {
             .file-list li {
                 margin: 5px 0;
             }
+            #backButton {
+                margin-bottom: 10px;
+            }
         </style>
     """.stripIndent()
 
@@ -177,6 +180,7 @@ script {
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
 
 
