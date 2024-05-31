@@ -73,7 +73,7 @@ stage('Generate & Upload Report') {
                     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
                     def selectStart = htmlFile.indexOf('<select id="files">')
                     def selectEnd = htmlFile.indexOf('</select>', selectStart)
-                    def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select>
+                    def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select
 
                     def packageCoverage = [:]
                     def packageFiles = [:]
@@ -99,6 +99,7 @@ stage('Generate & Upload Report') {
                                 fileContents[fileId] = fileContent
                             } else {
                                 fileContents[fileId] = "<pre id='${fileId}'>File content not found for ${filePath}</pre>"
+                                println "File content not found for ${filePath} with ID ${fileId}"
                             }
                         }
                     }
@@ -208,6 +209,7 @@ stage('Generate & Upload Report') {
 
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
+    
 
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
