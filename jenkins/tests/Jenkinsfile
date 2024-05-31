@@ -109,7 +109,7 @@ stage('Generate & Upload Report') {
                         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
                         def filesLinks = filesInPackage[packageName].collect { file ->
                             def fileId = file.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
-                            return "<li><a href='#' onclick='showFileCoverage(\"${file}\")'>${file}</a></li>"
+                            return "<li><a href='#' onclick='showFileCoverage(\"${fileId}\", \"${file}\")'>${file}</a></li>"
                         }.join('\n')
                         return "<tr class='${colorClass}'><td><a href='#' onclick='toggleFileList(\"${packageName}\")'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr><tr class='file-list' id='${packageName}' style='display: none'><td colspan='2'><ul>${filesLinks}</ul></td></tr>"
                     }.join('\n')
@@ -130,8 +130,8 @@ stage('Generate & Upload Report') {
                             </table>
                         </div>
                         <div id="content" style="display: none;">
+                            <button id="backButton" onclick="goBack()">Back</button>
                             <pre id="fileContent"></pre>
-                            <button id="backButton" style="display: none;" onclick="goBack()">Back</button>
                         </div>
                     """.stripIndent()
 
@@ -142,7 +142,7 @@ stage('Generate & Upload Report') {
                                 fileList.style.display = fileList.style.display === 'none' ? 'block' : 'none';
                             }
 
-                            function showFileCoverage(filePath) {
+                            function showFileCoverage(fileId, filePath) {
                                 fetch(filePath)
                                     .then(response => response.text())
                                     .then(data => {
@@ -199,7 +199,8 @@ stage('Generate & Upload Report') {
 
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
-         
+           
+
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
         }
