@@ -111,12 +111,16 @@ script {
             
             // Read the file content and store it
             def fileId = filePath.replaceAll('[-./]', '_')
-            def fileContent = findFileContent(fileId)
-            if (fileContent != null) {
-                fileContents[fileId] = fileContent
-            } else {
-                fileContents[fileId] = "File content not found for ${filePath}"
-            }
+            def fileContent = {
+                def fileContentStart = htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\"")
+                if (fileContentStart != -1) {
+                    def fileContentEnd = htmlFile.indexOf("</pre>", fileContentStart) + 6
+                    return htmlFile.substring(fileContentStart, fileContentEnd)
+                } else {
+                    return "File content not found for ${filePath}"
+                }
+            }()
+            fileContents[fileId] = fileContent
         }
     }
 
@@ -213,16 +217,6 @@ script {
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
 
-// Function to find file content or return null if not found
-def findFileContent(fileId) {
-    def fileContentStart = htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\"")
-    if (fileContentStart != -1) {
-        def fileContentEnd = htmlFile.indexOf("</pre>", fileContentStart) + 6
-        return htmlFile.substring(fileContentStart, fileContentEnd)
-    } else {
-        return null
-    }
-}
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
