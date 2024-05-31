@@ -66,7 +66,7 @@ pipeline {
 stage('Generate & Upload Report') {
             
         steps {
-script {
+ script {
     // Step 1: Read the generated HTML file
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
@@ -91,7 +91,7 @@ script {
     def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
         def averagePercentage = totalPercentage / packageFiles[packageName]
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
-        return "<tr class='${colorClass}'><td><a href='#${packageName}'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr>"
+        return "<tr class='${colorClass}'><td><a href='#' onclick='showPackageFiles(\"${packageName}\")'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr>"
     }.join('\n')
 
     // Step 4: Prepare the HTML content
@@ -129,8 +129,15 @@ script {
                 } else {
                     console.error('File element not found for ID:', fileId);
                 }
-                document.getElementById('packageCoverageTable').style.display = 'none';
+                document.querySelectorAll('div[id^="package"]').forEach(element => element.style.display = 'none');
                 document.getElementById('content').style.display = 'block';
+            }
+            
+            function showPackageFiles(packageName) {
+                document.querySelectorAll('div[id^="package"]').forEach(element => element.style.display = 'none');
+                document.getElementById(packageName).style.display = 'block';
+                document.getElementById('packageCoverageTable').style.display = 'none';
+                document.getElementById('content').style.display = 'none';
             }
             
             function showPackageCoverage() {
@@ -163,6 +170,7 @@ script {
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
 
                 archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
