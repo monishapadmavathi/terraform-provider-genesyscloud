@@ -115,10 +115,6 @@ script {
     }.join('\n')
 
     // Step 4: Prepare the HTML content
-    def packageCoverageHtml = """
-        <option value="packageCoverage" selected>Package-wise Coverage</option>
-    """.stripIndent()
-
     def tableHtml = """
         <div id="packageCoverageTable">
             <table border="1">
@@ -137,24 +133,6 @@ script {
 
     def scriptHtml = """
         <script>
-            function handleSelection() {
-                const select = document.getElementById('files');
-                const packageCoverageTable = document.getElementById('packageCoverageTable');
-                const otherTables = document.querySelectorAll('div[id^="fileTable"]');
-                if (select.value === 'packageCoverage') {
-                    packageCoverageTable.style.display = 'block';
-                    otherTables.forEach(table => table.style.display = 'none');
-                } else {
-                    packageCoverageTable.style.display = 'none';
-                    otherTables.forEach(table => {
-                        if (table.id === 'fileTable' + select.value.replace('file', '')) {
-                            table.style.display = 'block';
-                        } else {
-                            table.style.display = 'none');
-                        }
-                    });
-                }
-            }
             function showPackageFiles(packageName) {
                 document.getElementById('packageCoverageTable').style.display = 'none';
                 document.querySelectorAll('tr[id^="package-"]').forEach(row => row.style.display = 'none');
@@ -172,8 +150,10 @@ script {
                 document.querySelectorAll('div[id^="fileTable"]').forEach(table => table.style.display = 'none');
                 document.getElementById('backButton').style.display = 'none';
             }
-            document.addEventListener("DOMContentLoaded", handleSelection);
-            handleSelection(); // Ensures the package coverage table is shown by default
+            document.addEventListener("DOMContentLoaded", function() {
+                document.getElementById('packageCoverageTable').style.display = 'block';
+                document.getElementById('backButton').style.display = 'none';
+            });
         </script>
     """.stripIndent()
 
@@ -194,13 +174,14 @@ script {
         <button id="backButton" onclick="goBack()" style="display:none;">Back to Package Coverage</button>
     """.stripIndent()
 
-    // Step 5: Insert the new option, table, back button, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" onchange="handleSelection()">\n' + packageCoverageHtml)
+    // Step 5: Insert the table, back button, and styles into the HTML file
+    def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none;">')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + backButtonHtml + scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
 
                 archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
