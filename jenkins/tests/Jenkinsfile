@@ -66,11 +66,21 @@ pipeline {
 stage('Generate & Upload Report') {
             
         steps {
- script {
+script {
     // Step 1: Read the generated HTML file
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
+
+    if (selectStart == -1) {
+        error("Could not find the start of the <select id='files'> element in the HTML file.")
+    }
+
     def selectEnd = htmlFile.indexOf('</select>', selectStart)
+
+    if (selectEnd == -1) {
+        error("Could not find the end of the <select id='files'> element in the HTML file.")
+    }
+
     def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select>
 
     def packageCoverage = [:]
@@ -140,7 +150,7 @@ stage('Generate & Upload Report') {
                         if (table.id === 'fileTable' + select.value.replace('file', '')) {
                             table.style.display = 'block';
                         } else {
-                            table.style.display = 'none');
+                            table.style.display = 'none';
                         }
                     });
                 }
@@ -176,24 +186,15 @@ stage('Generate & Upload Report') {
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
+}
 
-                }
                 archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
         }
     }
 }
  
- def extractReason(String log) {
-    // Extract reason from the log
-    def reason = ""
-    def reasonPattern = /message="([^"]*)">/
-    def matcher = log =~ reasonPattern
-    if (matcher.find()) {
-        reason = matcher.group(1).trim()
-    }
-    return reason
-}
+
 
 
     
