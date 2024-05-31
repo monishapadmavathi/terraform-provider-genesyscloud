@@ -66,6 +66,7 @@ pipeline {
 stage('Generate & Upload Report') {
             
             steps {
+  
                 script {
                     // Read the generated HTML file
                     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
@@ -91,9 +92,11 @@ stage('Generate & Upload Report') {
                             // Extract file content
                             def fileId = filePath.replaceAll('[^a-zA-Z0-9]', '_') // Use underscores instead of removing non-alphanumeric characters
                             def fileContentStart = htmlFile.indexOf('<pre class="file" id="' + fileId + '"')
-                            def fileContentEnd = htmlFile.indexOf('</pre>', fileContentStart) + 6
-                            def fileContent = htmlFile.substring(fileContentStart, fileContentEnd)
-                            fileContents[fileId] = fileContent
+                            def fileContentEnd = fileContentStart != -1 ? htmlFile.indexOf('</pre>', fileContentStart) + 6 : -1
+                            if (fileContentStart != -1 && fileContentEnd != -1 && fileContentEnd > fileContentStart) {
+                                def fileContent = htmlFile.substring(fileContentStart, fileContentEnd)
+                                fileContents[fileId] = fileContent
+                            }
                         }
                     }
 
@@ -194,7 +197,7 @@ stage('Generate & Upload Report') {
                     // Write the updated HTML file
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
-        
+         
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
