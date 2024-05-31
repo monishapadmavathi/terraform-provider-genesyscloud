@@ -94,7 +94,7 @@ script {
         def averagePercentage = totalPercentage / packageFiles[packageName]
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def filesLinks = filesInPackage[packageName].collect { file ->
-            def fileId = file.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replace('/', '').replace('.go', '')
+            def fileId = file.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
             return "<li><a href='#' onclick='showFileCoverage(\"${fileId}\")'>${file}</a></li>"
         }.join('\n')
         return "<tr class='${colorClass}'><td><a href='#' onclick='toggleFileList(\"${packageName}\")'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr><tr class='file-list' id='${packageName}' style='display: none'><td colspan='2'><ul>${filesLinks}</ul></td></tr>"
@@ -180,6 +180,7 @@ script {
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
 
 
