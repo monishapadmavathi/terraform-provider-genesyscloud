@@ -72,7 +72,7 @@ script {
     def selectStart = htmlFile.indexOf('<select id="files" onchange="handleSelection()">')
 
     if (selectStart == -1) {
-        error("Could not find the start of the <select id="files"> element in the HTML file.")
+        error("Could not find the start of the <select id='files'> element in the HTML file.")
     }
 
     def selectEnd = htmlFile.indexOf('</select>', selectStart)
@@ -181,7 +181,7 @@ script {
     """.stripIndent()
 
     // Step 5: Insert the new option, table, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" onchange="handleSelection()">\n' + packageCoverageHtml)
+    def updatedHtmlFile = htmlFile.replace('<select id="files" onchange="handleSelection()"', '<select id="files" onchange="handleSelection()">\n' + packageCoverageHtml)
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
