@@ -109,7 +109,7 @@ stage('Generate & Upload Report') {
                         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
                         def filesLinks = filesInPackage[packageName].collect { file ->
                             def fileId = file.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
-                            return "<li><a href='#' onclick='showFileCoverage(\"${fileId}\", \"${file}\")'>${file}</a></li>"
+                            return "<li><a href='#' onclick='showFileCoverage(\"${fileId}\")'>${file}</a></li>"
                         }.join('\n')
                         return "<tr class='${colorClass}'><td><a href='#' onclick='toggleFileList(\"${packageName}\")'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr><tr class='file-list' id='${packageName}' style='display: none'><td colspan='2'><ul>${filesLinks}</ul></td></tr>"
                     }.join('\n')
@@ -142,19 +142,17 @@ stage('Generate & Upload Report') {
                                 fileList.style.display = fileList.style.display === 'none' ? 'block' : 'none';
                             }
 
-                            function showFileCoverage(fileId, filePath) {
-                                fetch(filePath)
-                                    .then(response => response.text())
-                                    .then(data => {
-                                        document.getElementById('fileContent').innerText = data;
-                                        document.getElementById('packageCoverageTable').style.display = 'none';
-                                        document.getElementById('content').style.display = 'block';
-                                        document.getElementById('backButton').style.display = 'block';
-                                    })
-                                    .catch(error => {
-                                        console.error('Error fetching file:', error);
-                                        document.getElementById('fileContent').innerText = 'Error fetching file content';
-                                    });
+                            function showFileCoverage(fileId) {
+                                document.querySelectorAll('pre[id^="file"]').forEach(file => file.style.display = 'none');
+                                const fileElement = document.getElementById(fileId);
+                                if (fileElement) {
+                                    document.getElementById('fileContent').innerText = fileElement.innerText;
+                                    document.getElementById('packageCoverageTable').style.display = 'none';
+                                    document.getElementById('content').style.display = 'block';
+                                    document.getElementById('backButton').style.display = 'block';
+                                } else {
+                                    document.getElementById('fileContent').innerText = 'File content not found';
+                                }
                             }
 
                             function goBack() {
@@ -199,7 +197,7 @@ stage('Generate & Upload Report') {
 
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
-           
+
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
