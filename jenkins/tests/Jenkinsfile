@@ -135,7 +135,12 @@ script {
                 packageCoverageTable.style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 document.querySelectorAll('pre[id^="file"]').forEach(file => file.style.display = 'none');
-                document.getElementById(fileId).style.display = 'block';
+                const fileElement = document.getElementById(fileId);
+                if (fileElement) {
+                    fileElement.style.display = 'block';
+                } else {
+                    console.error('File element not found for ID:', fileId);
+                }
                 document.getElementById('backButton').style.display = 'block';
             }
 
