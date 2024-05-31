@@ -184,7 +184,8 @@ script {
 
 
 
-                archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
+
+                archiveArtifacts artifacts: 'jenkins/tests/jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
         }
     }
