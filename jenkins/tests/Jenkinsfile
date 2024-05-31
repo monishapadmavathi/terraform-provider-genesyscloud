@@ -71,6 +71,13 @@ script {
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
     def selectEnd = htmlFile.indexOf('</select>', selectStart)
+    
+    // Validate the indices before proceeding
+    if (selectStart == -1 || selectEnd == -1) {
+        error "Could not find '<select id=\"files\">' or '</select>' in the HTML file."
+        return
+    }
+    
     def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select>
 
     def packageCoverage = [:]
@@ -81,8 +88,22 @@ script {
     // Step 2: Parse the existing options to calculate package-wise coverage and store file contents
     fileCoverageSection.split('\n').each { line ->
         if (line.contains('<option value=')) {
-            def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
-            def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
+            def filePathStart = line.indexOf('>') + 1
+            def filePathEnd = line.indexOf(' (', filePathStart)
+            if (filePathStart == -1 || filePathEnd == -1) {
+                error "Could not extract file path and percentage from line: $line"
+                return
+            }
+            def filePath = line.substring(filePathStart, filePathEnd).trim()
+            
+            def percentageStart = line.indexOf('(', filePathEnd) + 1
+            def percentageEnd = line.indexOf('%', percentageStart)
+            if (percentageStart == -1 || percentageEnd == -1) {
+                error "Could not extract percentage from line: $line"
+                return
+            }
+            def percentage = line.substring(percentageStart, percentageEnd).toFloat()
+            
             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
             packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
@@ -90,7 +111,11 @@ script {
             
             // Read the file content and store it
             def fileId = filePath.replaceAll('[-./]', '_')
-            fileContents[fileId] = htmlFile.substring(htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\""), htmlFile.indexOf("</pre>", htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\"")) + 6)
+            def fileContentStart = htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\"")
+            if (fileContentStart != -1) {
+                def fileContentEnd = htmlFile.indexOf("</pre>", fileContentStart) + 6
+                fileContents[fileId] = htmlFile.substring(fileContentStart, fileContentEnd)
+            }
         }
     }
 
@@ -127,7 +152,7 @@ script {
             function handleSelection() {
                 const packageCoverageTable = document.getElementById('packageCoverageTable');
                 packageCoverageTable.style.display = 'block';
-                document.querySelectorAll('div[id^="fileTable"]').forEach(table => table.style.display = 'none');
+                document.querySelectorAll('div[id^=\"fileTable\"]').forEach(table => table.style.display = 'none');
             }
 
             function toggleFileList(packageName) {
