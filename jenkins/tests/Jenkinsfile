@@ -65,8 +65,6 @@ pipeline {
 
 stage('Generate & Upload Report') {
             
-
-
             steps {
                 script {
                     // Read the generated HTML file
@@ -91,8 +89,8 @@ stage('Generate & Upload Report') {
                             filesInPackage[packageName] = (filesInPackage[packageName] ?: []) << filePath
 
                             // Extract file content
-                            def fileId = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
-                            def fileContentStart = htmlFile.indexOf('<pre class="file"', htmlFile.indexOf('<pre class="file" id="' + fileId + '"'))
+                            def fileId = filePath.replaceAll('[^a-zA-Z0-9]', '_') // Use underscores instead of removing non-alphanumeric characters
+                            def fileContentStart = htmlFile.indexOf('<pre class="file" id="' + fileId + '"')
                             def fileContentEnd = htmlFile.indexOf('</pre>', fileContentStart) + 6
                             def fileContent = htmlFile.substring(fileContentStart, fileContentEnd)
                             fileContents[fileId] = fileContent
@@ -104,7 +102,7 @@ stage('Generate & Upload Report') {
                         def averagePercentage = totalPercentage / packageFiles[packageName]
                         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
                         def filesLinks = filesInPackage[packageName].collect { file ->
-                            def fileId = file.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
+                            def fileId = file.replaceAll('[^a-zA-Z0-9]', '_') // Use underscores instead of removing non-alphanumeric characters
                             return "<li><a href='#' onclick='showFileCoverage(\"${fileId}\")'>${file}</a></li>"
                         }.join('\n')
                         return "<tr class='${colorClass}'><td><a href='#' onclick='toggleFileList(\"${packageName}\")'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr><tr class='file-list' id='${packageName}' style='display: none'><td colspan='2'><ul>${filesLinks}</ul></td></tr>"
@@ -193,11 +191,11 @@ stage('Generate & Upload Report') {
                     updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;">')
                     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
+                    // Write the updated HTML file
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
-            
+        
 
-            
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
         }
