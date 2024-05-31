@@ -76,8 +76,9 @@ script {
     def packageCoverage = [:]
     def packageFiles = [:]
     def filesInPackage = [:]
+    def fileContents = [:]
 
-    // Step 2: Parse the existing options to calculate package-wise coverage
+    // Step 2: Parse the existing options to calculate package-wise coverage and store file contents
     fileCoverageSection.split('\n').each { line ->
         if (line.contains('<option value=')) {
             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
@@ -86,6 +87,10 @@ script {
             packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
             filesInPackage[packageName] = (filesInPackage[packageName] ?: []) << filePath
+            
+            // Read the file content and store it
+            def fileId = filePath.replaceAll('[-./]', '_')
+            fileContents[fileId] = htmlFile.substring(htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\""), htmlFile.indexOf("</pre>", htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\"")) + 6)
         }
     }
 
@@ -134,13 +139,7 @@ script {
                 const packageCoverageTable = document.getElementById('packageCoverageTable');
                 packageCoverageTable.style.display = 'none';
                 document.getElementById('content').style.display = 'block';
-                document.querySelectorAll('pre[id^="file"]').forEach(file => file.style.display = 'none');
-                const fileElement = document.getElementById(fileId);
-                if (fileElement) {
-                    fileElement.style.display = 'block';
-                } else {
-                    console.error('File element not found for ID:', fileId);
-                }
+                document.getElementById('fileContent').innerHTML = fileContents[fileId] || 'File content not found';
                 document.getElementById('backButton').style.display = 'block';
             }
 
@@ -150,6 +149,8 @@ script {
                 document.getElementById('content').style.display = 'none';
                 document.getElementById('backButton').style.display = 'none';
             }
+
+            const fileContents = ${groovy.json.JsonOutput.toJson(fileContents)};
 
             document.addEventListener("DOMContentLoaded", handleSelection);
         </script>
@@ -180,7 +181,7 @@ script {
     // Step 5: Insert the new option, table, and styles into the HTML file
     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none" onchange="handleSelection()">\n')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
-    updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;">')
+    updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;"><div id="fileContent"></div></div>')
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
