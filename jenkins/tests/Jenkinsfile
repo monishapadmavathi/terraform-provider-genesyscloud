@@ -73,68 +73,52 @@ stage('Generate & Upload Report') {
                     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
                     def selectStart = htmlFile.indexOf('<select id="files">')
                     def selectEnd = htmlFile.indexOf('</select>', selectStart)
-                    
-                    // Validate the indices before proceeding
-                    if (selectStart == -1 || selectEnd == -1) {
-                        error "Could not find '<select id=\"files\">' or '</select>' in the HTML file."
-                        return
-                    }
-                    
-                    def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select>
+                    def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select
 
                     def packageCoverage = [:]
                     def packageFiles = [:]
                     def filesInPackage = [:]
                     def fileContents = [:]
 
-                    // Step 2: Parse the existing options to calculate package-wise coverage and store file contents
+                    // Step 2: Parse the existing options to calculate package-wise coverage
                     fileCoverageSection.split('\n').each { line ->
                         if (line.contains('<option value=')) {
-                            def filePathStart = line.indexOf('>') + 1
-                            def filePathEnd = line.indexOf(' (', filePathStart)
-                            if (filePathStart == -1 || filePathEnd == -1) {
-                                error "Could not extract file path and percentage from line: $line"
-                                return
-                            }
-                            def filePath = line.substring(filePathStart, filePathEnd).trim()
-                            
-                            def percentageStart = line.indexOf('(', filePathEnd) + 1
-                            def percentageEnd = line.indexOf('%', percentageStart)
-                            if (percentageStart == -1 || percentageEnd == -1) {
-                                error "Could not extract percentage from line: $line"
-                                return
-                            }
-                            def percentage = line.substring(percentageStart, percentageEnd).toFloat()
-                            
+                            def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
+                            def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
                             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
                             packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
                             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
                             filesInPackage[packageName] = (filesInPackage[packageName] ?: []) << filePath
-                            
-                            // Read the file content and store it
-                            def fileId = filePath.replaceAll('[-./]', '_')
-                            def fileContentStart = htmlFile.indexOf("<pre class=\"file\" id=\"${fileId}\"")
+
+                            // Step 3: Extract file content
+                            def fileId = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
+                            def fileContentStart = htmlFile.indexOf('<pre class="file" id="' + fileId + '"')
                             if (fileContentStart != -1) {
-                                def fileContentEnd = htmlFile.indexOf("</pre>", fileContentStart) + 6
-                                fileContents[fileId] = htmlFile.substring(fileContentStart, fileContentEnd)
+                                def fileContentEnd = htmlFile.indexOf('</pre>', fileContentStart) + 6
+                                def fileContent = htmlFile.substring(fileContentStart, fileContentEnd)
+                                fileContents[fileId] = fileContent
                             } else {
                                 fileContents[fileId] = "File content not found for ${filePath}"
                             }
                         }
                     }
 
-                    // Step 3: Generate the package-wise coverage table with hyperlinks to files
+                    // Step 4: Generate the package-wise coverage table with embedded file contents
                     def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
                         def averagePercentage = totalPercentage / packageFiles[packageName]
                         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
                         def filesLinks = filesInPackage[packageName].collect { file ->
-                            def fileId = file.replaceAll('[-./]', '_')
+                            def fileId = file.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
                             return "<li><a href='#' onclick='showFileCoverage(\"${fileId}\")'>${file}</a></li>"
                         }.join('\n')
-                        return "<tr class='${colorClass}'><td><a href='#' onclick='toggleFileList(\"${packageName}\")'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr><tr class='file-list' id='${packageName}' style='display: none'><td colspan='2'><ul>${filesLinks}</ul></td></tr>"
+                        def filesContents = filesInPackage[packageName].collect { file ->
+                            def fileId = file.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
+                            return fileContents[fileId]
+                        }.join('\n')
+                        return "<tr class='${colorClass}'><td><a href='#' onclick='toggleFileList(\"${packageName}\")'>${packageName}</a></td><td>${String.format('%.1f', averagePercentage)}%</td></tr><tr class='file-list' id='${packageName}' style='display: none'><td colspan='2'><ul>${filesLinks}</ul>${filesContents}</td></tr>"
                     }.join('\n')
 
-                    // Step 4: Prepare the HTML content
+                    // Step 5: Prepare the HTML content
                     def tableHtml = """
                         <div id="packageCoverageTable">
                             <table border="1">
@@ -156,7 +140,7 @@ stage('Generate & Upload Report') {
                             function handleSelection() {
                                 const packageCoverageTable = document.getElementById('packageCoverageTable');
                                 packageCoverageTable.style.display = 'block';
-                                document.querySelectorAll('div[id^=\"fileTable\"]').forEach(table => table.style.display = 'none');
+                                document.querySelectorAll('div[id^="fileTable"]').forEach(table => table.style.display = 'none');
                             }
 
                             function toggleFileList(packageName) {
@@ -168,7 +152,13 @@ stage('Generate & Upload Report') {
                                 const packageCoverageTable = document.getElementById('packageCoverageTable');
                                 packageCoverageTable.style.display = 'none';
                                 document.getElementById('content').style.display = 'block';
-                                document.getElementById('fileContent').innerHTML = fileContents[fileId] || 'File content not found';
+                                document.querySelectorAll('pre[id^="file"]').forEach(file => file.style.display = 'none');
+                                const fileElement = document.getElementById(fileId);
+                                if (fileElement) {
+                                    fileElement.style.display = 'block';
+                                } else {
+                                    console.error('File element not found for ID:', fileId);
+                                }
                                 document.getElementById('backButton').style.display = 'block';
                             }
 
@@ -178,8 +168,6 @@ stage('Generate & Upload Report') {
                                 document.getElementById('content').style.display = 'none';
                                 document.getElementById('backButton').style.display = 'none';
                             }
-
-                            const fileContents = ${groovy.json.JsonOutput.toJson(fileContents)};
 
                             document.addEventListener("DOMContentLoaded", handleSelection);
                         </script>
@@ -207,17 +195,15 @@ stage('Generate & Upload Report') {
                         </style>
                     """.stripIndent()
 
-                    // Step 5: Insert the new option, table, and styles into the HTML file
+                    // Step 6: Insert the new option, table, and styles into the HTML file
                     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none" onchange="handleSelection()">\n')
                     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
-                    updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;"><div id="fileContent"></div></div>')
+                    updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;">')
                     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
-                    // Write the updated HTML file
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
       
-
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
         }
