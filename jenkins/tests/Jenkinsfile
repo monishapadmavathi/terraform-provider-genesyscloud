@@ -67,6 +67,7 @@ stage('Generate & Upload Report') {
             
             steps {
 
+
                 script {
                     // Step 1: Read the generated HTML file
                     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
@@ -215,7 +216,7 @@ stage('Generate & Upload Report') {
                     // Print a success message
                     println "HTML report generated successfully."
                 }
-            
+         
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
