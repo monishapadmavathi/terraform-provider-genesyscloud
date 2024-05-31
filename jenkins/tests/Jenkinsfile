@@ -68,7 +68,7 @@ stage('Generate & Upload Report') {
             steps {
 
                 script {
-                    // Read the generated HTML file
+                    // Step 1: Read the generated HTML file
                     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
                     def selectStart = htmlFile.indexOf('<select id="files">')
                     def selectEnd = htmlFile.indexOf('</select>', selectStart)
@@ -79,7 +79,7 @@ stage('Generate & Upload Report') {
                     def filesInPackage = [:]
                     def fileContents = [:]
 
-                    // Parse the existing options to calculate package-wise coverage
+                    // Step 2: Parse the existing options to calculate package-wise coverage
                     fileCoverageSection.split('\n').each { line ->
                         if (line.contains('<option value=')) {
                             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
@@ -89,8 +89,8 @@ stage('Generate & Upload Report') {
                             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
                             filesInPackage[packageName] = (filesInPackage[packageName] ?: []) << filePath
 
-                            // Extract file content
-                            def fileId = filePath.replaceAll('[^a-zA-Z0-9]', '_') // Use underscores instead of removing non-alphanumeric characters
+                            // Step 3: Extract file content
+                            def fileId = filePath.replaceAll('[^a-zA-Z0-9]', '_') // Replace non-alphanumeric characters with underscores
                             def fileContentStart = htmlFile.indexOf('<pre class="file" id="' + fileId + '"')
                             def fileContentEnd = fileContentStart != -1 ? htmlFile.indexOf('</pre>', fileContentStart) + 6 : -1
                             if (fileContentStart != -1 && fileContentEnd != -1 && fileContentEnd > fileContentStart) {
@@ -100,12 +100,12 @@ stage('Generate & Upload Report') {
                         }
                     }
 
-                    // Generate the package-wise coverage table
+                    // Step 4: Generate the package-wise coverage table
                     def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
                         def averagePercentage = totalPercentage / packageFiles[packageName]
                         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
                         def filesLinks = filesInPackage[packageName].collect { file ->
-                            def fileId = file.replaceAll('[^a-zA-Z0-9]', '_') // Use underscores instead of removing non-alphanumeric characters
+                            def fileId = file.replaceAll('[^a-zA-Z0-9]', '_')
                             return "<li><a href='#' onclick='showFileCoverage(\"${fileId}\")'>${file}</a></li>"
                         }.join('\n')
                         return """
@@ -121,18 +121,16 @@ stage('Generate & Upload Report') {
                         """
                     }.join('\n')
 
-                    // Generate the script for handling file content and navigation
+                    // Step 5: Generate the script for handling file content and navigation
                     def scriptHtml = """
                         <script>
-                            function handleSelection() {
-                                const packageCoverageTable = document.getElementById('packageCoverageTable');
-                                packageCoverageTable.style.display = 'block';
-                                document.querySelectorAll('div[id^="fileTable"]').forEach(table => table.style.display = 'none');
-                            }
-
                             function toggleFileList(packageName) {
                                 const fileList = document.getElementById(packageName);
-                                fileList.style.display = fileList.style.display === 'none' ? 'block' : 'none';
+                                if (fileList) {
+                                    fileList.style.display = fileList.style.display === 'none' ? 'block' : 'none';
+                                } else {
+                                    console.error('Package element not found for:', packageName);
+                                }
                             }
 
                             function showFileCoverage(fileId) {
@@ -155,11 +153,13 @@ stage('Generate & Upload Report') {
                                 document.querySelectorAll('pre[id^="file"]').forEach(file => file.style.display = 'none');
                             }
 
-                            document.addEventListener("DOMContentLoaded", handleSelection);
+                            document.addEventListener("DOMContentLoaded", () => {
+                                document.getElementById('packageCoverageTable').style.display = 'block';
+                            });
                         </script>
                     """.stripIndent()
 
-                    // Generate the HTML content
+                    // Step 6: Generate the HTML content
                     def tableHtml = """
                         <div id="packageCoverageTable">
                             <table border="1">
@@ -182,7 +182,7 @@ stage('Generate & Upload Report') {
                         </div>
                     """.stripIndent()
 
-                    // Define the CSS styles
+                    // Step 7: Define the CSS styles
                     def cssStyles = """
                         <style>
                             .light-green {
@@ -204,18 +204,18 @@ stage('Generate & Upload Report') {
                         </style>
                     """.stripIndent()
 
-                    // Modify the existing HTML file
+                    // Step 8: Modify the existing HTML file
                     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" style="display:none" onchange="handleSelection()">\n')
                     updatedHtmlFile = updatedHtmlFile.replace('</head>', '\n${cssStyles}\n${scriptHtml}\n</head>')
                     updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '${backButtonHtml}\n<div id="content" style="display: none;">')
 
-                    // Write the updated HTML file
+                    // Step 9: Write the updated HTML file
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile + '\n' + tableHtml
 
                     // Print a success message
                     println "HTML report generated successfully."
                 }
-         
+            
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
