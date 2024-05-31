@@ -34,6 +34,10 @@ pipeline {
         PATH = "${env.PATH}:${HOME}/go/bin:/home/jenkins/.local/bin:${env.GROOVY_HOME}/bin"
      
     }
+    tools {
+        go 'Go 1.20'
+        terraform 'Terraform 1.0.10'
+    }
 
 
     stages {

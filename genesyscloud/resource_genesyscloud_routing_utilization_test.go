@@ -190,10 +190,6 @@ func TestAccResourceRoutingUtilizationWithLabels(t *testing.T) {
 					resource.TestCheckResourceAttrSet("genesyscloud_routing_utilization.routing-util", "label_utilizations.1.label_id"),
 					resource.TestCheckResourceAttr("genesyscloud_routing_utilization.routing-util", "label_utilizations.1.maximum_capacity", maxCapacity2),
 				),
-				PreConfig: func() {
-					// Wait for a specified duration - to avoid multiple deletion taking place error
-					time.Sleep(30 * time.Second)
-				},
 			},
 			{
 				// Import/Read
@@ -236,10 +232,12 @@ func TestAccResourceRoutingUtilizationWithLabels(t *testing.T) {
 
 					return nil
 				},
-				PreConfig: func() {
-					// Wait for a specified duration - to avoid multiple deletion taking place error
-					time.Sleep(30 * time.Second)
-				},
+				Check: resource.ComposeTestCheckFunc(
+					func(s *terraform.State) error {
+						time.Sleep(60 * time.Second)
+						return nil
+					},
+				),
 			},
 		},
 	})

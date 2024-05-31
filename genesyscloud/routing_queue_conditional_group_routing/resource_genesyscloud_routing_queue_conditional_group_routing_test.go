@@ -2,9 +2,6 @@ package routing_queue_conditional_group_routing
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"strings"
 	gcloud "terraform-provider-genesyscloud/genesyscloud"
@@ -14,6 +11,11 @@ import (
 	"terraform-provider-genesyscloud/genesyscloud/util"
 	featureToggles "terraform-provider-genesyscloud/genesyscloud/util/feature_toggles"
 	"testing"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccResourceRoutingQueueConditionalGroupRouting(t *testing.T) {
@@ -34,7 +36,7 @@ func TestAccResourceRoutingQueueConditionalGroupRouting(t *testing.T) {
 
 		testUserResource = "user_resource1"
 		testUserName     = "nameUser1" + uuid.NewString()
-		testUserEmail    = uuid.NewString() + "@example.com"
+		testUserEmail    = uuid.NewString() + "@exampletest.com"
 
 		groupResourceId = "group"
 		groupName       = "terraform test group" + uuid.NewString()
@@ -246,6 +248,12 @@ func TestAccResourceRoutingQueueConditionalGroupRouting(t *testing.T) {
 				ResourceName:      "genesyscloud_routing_queue_conditional_group_routing." + conditionalGroupRoutingResource,
 				ImportState:       true,
 				ImportStateVerify: true,
+				Check: resource.ComposeTestCheckFunc(
+					func(s *terraform.State) error {
+						time.Sleep(45 * time.Second) // Wait for 60 seconds for resources to get deleted properly
+						return nil
+					},
+				),
 			},
 		},
 	})
