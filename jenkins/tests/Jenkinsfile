@@ -90,7 +90,7 @@ stage('Generate & Upload Report') {
                             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
                             filesInPackage[packageName] = (filesInPackage[packageName] ?: []) << filePath
 
-                            // Extract file content for initial display (not used in final solution)
+                            // Extract file content for initial display
                             def fileId = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/', '').replaceAll('[^a-zA-Z0-9]', '')
                             def fileContentStart = htmlFile.indexOf('<pre class="file" id="' + fileId + '"')
                             if (fileContentStart != -1) {
@@ -135,24 +135,28 @@ stage('Generate & Upload Report') {
                         </div>
                     """.stripIndent()
 
+                    // Serialize file contents to a JavaScript object
+                    def fileContentsJson = new groovy.json.JsonBuilder(fileContents).toString()
+
                     def scriptHtml = """
                         <script>
+                            const fileContents = ${fileContentsJson};
+
                             function toggleFileList(packageName) {
                                 const fileList = document.getElementById(packageName);
                                 fileList.style.display = fileList.style.display === 'none' ? 'block' : 'none';
                             }
 
                             function showFileCoverage(fileId) {
-                                document.querySelectorAll('pre[id^="file"]').forEach(file => file.style.display = 'none');
-                                const fileElement = document.getElementById(fileId);
-                                if (fileElement) {
-                                    document.getElementById('fileContent').innerText = fileElement.innerText;
-                                    document.getElementById('packageCoverageTable').style.display = 'none';
-                                    document.getElementById('content').style.display = 'block';
-                                    document.getElementById('backButton').style.display = 'block';
+                                const fileContentElement = document.getElementById('fileContent');
+                                if (fileContents[fileId]) {
+                                    fileContentElement.innerHTML = fileContents[fileId];
                                 } else {
-                                    document.getElementById('fileContent').innerText = 'File content not found';
+                                    fileContentElement.innerText = 'File content not found';
                                 }
+                                document.getElementById('packageCoverageTable').style.display = 'none';
+                                document.getElementById('content').style.display = 'block';
+                                document.getElementById('backButton').style.display = 'block';
                             }
 
                             function goBack() {
@@ -197,6 +201,7 @@ stage('Generate & Upload Report') {
 
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
+          
 
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
