@@ -70,7 +70,7 @@ stage('Generate & Upload Report') {
 
                 script {
                     // Step 1: Read the generated HTML file
-                    def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
+                    def htmlFile = readFile 'coverageAcceptance.html'
                     def selectStart = htmlFile.indexOf('<select id="files">')
                     def selectEnd = htmlFile.indexOf('</select>', selectStart)
                     def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select
@@ -201,9 +201,9 @@ stage('Generate & Upload Report') {
                     updatedHtmlFile = updatedHtmlFile.replace('<div id="content">', '<div id="backButton" style="display: none;"><button onclick="goBack()">Back</button></div>\n<div id="content" style="display: none;">')
                     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
-                    writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
+                    writeFile file: 'coverageAcceptance.html', text: updatedHtmlFile
                 }
-      
+
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
         }
