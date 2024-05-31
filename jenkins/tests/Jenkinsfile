@@ -197,7 +197,6 @@ stage('Generate & Upload Report') {
                     // Write the updated HTML file
                     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
                 }
-         
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
