@@ -75,6 +75,7 @@ script {
 
     def packageCoverage = [:]
     def packageFiles = [:]
+    def fileDetails = [:]
 
     // Step 2: Parse the existing options to calculate package-wise coverage
     fileCoverageSection.split('\n').each { line ->
@@ -82,8 +83,9 @@ script {
             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
             def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
-            packageFiles[packageName] = (packageFiles[packageName] ?: []) + [filePath]
+            packageFiles[packageName] = (packageFiles[packageName] ?: []) + filePath
             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
+            fileDetails[filePath] = [percentage: percentage, package: packageName]
         }
     }
 
@@ -94,14 +96,31 @@ script {
         return "<tr class='${colorClass}' onclick='showFiles(\"${packageName}\")'><td>${packageName}</td><td>${String.format('%.1f', averagePercentage)}%</td></tr>"
     }.join('\n')
 
-    def fileLists = packageFiles.collect { packageName, files ->
-        def fileList = files.collect { file ->
-            return "<li onclick='showFileContent(\"${file}\")'>${file}</li>"
+    // Step 4: Generate the file lists for each package
+    def fileListsHtml = packageFiles.collect { packageName, files ->
+        def fileRows = files.collect { filePath ->
+            def filePercentage = fileDetails[filePath].percentage
+            def colorClass = filePercentage < 50 ? 'light-red' : 'light-green'
+            return "<tr class='${colorClass}' onclick='showFileContent(\"${filePath}\")'><td>${filePath}</td><td>${String.format('%.1f', filePercentage)}%</td></tr>"
         }.join('\n')
-        return "<div id='files-${packageName}' class='file-list'><ul>${fileList}</ul></div>"
+        return """
+            <div id="fileList_${packageName}" style="display: none;">
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Coverage (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${fileRows}
+                    </tbody>
+                </table>
+            </div>
+        """
     }.join('\n')
 
-    // Step 4: Prepare the HTML content
+    // Step 5: Prepare the HTML content
     def packageCoverageHtml = """
         <option value="packageCoverage" selected>Package-wise Coverage</option>
     """.stripIndent()
@@ -120,80 +139,58 @@ script {
                 </tbody>
             </table>
         </div>
-        ${fileLists}
+        ${fileListsHtml}
     """.stripIndent()
 
     def scriptHtml = """
         <script>
-            function handleSelection() {
-                const select = document.getElementById('files');
-                const packageCoverageTable = document.getElementById('packageCoverageTable');
-                const fileLists = document.querySelectorAll('.file-list');
-                const otherTables = document.querySelectorAll('div[id^="fileTable"]');
-                if (select.value === 'packageCoverage') {
-                    packageCoverageTable.style.display = 'block';
-                    fileLists.forEach(list => list.style.display = 'none');
-                    otherTables.forEach(table => table.style.display = 'none');
-                } else {
-                    packageCoverageTable.style.display = 'none';
-                    fileLists.forEach(list => list.style.display = list.id === 'files-' + select.value ? 'block' : 'none');
-                    otherTables.forEach(table => table.style.display = 'none');
-                }
-            }
-
             function showFiles(packageName) {
+                document.querySelectorAll('div[id^="fileList_"]').forEach(div => div.style.display = 'none');
+                document.getElementById('fileList_' + packageName).style.display = 'block';
                 document.getElementById('packageCoverageTable').style.display = 'none';
-                document.querySelectorAll('.file-list').forEach(list => list.style.display = 'none');
-                document.getElementById('files-' + packageName).style.display = 'block';
+            }
+            
+            function showFileContent(filePath) {
+                fetch(filePath)
+                    .then(response => response.text())
+                    .then(data => {
+                        const fileContentDiv = document.getElementById('fileContent');
+                        fileContentDiv.innerHTML = '<pre>' + data + '</pre><button onclick="backToFileList()">Back</button>';
+                        fileContentDiv.style.display = 'block';
+                        document.getElementById('fileList_' + fileDetails[filePath].package).style.display = 'none';
+                    });
             }
 
-            function showFileContent(fileName) {
-                const contentDiv = document.getElementById('content');
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', fileName);
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        contentDiv.innerHTML = '<button onclick="goBack()">Back</button><pre>' + xhr.responseText + '</pre>';
-                        contentDiv.style.display = 'block';
-                        document.getElementById('packageCoverageTable').style.display = 'none';
-                        document.querySelectorAll('.file-list').forEach(list => list.style.display = 'none');
-                    }
-                };
-                xhr.send();
+            function backToFileList() {
+                const fileContentDiv = document.getElementById('fileContent');
+                fileContentDiv.style.display = 'none';
+                const currentPackage = fileDetails[fileContentDiv.getAttribute('data-current-file')].package;
+                document.getElementById('fileList_' + currentPackage).style.display = 'block';
             }
 
-            function goBack() {
-                const contentDiv = document.getElementById('content');
-                contentDiv.style.display = 'none';
-                handleSelection();
-            }
-
-            document.addEventListener("DOMContentLoaded", handleSelection);
-            handleSelection();
+            const fileDetails = ${groovy.json.JsonOutput.toJson(fileDetails)};
         </script>
     """.stripIndent()
 
+    // Define the CSS classes
     def cssStyles = """
         <style>
             .light-green {
-                background-color: #c8e6c9;
+                background-color: #c8e6c9; /* light green */
             }
             .light-red {
-                background-color: #ffcdd2;
+                background-color: #ffcdd2; /* light red */
             }
-            .file-list {
-                display: none;
-            }
-            #content {
+            #fileContent {
                 display: none;
             }
         </style>
     """.stripIndent()
 
-    // Step 5: Insert the new option, table, and styles into the HTML file
+    // Step 6: Insert the new option, table, and styles into the HTML file
     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" onchange="handleSelection()">\n' + packageCoverageHtml)
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
-    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
+    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + '<div id="fileContent"></div>' + scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
