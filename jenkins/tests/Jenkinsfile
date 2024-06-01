@@ -106,7 +106,7 @@ script {
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { fileEntry ->
             def fileContent = ""
-            def optionFile = fileEntry.filePath.substring(fileEntry.filePath.indexOf('value="') + 7, fileEntry.filePath.indexOf('">'))
+            def optionFile = fileEntry.filePath.substring(fileEntry.filePath.indexOf('value="') + 7, fileEntry.filePath.lastIndexOf('">')).trim()
             def fileToRead = new File(optionFile)
             if (fileToRead.exists() && fileToRead.isFile()) {
                 try {
