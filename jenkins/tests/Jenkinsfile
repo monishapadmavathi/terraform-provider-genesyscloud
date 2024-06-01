@@ -67,7 +67,7 @@ stage('Generate & Upload Report') {
             
             steps {
     
-  script {
+script {
     // Step 1: Read the generated HTML file
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
@@ -100,22 +100,11 @@ stage('Generate & Upload Report') {
         def averagePercentage = totalPercentage / packageFiles[packageName]
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { file ->
-            def sanitizedFilePath = file.filePath.replaceAll('[^a-zA-Z0-9]', '')
-            return """
-                <tr class='fileRow' data-file='${sanitizedFilePath}' style='display: none; cursor: pointer;'>
-                    <td>${file.filePath}</td>
-                    <td>${String.format('%.1f', file.percentage)}%</td>
-                </tr>
-                <tr id='${sanitizedFilePath}' class='fileContent' style='display: none;'>
-                    <td colspan='2'>
-                        <iframe src='${file.filePath}' style='width:100%; height:400px; border:none;'></iframe>
-                    </td>
-                </tr>
-            """
+            return "<tr class='fileRow' data-file='${file.filePath}' style='display: none;'><td>${file.filePath}</td><td>${String.format('%.1f', file.percentage)}%</td></tr>"
         }.join('\n')
 
         return """
-            <tr class='${colorClass}' onclick='toggleFiles("${packageName}")' style='cursor: pointer;'>
+            <tr class='${colorClass}' onclick='toggleFiles("${packageName}")'>
                 <td>${packageName}</td>
                 <td>${String.format('%.1f', averagePercentage)}%</td>
             </tr>
@@ -148,43 +137,24 @@ stage('Generate & Upload Report') {
                     row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
                 });
             }
-
-            function toggleFileContent(fileId) {
-                const contentRow = document.getElementById(fileId);
-                contentRow.style.display = contentRow.style.display === 'none' ? 'table-row' : 'none';
-            }
-
             document.addEventListener("DOMContentLoaded", () => {
                 document.querySelectorAll('.fileRow').forEach(row => {
-                    row.addEventListener('click', function(event) {
-                        event.stopPropagation(); // Prevent the package row click event
+                    row.addEventListener('click', function() {
                         const filePath = this.getAttribute('data-file');
-                        toggleFileContent(filePath);
+                        const contentDiv = document.getElementById('content');
+                        contentDiv.innerHTML = '<object type="text/plain" data="' + filePath + '" style="width: 100%; height: 500px;"></object>';
                     });
                 });
             });
         </script>
     """.stripIndent()
 
-    // Define the CSS classes
-    def cssStyles = """
-        <style>
-            .light-green {
-                background-color: #c8e6c9; /* light green */
-            }
-            .light-red {
-                background-color: #ffcdd2; /* light red */
-            }
-            .fileRow {
-                cursor: pointer;
-            }
-        </style>
-    """.stripIndent()
-
-    // Step 5: Insert the new table, script, and styles into the HTML file
+    // Step 5: Remove the dropdown and insert the new table, script, and styles into the HTML file
     def updatedHtmlFile = htmlFile.replaceFirst('<select id="files">.*?</select>', '')
-    updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
-    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
+    updatedHtmlFile = updatedHtmlFile.replace('<div id="topbar">', '<!-- Removed topbar -->')
+    updatedHtmlFile = updatedHtmlFile.replace('<div id="nav">', '<!-- Removed nav -->')
+    updatedHtmlFile = updatedHtmlFile.replace('</head>', "<style>\n${cssStyles}\n</style>\n</head>")
+    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + '\n' + scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
