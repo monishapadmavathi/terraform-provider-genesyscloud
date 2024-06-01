@@ -71,6 +71,12 @@ script {
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
     def selectEnd = htmlFile.indexOf('</select>', selectStart)
+    
+    if (selectStart == -1 || selectEnd == -1) {
+        echo "Error: Couldn't find <select> tag in the HTML file."
+        return
+    }
+
     def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select>
 
     def packageCoverage = [:]
@@ -80,7 +86,7 @@ script {
     // Step 2: Parse the existing options to calculate package-wise coverage
     fileCoverageSection.split('\n').each { line ->
         if (line.contains('<option value=')) {
-            def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
+            def filePath = line.substring(line.indexOf('value="') + 7, line.indexOf('">')).trim()
             def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
             packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
