@@ -99,7 +99,13 @@ script {
         def averagePercentage = totalPercentage / packageFiles[packageName]
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { file ->
-            def fileContent = readFile(file.filePath).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            def fileContent = ""
+            def file = new File(file.filePath)
+            if (file.exists() && file.isFile()) {
+                fileContent = file.text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            } else {
+                fileContent = "File not found or is not accessible."
+            }
             return """
                 <tr class='fileRow' data-file='${file.filePath}' style='display: none;' onclick='toggleFileContent("${file.filePath.replaceAll(/[\W]/, '_')}")'>
                     <td>${file.filePath}</td>
