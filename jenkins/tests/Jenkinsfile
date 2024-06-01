@@ -75,7 +75,7 @@ script {
 
     def packageCoverage = [:]
     def packageFiles = [:]
-    def fileDetails = [:]
+    def packageFileMap = [:] // To store package and their corresponding files
 
     // Step 2: Parse the existing options to calculate package-wise coverage
     fileCoverageSection.split('\n').each { line ->
@@ -83,39 +83,35 @@ script {
             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
             def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
-            packageFiles[packageName] = (packageFiles[packageName] ?: []) << filePath
+            packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
+
+            // Collect files for each package
+            if (!packageFileMap.containsKey(packageName)) {
+                packageFileMap[packageName] = []
+            }
+            packageFileMap[packageName].add([filePath: filePath, percentage: percentage])
         }
     }
 
     // Step 3: Generate the package-wise coverage table with highlighting
     def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
-        def averagePercentage = totalPercentage / packageFiles[packageName].size()
+        def averagePercentage = totalPercentage / packageFiles[packageName]
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
-        def fileList = packageFiles[packageName].collect { filePath ->
-            def fileName = filePath.substring(filePath.lastIndexOf('/') + 1)
-            return "<li onclick=\"toggleFileContent('${fileName}')\">${fileName}</li>"
+        def fileRows = packageFileMap[packageName].collect { file ->
+            return "<tr class='fileRow' data-file='${file.filePath}' style='display: none;'><td>${file.filePath}</td><td>${String.format('%.1f', file.percentage)}%</td></tr>"
         }.join('\n')
+
         return """
-            <tr class='${colorClass}' onclick="togglePackageFiles('${packageName}')">
+            <tr class='${colorClass}' onclick='toggleFiles("${packageName}")'>
                 <td>${packageName}</td>
                 <td>${String.format('%.1f', averagePercentage)}%</td>
             </tr>
-            <tr id="files-${packageName}" style="display:none">
-                <td colspan="2">
-                    <ul>
-                        ${fileList}
-                    </ul>
-                </td>
-            </tr>
+            ${fileRows}
         """
     }.join('\n')
 
     // Step 4: Prepare the HTML content
-    def packageCoverageHtml = """
-        <option value="packageCoverage" selected>Package-wise Coverage</option>
-    """.stripIndent()
-
     def tableHtml = """
         <div id="packageCoverageTable">
             <table border="1">
@@ -134,37 +130,18 @@ script {
 
     def scriptHtml = """
         <script>
-            function togglePackageFiles(packageName) {
-                const fileList = document.getElementById('files-' + packageName);
-                fileList.style.display = (fileList.style.display === 'none') ? 'table-row' : 'none';
+            function toggleFiles(packageName) {
+                const rows = document.querySelectorAll('.fileRow[data-file^="terraform-provider-genesyscloud/genesyscloud/' + packageName + '"]');
+                rows.forEach(row => {
+                    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+                });
             }
-
-            function toggleFileContent(fileName) {
-                const fileContent = document.getElementById('content-' + fileName);
-                fileContent.style.display = (fileContent.style.display === 'none') ? 'block' : 'none';
-            }
-
-            function handleSelection() {
-                const select = document.getElementById('files');
-                const packageCoverageTable = document.getElementById('packageCoverageTable');
-                const otherTables = document.querySelectorAll('div[id^="fileTable"]');
-                if (select.value === 'packageCoverage') {
-                    packageCoverageTable.style.display = 'block';
-                    otherTables.forEach(table => table.style.display = 'none');
-                } else {
-                    packageCoverageTable.style.display = 'none';
-                    otherTables.forEach(table => {
-                        if (table.id === 'fileTable' + select.value.replace('file', '')) {
-                            table.style.display = 'block';
-                        } else {
-                            table.style.display = 'none');
-                        }
-                    });
-                }
-            }
-
-            document.addEventListener("DOMContentLoaded", handleSelection);
-            handleSelection(); // Ensures the package coverage table is shown by default
+            document.querySelectorAll('.fileRow').forEach(row => {
+                row.addEventListener('click', function() {
+                    const filePath = this.getAttribute('data-file');
+                    window.open(filePath); // Opens the detailed file content
+                });
+            });
         </script>
     """.stripIndent()
 
@@ -177,11 +154,14 @@ script {
             .light-red {
                 background-color: #ffcdd2; /* light red */
             }
+            .fileRow {
+                cursor: pointer;
+            }
         </style>
     """.stripIndent()
 
-    // Step 5: Insert the new option, table, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" onchange="handleSelection()">\n' + packageCoverageHtml)
+    // Step 5: Insert the new table, script, and styles into the HTML file
+    def updatedHtmlFile = htmlFile.replace('<select id="files">', '')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
