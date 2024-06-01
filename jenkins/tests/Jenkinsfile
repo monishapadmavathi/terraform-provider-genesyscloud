@@ -76,6 +76,7 @@ script {
     def packageCoverage = [:]
     def packageFiles = [:]
     def packageFileMap = [:] // To store package and their corresponding files
+    def fileOptionsMap = [:] // To map file paths to option values
 
     // Step 2: Parse the existing options to calculate package-wise coverage
     fileCoverageSection.split('\n').each { line ->
@@ -91,6 +92,10 @@ script {
                 packageFileMap[packageName] = []
             }
             packageFileMap[packageName].add([filePath: filePath, percentage: percentage])
+
+            // Map file path to option value
+            def optionValue = line.substring(line.indexOf('value="') + 7, line.indexOf('">')).trim()
+            fileOptionsMap[filePath] = optionValue
         }
     }
 
@@ -99,7 +104,7 @@ script {
         def averagePercentage = totalPercentage / packageFiles[packageName]
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { file ->
-            return "<tr class='fileRow' data-file='${file.filePath}' style='display: none;'><td>${file.filePath}</td><td>${String.format('%.1f', file.percentage)}%</td></tr>"
+            return "<tr class='fileRow' data-file='${file.filePath}' data-option='${fileOptionsMap[file.filePath]}' style='display: none;'><td>${file.filePath}</td><td>${String.format('%.1f', file.percentage)}%</td></tr>"
         }.join('\n')
 
         return """
@@ -121,6 +126,13 @@ script {
         }
         .fileRow {
             cursor: pointer;
+        }
+        .fileContent {
+            display: none;
+            margin-top: 10px;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
         }
     """.stripIndent()
 
@@ -154,11 +166,26 @@ script {
                 document.querySelectorAll('.fileRow').forEach(row => {
                     row.addEventListener('click', function() {
                         const filePath = this.getAttribute('data-file');
+                        const optionValue = this.getAttribute('data-option');
+                        const contentDiv = document.getElementById('content');
+
+                        // Create a container div for file content
+                        let fileContentDiv = document.getElementById(optionValue);
+                        if (!fileContentDiv) {
+                            fileContentDiv = document.createElement('div');
+                            fileContentDiv.id = optionValue;
+                            fileContentDiv.className = 'fileContent';
+                            contentDiv.appendChild(fileContentDiv);
+                        }
+
+                        // Toggle visibility of the file content div
+                        fileContentDiv.style.display = fileContentDiv.style.display === 'none' ? 'block' : 'none';
+
+                        // Fetch and display file content
                         fetch(filePath)
                             .then(response => response.text())
                             .then(data => {
-                                const contentDiv = document.getElementById('content');
-                                contentDiv.innerHTML = '<pre>' + data + '</pre>';
+                                fileContentDiv.innerHTML = '<pre>' + data + '</pre>';
                             })
                             .catch(error => console.error('Error fetching file:', error));
                     });
@@ -176,6 +203,7 @@ script {
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
