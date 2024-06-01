@@ -136,10 +136,12 @@ script {
                     row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
                 });
             }
-            document.querySelectorAll('.fileRow').forEach(row => {
-                row.addEventListener('click', function() {
-                    const filePath = this.getAttribute('data-file');
-                    window.open(filePath); // Opens the detailed file content
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll('.fileRow').forEach(row => {
+                    row.addEventListener('click', function() {
+                        const filePath = this.getAttribute('data-file');
+                        window.open(filePath); // Opens the detailed file content
+                    });
                 });
             });
         </script>
@@ -161,7 +163,7 @@ script {
     """.stripIndent()
 
     // Step 5: Insert the new table, script, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replace('<select id="files">', '')
+    def updatedHtmlFile = htmlFile.replaceFirst('<select id="files">.*?</select>', '')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
 
