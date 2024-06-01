@@ -82,7 +82,7 @@ script {
             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
             def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
-            packageFiles[packageName] = (packageFiles[packageName] ?: []) + filePath
+            packageFiles[packageName] = (packageFiles[packageName] ?: []) + [filePath]
             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
         }
     }
@@ -94,7 +94,6 @@ script {
         return "<tr class='${colorClass}' onclick='showFiles(\"${packageName}\")'><td>${packageName}</td><td>${String.format('%.1f', averagePercentage)}%</td></tr>"
     }.join('\n')
 
-    // Step 4: Generate the file list for each package
     def fileLists = packageFiles.collect { packageName, files ->
         def fileList = files.collect { file ->
             return "<li onclick='showFileContent(\"${file}\")'>${file}</li>"
@@ -102,7 +101,7 @@ script {
         return "<div id='files-${packageName}' class='file-list'><ul>${fileList}</ul></div>"
     }.join('\n')
 
-    // Step 5: Prepare the HTML content
+    // Step 4: Prepare the HTML content
     def packageCoverageHtml = """
         <option value="packageCoverage" selected>Package-wise Coverage</option>
     """.stripIndent()
@@ -170,18 +169,17 @@ script {
             }
 
             document.addEventListener("DOMContentLoaded", handleSelection);
-            handleSelection(); // Ensures the package coverage table is shown by default
+            handleSelection();
         </script>
     """.stripIndent()
 
-    // Define the CSS classes
     def cssStyles = """
         <style>
             .light-green {
-                background-color: #c8e6c9; /* light green */
+                background-color: #c8e6c9;
             }
             .light-red {
-                background-color: #ffcdd2; /* light red */
+                background-color: #ffcdd2;
             }
             .file-list {
                 display: none;
@@ -192,7 +190,7 @@ script {
         </style>
     """.stripIndent()
 
-    // Step 6: Insert the new option, table, and styles into the HTML file
+    // Step 5: Insert the new option, table, and styles into the HTML file
     def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" onchange="handleSelection()">\n' + packageCoverageHtml)
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + scriptHtml + '\n</body>')
