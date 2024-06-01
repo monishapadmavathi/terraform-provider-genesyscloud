@@ -67,7 +67,7 @@ stage('Generate & Upload Report') {
             
             steps {
     
-    script {
+  script {
     // Step 1: Read the generated HTML file
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
@@ -102,7 +102,7 @@ stage('Generate & Upload Report') {
         def fileRows = packageFileMap[packageName].collect { file ->
             def sanitizedFilePath = file.filePath.replaceAll('[^a-zA-Z0-9]', '')
             return """
-                <tr class='fileRow' data-file='${sanitizedFilePath}' onclick='toggleFileContent("${sanitizedFilePath}")' style='display: none; cursor: pointer;'>
+                <tr class='fileRow' data-file='${sanitizedFilePath}' style='display: none; cursor: pointer;'>
                     <td>${file.filePath}</td>
                     <td>${String.format('%.1f', file.percentage)}%</td>
                 </tr>
@@ -143,7 +143,7 @@ stage('Generate & Upload Report') {
     def scriptHtml = """
         <script>
             function toggleFiles(packageName) {
-                const rows = document.querySelectorAll('.fileRow[data-file^="' + packageName.replace(/[^a-zA-Z0-9]/g, '') + '"]');
+                const rows = document.querySelectorAll('.fileRow[data-file^="terraform-provider-genesyscloud/genesyscloud/' + packageName + '"]');
                 rows.forEach(row => {
                     row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
                 });
@@ -174,6 +174,9 @@ stage('Generate & Upload Report') {
             }
             .light-red {
                 background-color: #ffcdd2; /* light red */
+            }
+            .fileRow {
+                cursor: pointer;
             }
         </style>
     """.stripIndent()
