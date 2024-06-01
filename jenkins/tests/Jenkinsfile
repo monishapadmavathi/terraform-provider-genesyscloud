@@ -71,7 +71,7 @@ script {
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
     def selectEnd = htmlFile.indexOf('</select>', selectStart)
-    def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select>
+    def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select
 
     def packageCoverage = [:]
     def packageFiles = [:]
@@ -121,10 +121,6 @@ script {
     }.join('\n')
 
     // Step 5: Prepare the HTML content
-    def packageCoverageHtml = """
-        <option value="packageCoverage" selected>Package-wise Coverage</option>
-    """.stripIndent()
-
     def tableHtml = """
         <div id="packageCoverageTable">
             <table border="1">
@@ -155,9 +151,10 @@ script {
                     .then(response => response.text())
                     .then(data => {
                         const fileContentDiv = document.getElementById('fileContent');
+                        fileContentDiv.setAttribute('data-current-file', filePath);
                         fileContentDiv.innerHTML = '<pre>' + data + '</pre><button onclick="backToFileList()">Back</button>';
                         fileContentDiv.style.display = 'block';
-                        document.getElementById('fileList_' + fileDetails[filePath].package).style.display = 'none';
+                        document.querySelectorAll('div[id^="fileList_"]').forEach(div => div.style.display = 'none');
                     });
             }
 
@@ -187,8 +184,8 @@ script {
         </style>
     """.stripIndent()
 
-    // Step 6: Insert the new option, table, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files" onchange="handleSelection()">\n' + packageCoverageHtml)
+    // Step 6: Insert the new table, and styles into the HTML file
+    def updatedHtmlFile = htmlFile.replace('<select id="files">', '<select id="files">\n')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', cssStyles + '\n</head>')
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + '<div id="fileContent"></div>' + scriptHtml + '\n</body>')
 
