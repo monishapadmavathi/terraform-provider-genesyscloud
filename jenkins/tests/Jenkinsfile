@@ -98,20 +98,20 @@ script {
     def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
         def averagePercentage = totalPercentage / packageFiles[packageName]
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
-        def fileRows = packageFileMap[packageName].collect { file ->
+        def fileRows = packageFileMap[packageName].collect { fileEntry ->
             def fileContent = ""
-            def file = new File(file.filePath)
-            if (file.exists() && file.isFile()) {
-                fileContent = file.text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            def fileToRead = new File(fileEntry.filePath)
+            if (fileToRead.exists() && fileToRead.isFile()) {
+                fileContent = fileToRead.text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             } else {
                 fileContent = "File not found or is not accessible."
             }
             return """
-                <tr class='fileRow' data-file='${file.filePath}' style='display: none;' onclick='toggleFileContent("${file.filePath.replaceAll(/[\W]/, '_')}")'>
-                    <td>${file.filePath}</td>
-                    <td>${String.format('%.1f', file.percentage)}%</td>
+                <tr class='fileRow' data-file='${fileEntry.filePath}' style='display: none;' onclick='toggleFileContent("${fileEntry.filePath.replaceAll(/[\W]/, '_')}")'>
+                    <td>${fileEntry.filePath}</td>
+                    <td>${String.format('%.1f', fileEntry.percentage)}%</td>
                 </tr>
-                <tr id='${file.filePath.replaceAll(/[\W]/, '_')}' class='fileContentRow' style='display: none;'>
+                <tr id='${fileEntry.filePath.replaceAll(/[\W]/, '_')}' class='fileContentRow' style='display: none;'>
                     <td colspan='2'><pre>${fileContent}</pre></td>
                 </tr>
             """
