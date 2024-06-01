@@ -66,6 +66,7 @@ pipeline {
 stage('Generate & Upload Report') {
             
             steps {
+    
     script {
     // Step 1: Read the generated HTML file
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
@@ -99,7 +100,7 @@ stage('Generate & Upload Report') {
         def averagePercentage = totalPercentage / packageFiles[packageName]
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { file ->
-            def sanitizedFilePath = file.filePath.replaceAll(/[\W_]/, '')
+            def sanitizedFilePath = file.filePath.replaceAll('[^a-zA-Z0-9]', '')
             return """
                 <tr class='fileRow' data-file='${sanitizedFilePath}' onclick='toggleFileContent("${sanitizedFilePath}")' style='display: none; cursor: pointer;'>
                     <td>${file.filePath}</td>
@@ -142,7 +143,7 @@ stage('Generate & Upload Report') {
     def scriptHtml = """
         <script>
             function toggleFiles(packageName) {
-                const rows = document.querySelectorAll('.fileRow[data-file^="' + packageName.replace(/[\W_]/g, '') + '"]');
+                const rows = document.querySelectorAll('.fileRow[data-file^="' + packageName.replace(/[^a-zA-Z0-9]/g, '') + '"]');
                 rows.forEach(row => {
                     row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
                 });
