@@ -112,6 +112,19 @@ script {
         """
     }.join('\n')
 
+    // Define the CSS classes
+    def cssStyles = """
+        .light-green {
+            background-color: #c8e6c9; /* light green */
+        }
+        .light-red {
+            background-color: #ffcdd2; /* light red */
+        }
+        .fileRow {
+            cursor: pointer;
+        }
+    """.stripIndent()
+
     // Step 4: Prepare the HTML content
     def tableHtml = """
         <div id="packageCoverageTable">
