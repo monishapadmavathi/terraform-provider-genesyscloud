@@ -102,6 +102,9 @@ script {
         def averagePercentage = totalPercentage / packageFiles[packageName].size()
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { fileEntry ->
+            def fileContent = htmlFile.substring(htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\""), htmlFile.indexOf("</pre>", htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\"")) + 6)
+            fileContent = fileContent.replaceAll(/style='display: none;'/, '')
+
             return """
                 <tr class='fileRow ${packageName}' style='display: none; cursor: pointer;' onclick='toggleFileContent("${fileEntry.fileNumber}")'>
                     <td>${fileEntry.filePath}</td>
@@ -109,7 +112,7 @@ script {
                 </tr>
                 <tr id='content_${fileEntry.fileNumber}' class='fileContentRow' style='display: none;'>
                     <td colspan='2'>
-                        <pre class='file' id='${fileEntry.fileNumber}'>${htmlFile.substring(htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\""), htmlFile.indexOf("</pre>", htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\"")) + 6)}</pre>
+                        ${fileContent}
                     </td>
                 </tr>
             """
