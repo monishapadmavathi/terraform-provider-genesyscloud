@@ -105,6 +105,11 @@ script {
                     <td>${fileEntry.filePath}</td>
                     <td>${String.format('%.1f', fileEntry.percentage)}%</td>
                 </tr>
+                <tr id='content_${fileEntry.fileNumber}' class='fileContentRow' style='display: none;'>
+                    <td colspan='2'>
+                        <pre class='file' id='${fileEntry.fileNumber}'>${htmlFile.substring(htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\""), htmlFile.indexOf("</pre>", htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\"")) + 6)}</pre>
+                    </td>
+                </tr>
             """
         }.join('\n')
 
@@ -127,6 +132,9 @@ script {
         }
         .fileRow {
             cursor: pointer;
+        }
+        .fileContentRow {
+            background-color: #f5f5f5;
         }
     """.stripIndent()
 
@@ -156,9 +164,9 @@ script {
                 });
             }
             function toggleFileContent(fileId) {
-                const content = document.querySelector('.file#' + fileId);
-                if (content) {
-                    content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                const contentRow = document.getElementById('content_' + fileId);
+                if (contentRow) {
+                    contentRow.style.display = contentRow.style.display === 'none' ? 'table-row' : 'none';
                 }
             }
         </script>
