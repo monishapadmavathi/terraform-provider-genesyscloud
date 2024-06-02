@@ -124,7 +124,7 @@ script {
         if (packageFiles[packageName].size() == 1) {
             toggleAction = "toggleFileContent('${fileNumberMap[packageFiles[packageName][0]]}')"
         } else if (packageName.contains('.go')) {
-            toggleAction = "toggleFileContent('${fileNumberMap[packageName]}')"
+            toggleAction = "toggleFileContent('${fileNumberMap[packageFiles[packageName]]}')"
         } else {
             toggleAction = "toggleFiles(\"${packageName}\")"
         }
@@ -193,7 +193,7 @@ script {
     """.stripIndent()
 
     // Step 5: Remove the dropdown and insert the new table, script, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replace('<select id="files">.*</select>', '')
+   def updatedHtmlFile = htmlFile.replaceAll(/(?s)<select id="files">.*<\/select>/, '')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="topbar">', '<!-- Removed topbar -->')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="nav">', '<!-- Removed nav -->')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', "<style>\n${cssStyles}\n</style>\n</head>")
