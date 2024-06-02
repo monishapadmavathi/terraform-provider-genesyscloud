@@ -81,7 +81,7 @@ script {
     // Step 2: Parse the existing options to calculate package-wise coverage
     fileCoverageSection.split('\n').each { line ->
         if (line.contains('<option value=')) {
-            def fileNumber = line.substring(line.indexOf('value=') + 7, line.indexOf('>') - 1).trim()
+            def fileNumber = line.substring(line.indexOf('value="') + 7, line.indexOf('">')).trim()
             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
             def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
