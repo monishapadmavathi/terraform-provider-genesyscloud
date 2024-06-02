@@ -71,12 +71,6 @@ script {
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
     def selectEnd = htmlFile.indexOf('</select>', selectStart)
-    
-    if (selectStart == -1 || selectEnd == -1) {
-        echo "Error: Couldn't find <select> tag in the HTML file."
-        return
-    }
-
     def fileCoverageSection = htmlFile.substring(selectStart, selectEnd + 9) // +9 to include </select>
 
     def packageCoverage = [:]
@@ -86,114 +80,8 @@ script {
     // Step 2: Parse the existing options to calculate package-wise coverage
     fileCoverageSection.split('\n').each { line ->
         if (line.contains('<option value=')) {
-            def filePath = line.substring(line.indexOf('value="') + 7, line.indexOf('">')).trim()
-            def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
-            def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
-            packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
-            packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
-
-            // Collect files for each package
-            if (!packageFileMap.containsKey(packageName)) {
-                packageFileMap[packageName] = []
-            }
-            packageFileMap[packageName].add([filePath: filePath, percentage: percentage])
-        }
-    }
-
-    // Step 3: Generate the package-wise coverage table with highlighting
-    def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
-        def averagePercentage = totalPercentage / packageFiles[packageName]
-        def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
-        def fileRows = packageFileMap[packageName].collect { fileEntry ->
-            def fileContent = ""
-            def optionFile = fileEntry.filePath
-            def fileToRead = new File(optionFile)
-            if (fileToRead.exists() && fileToRead.isFile()) {
-                try {
-                    fileContent = fileToRead.text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-                } catch (Exception e) {
-                    fileContent = "Error reading file: ${e.message}"
-                }
-            } else {
-                fileContent = "File not found or is not accessible."
-            }
-            return """
-                <tr class='fileRow' data-file='${optionFile}' style='display: none;' onclick='toggleFileContent("${optionFile.replaceAll(/[\W]/, '_')}")'>
-                    <td>${optionFile}</td>
-                    <td>${String.format('%.1f', fileEntry.percentage)}%</td>
-                </tr>
-                <tr id='${optionFile.replaceAll(/[\W]/, '_')}' class='fileContentRow' style='display: none;'>
-                    <td colspan='2'><pre>${fileContent}</pre></td>
-                </tr>
-            """
-        }.join('\n')
-
-        return """
-            <tr class='${colorClass}' onclick='toggleFiles("${packageName}")'>
-                <td>${packageName}</td>
-                <td>${String.format('%.1f', averagePercentage)}%</td>
-            </tr>
-            ${fileRows}
-        """
-    }.join('\n')
-
-    // Define the CSS classes
-    def cssStyles = """
-        .light-green {
-            background-color: #c8e6c9; /* light green */
-        }
-        .light-red {
-            background-color: #ffcdd2; /* light red */
-        }
-        .fileRow {
-            cursor: pointer;
-        }
-        .fileContentRow {
-            background-color: #f5f5f5;
-        }
-    """.stripIndent()
-
-    // Step 4: Prepare the HTML content
-    def tableHtml = """
-        <div id="packageCoverageTable">
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Package</th>
-                        <th>Coverage (%)</th>
-                    </tr>
-                </thead>
-                <tbody id="packageCoverageBody">
-                    ${packageCoverageRows}
-                </tbody>
-            </table>
-        </div>
-    """.stripIndent()
-
-    def scriptHtml = """
-        <script>
-            function toggleFiles(packageName) {
-                const rows = document.querySelectorAll('.fileRow[data-file^="terraform-provider-genesyscloud/genesyscloud/' + packageName + '"]');
-                rows.forEach(row => {
-                    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-                });
-            }
-            function toggleFileContent(fileId) {
-                const contentRow = document.getElementById(fileId);
-                contentRow.style.display = contentRow.style.display === 'none' ? 'table-row' : 'none';
-            }
-        </script>
-    """.stripIndent()
-
-    // Step 5: Remove the dropdown and insert the new table, script, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replaceFirst('<select id="files">.*?</select>', '')
-    updatedHtmlFile = updatedHtmlFile.replace('<div id="topbar">', '<!-- Removed topbar -->')
-    updatedHtmlFile = updatedHtmlFile.replace('<div id="nav">', '<!-- Removed nav -->')
-    updatedHtmlFile = updatedHtmlFile.replace('</head>', "<style>\n${cssStyles}\n</style>\n</head>")
-    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + '\n' + scriptHtml + '\n</body>')
-
-    writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
-}
+            def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
+            def percentage
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
