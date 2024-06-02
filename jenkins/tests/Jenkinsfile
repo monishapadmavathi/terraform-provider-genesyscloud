@@ -66,7 +66,7 @@ pipeline {
 stage('Generate & Upload Report') {
             
             steps {
-script {
+                script {
     // Step 1: Read the generated HTML file
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
