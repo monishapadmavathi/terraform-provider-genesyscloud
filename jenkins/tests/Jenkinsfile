@@ -104,7 +104,7 @@ script {
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { fileEntry ->
             def fileContent = htmlFile.substring(htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\""), htmlFile.indexOf("</pre>", htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\"")) + 6)
-            fileContent = fileContent.replaceAll(/style='display: none;'/, 'style="display: table-row;"')
+            fileContent = fileContent.replaceAll(/style="display: none"/, 'style="display: table-row"')
 
             return """
                 <tr class='fileRow ${packageName}' style='display: none; cursor: pointer;' onclick='toggleFileContent("${fileEntry.fileNumber}")'>
@@ -193,7 +193,7 @@ script {
     """.stripIndent()
 
     // Step 5: Remove the dropdown and insert the new table, script, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replaceFirst('<select id="files">.*?</select>', '')
+    def updatedHtmlFile = htmlFile.replace('<select id="files">.*?</select>', '')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="topbar">', '<!-- Removed topbar -->')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="nav">', '<!-- Removed nav -->')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', "<style>\n${cssStyles}\n</style>\n</head>")
