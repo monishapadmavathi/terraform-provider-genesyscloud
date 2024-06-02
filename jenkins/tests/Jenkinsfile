@@ -66,7 +66,6 @@ pipeline {
 stage('Generate & Upload Report') {
             
             steps {
-
 script {
     // Step 1: Read the generated HTML file
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
@@ -81,6 +80,7 @@ script {
     // Step 2: Parse the existing options to calculate package-wise coverage
     fileCoverageSection.split('\n').each { line ->
         if (line.contains('<option value=')) {
+            def fileNumber = line.substring(line.indexOf('value=') + 7, line.indexOf('>') - 1).trim()
             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
             def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
@@ -91,7 +91,7 @@ script {
             if (!packageFileMap.containsKey(packageName)) {
                 packageFileMap[packageName] = []
             }
-            packageFileMap[packageName].add([filePath: filePath, percentage: percentage])
+            packageFileMap[packageName].add([fileNumber: fileNumber, filePath: filePath, percentage: percentage])
         }
     }
 
@@ -101,7 +101,7 @@ script {
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { fileEntry ->
             return """
-                <tr class='fileRow ${packageName}' style='display: none; cursor: pointer;' onclick='toggleFileContent("${fileEntry.filePath.replaceAll(/[\W]/, '_')}")'>
+                <tr class='fileRow ${packageName}' style='display: none; cursor: pointer;' onclick='toggleFileContent("${fileEntry.fileNumber}")'>
                     <td>${fileEntry.filePath}</td>
                     <td>${String.format('%.1f', fileEntry.percentage)}%</td>
                 </tr>
@@ -156,8 +156,10 @@ script {
                 });
             }
             function toggleFileContent(fileId) {
-                const contentRow = document.getElementById(fileId);
-                contentRow.style.display = contentRow.style.display === 'none' ? 'table-row' : 'none';
+                const content = document.querySelector('.file#' + fileId);
+                if (content) {
+                    content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                }
             }
         </script>
     """.stripIndent()
@@ -171,6 +173,7 @@ script {
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
