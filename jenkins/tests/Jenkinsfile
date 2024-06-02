@@ -180,13 +180,13 @@ script {
             function toggleFiles(packageName) {
                 const rows = document.querySelectorAll('.fileRow.' + packageName);
                 rows.forEach(row => {
-                    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+                    row.style.display = row.style.display === 'none' ? 'table-row' ;
                 });
             }
             function toggleFileContent(fileId) {
                 const contentRow = document.getElementById('content_' + fileId);
                 if (contentRow) {
-                    contentRow.style.display = contentRow.style.display === 'none' ? 'table-row' : 'none';
+                    contentRow.style.display = contentRow.style.display === 'none' ? 'table-row' ;
                 }
             }
         </script>
