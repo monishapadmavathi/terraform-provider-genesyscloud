@@ -84,7 +84,7 @@ script {
             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
             def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
-            packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
+            packageFiles[packageName] = (packageFiles[packageName] ?: []) + fileNumber
             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
 
             // Collect files for each package
@@ -97,7 +97,7 @@ script {
 
     // Step 3: Generate the package-wise coverage table with highlighting
     def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
-        def averagePercentage = totalPercentage / packageFiles[packageName]
+        def averagePercentage = totalPercentage / packageFiles[packageName].size()
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { fileEntry ->
             return """
@@ -173,7 +173,6 @@ script {
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
-
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
