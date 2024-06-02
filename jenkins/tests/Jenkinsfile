@@ -111,9 +111,9 @@ script {
                     <td>${fileEntry.filePath}</td>
                     <td>${String.format('%.1f', fileEntry.percentage)}%</td>
                 </tr>
-                <tr id='content_${fileEntry.fileNumber}' class='fileContentRow' style='display: table-row;'>
+                <tr id='content_${fileEntry.fileNumber}' class='fileContentRow' style='display: none;'>
                     <td colspan='2'>
-                        <pre class='file' id='${fileEntry.fileNumber}'>${fileContent}</pre>
+                        <pre class='file' style='display: table-row;' id='${fileEntry.fileNumber}'>${fileContent}</pre>
                     </td>
                 </tr>
             """
@@ -193,7 +193,7 @@ script {
     """.stripIndent()
 
     // Step 5: Remove the dropdown and insert the new table, script, and styles into the HTML file
-    def updatedHtmlFile = htmlFile.replace('<select id="files">.</select>', '')
+    def updatedHtmlFile = htmlFile.replace('<select id="files">.*</select>', '')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="topbar">', '<!-- Removed topbar -->')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="nav">', '<!-- Removed nav -->')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', "<style>\n${cssStyles}\n</style>\n</head>")
