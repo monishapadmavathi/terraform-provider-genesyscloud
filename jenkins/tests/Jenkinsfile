@@ -124,7 +124,7 @@ script {
         if (packageFiles[packageName].size() == 1) {
             toggleAction = "toggleFileContent('${fileNumberMap[packageFiles[packageName][0]]}')"
         } else if (packageName.contains('.go')) {
-            toggleAction = "toggleFileContent('${fileNumberMap[packageFiles[packageName]]}')"
+            toggleAction = "toggleFileContent('${fileNumberMap[packageFiles[packageName][0]]}')"
         } else {
             toggleAction = "toggleFiles(\"${packageName}\")"
         }
@@ -154,7 +154,7 @@ script {
         }
         #nav, #legend {
             float: top;
-            margin-left: 10px;
+            margin-top: 10px;
         }
     """.stripIndent()
 
