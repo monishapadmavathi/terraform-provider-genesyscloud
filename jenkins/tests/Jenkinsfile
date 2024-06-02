@@ -77,16 +77,12 @@ script {
     def packageCoverage = [:]
     def packageFiles = [:]
     def packageFileMap = [:] // To store package and their corresponding files
-    def fileContentMap = [:] // To store the content of each file
 
-    // Step 2: Parse the existing options to calculate package-wise coverage and store file contents
+    // Step 2: Parse the existing options to calculate package-wise coverage
     fileCoverageSection.split('\n').each { line ->
         if (line.contains('<option value=')) {
             def filePath = line.substring(line.indexOf('>') + 1, line.indexOf(' (')).trim()
             def percentage = line.substring(line.indexOf('(') + 1, line.indexOf('%')).toFloat()
-            def fileId = line.substring(line.indexOf('value="') + 7, line.indexOf('"', line.indexOf('value="') + 7)).trim()
-            def fileContent = fileId == "file0" ? "/* File content for file0 */" : fileId == "file1" ? "/* File content for file1 */" : "/* File content for file2 */"
-
             def packageName = filePath.replaceFirst('terraform-provider-genesyscloud/genesyscloud/([^/]+)/.*', '$1')
             packageFiles[packageName] = (packageFiles[packageName] ?: 0) + 1
             packageCoverage[packageName] = (packageCoverage[packageName] ?: 0) + percentage
@@ -96,9 +92,6 @@ script {
                 packageFileMap[packageName] = []
             }
             packageFileMap[packageName].add([filePath: filePath, percentage: percentage])
-
-            // Store file content
-            fileContentMap[filePath] = fileContent
         }
     }
 
@@ -107,15 +100,13 @@ script {
         def averagePercentage = totalPercentage / packageFiles[packageName]
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { fileEntry ->
-            def filePath = fileEntry.filePath
-            def fileContent = fileContentMap[filePath] ?: "File not found or is not accessible."
-            def fileId = filePath.replaceAll(/[\W]/, '_')
+            def fileContent = "File content for ${fileEntry.filePath}"
             return """
-                <tr class='fileRow' data-file='${filePath}' style='display: none;' onclick='toggleFileContent("${fileId}")'>
-                    <td>${filePath}</td>
+                <tr class='fileRow' data-file='${fileEntry.filePath}' style='display: none;' onclick='toggleFileContent("${fileEntry.filePath.replaceAll(/[\W]/, '_')}")'>
+                    <td>${fileEntry.filePath}</td>
                     <td>${String.format('%.1f', fileEntry.percentage)}%</td>
                 </tr>
-                <tr id='${fileId}' class='fileContentRow' style='display: none;'>
+                <tr id='${fileEntry.filePath.replaceAll(/[\W]/, '_')}' class='fileContentRow' style='display: none;'>
                     <td colspan='2'><pre>${fileContent}</pre></td>
                 </tr>
             """
