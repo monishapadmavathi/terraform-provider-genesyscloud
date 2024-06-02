@@ -116,7 +116,7 @@ script {
         }.join('\n')
 
         // Check if the package itself should be toggled
-        def toggleAction = packageFiles[packageName].size() == 1 ? "toggleFileContent('${fileNumberMap[packageFiles[packageName][0]]}')" : "toggleFiles('${packageName}')"
+        def toggleAction = packageFiles[packageName].size() == 1 ? "toggleFileContent('${fileNumberMap[packageFiles[packageName][0]]}')" : "toggleFiles(\"${packageName}\")"
 
         return """
             <tr class='${colorClass}' style='cursor: pointer;' onclick='${toggleAction}'>
