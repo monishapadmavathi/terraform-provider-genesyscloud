@@ -66,7 +66,8 @@ pipeline {
 stage('Generate & Upload Report') {
             
             steps {
-                script {
+        
+script {
     // Step 1: Read the generated HTML file
     def htmlFile = readFile 'jenkins/tests/coverageAcceptance.html'
     def selectStart = htmlFile.indexOf('<select id="files">')
@@ -103,7 +104,7 @@ stage('Generate & Upload Report') {
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
         def fileRows = packageFileMap[packageName].collect { fileEntry ->
             def fileContent = htmlFile.substring(htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\""), htmlFile.indexOf("</pre>", htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\"")) + 6)
-            fileContent = fileContent.replaceAll(/style='display: none;'/, '')
+            fileContent = fileContent.replaceAll(/style='display: none;'/, 'style="display: table-row;"')
 
             return """
                 <tr class='fileRow ${packageName}' style='display: none; cursor: pointer;' onclick='toggleFileContent("${fileEntry.fileNumber}")'>
@@ -151,6 +152,10 @@ stage('Generate & Upload Report') {
         .fileContentRow {
             background-color: #f5f5f5;
         }
+        #nav, #legend {
+            float: top;
+            margin-left: 10px;
+        }
     """.stripIndent()
 
     // Step 4: Prepare the HTML content
@@ -196,6 +201,7 @@ stage('Generate & Upload Report') {
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
+
 
      archiveArtifacts artifacts: 'jenkins/tests/coverageAcceptance.html', allowEmptyArchive: true   
            }
