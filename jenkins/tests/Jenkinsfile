@@ -122,7 +122,7 @@ script {
         // Check if the package itself should be toggled
         def toggleAction
         if (packageFiles[packageName].size() == 1 || packageName.contains('.go')) {
-            toggleAction = "toggleFileContent('${packageFileMap[packageName][0].fileNumber}')"
+            toggleAction = "toggleFileContent(\"${packageFileMap[packageName][0].fileNumber}\")"
         } else {
             toggleAction = "toggleFiles(\"${packageName}\")"
         }
