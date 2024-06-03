@@ -109,7 +109,7 @@ script {
             def textColor = fileEntry.percentage < 50 ? 'red' : 'green'
 
             return """
-                <tr class='fileRow ${packageName}' style='display: none; cursor: pointer;' onclick='toggleFileContent("${fileEntry.fileNumber}")'>
+                <tr class='fileRow ${packageName}' style='display: none; cursor: pointer; color: ${textColor};' onclick='toggleFileContent("${fileEntry.fileNumber}")'>
                     <td>${fileEntry.filePath}</td>
                     <td style="color: ${textColor};">${String.format('%.1f', fileEntry.percentage)}%</td>
                 </tr>
