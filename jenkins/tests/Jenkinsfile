@@ -122,7 +122,7 @@ script {
         // Check if the package itself should be toggled
         def toggleAction
         if (packageFiles[packageName].size() == 1 || packageName.contains('.go')) {
-            toggleAction = "toggleFileContent('${fileNumberMap[packageFiles[packageName][0]]}')"
+            toggleAction = "toggleFileContent('${packageFileMap[packageName][0].fileNumber}')"
         } else {
             toggleAction = "toggleFiles(\"${packageName}\")"
         }
@@ -195,7 +195,8 @@ script {
     updatedHtmlFile = updatedHtmlFile.replace('<div id="topbar">', '<!-- Removed topbar -->')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="nav">', '<!-- Removed nav -->')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', "<style>\n${cssStyles}\n</style>\n</head>")
-    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + '\n' + scriptHtml + '\n</body>')
+    updatedHtmlFile = updatedHtmlFile.replace('<div id="tracked-not-covered-covered">', '<div id="tracked-not-covered-covered">' + tableHtml)
+    updatedHtmlFile = updatedHtmlFile.replace('</body>', scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
