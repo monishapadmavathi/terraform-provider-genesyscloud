@@ -106,7 +106,7 @@ script {
             def fileContent = htmlFile.substring(htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\""), htmlFile.indexOf("</pre>", htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\"")) + 6)
             fileContent = fileContent.replaceAll(/style="display: none"/, 'style="display: table-row"')
 
-            def textColor = fileEntry.percentage < 50 ? 'dark-orange' : 'green'
+            def textColor = fileEntry.percentage < 50 ? 'red' : 'green'
 
             return """
                 <tr class='fileRow ${packageName}' style='display: none; cursor: pointer;' onclick='toggleFileContent("${fileEntry.fileNumber}")'>
@@ -159,8 +159,8 @@ script {
         #packageCoverageTable {
             width: 100%;
         }
-        .dark-orange {
-            color: #ff8c00; /* dark orange */
+        .red {
+            color: red; /* red */
         }
         .green {
             color: green; /* green */
