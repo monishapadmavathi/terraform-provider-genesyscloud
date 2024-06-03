@@ -190,13 +190,12 @@ script {
         </script>
     """.stripIndent()
 
-    // Step 5: Insert the new table, script, and styles into the HTML file
+    // Step 5: Remove the dropdown and insert the new table, script, and styles into the HTML file
     def updatedHtmlFile = htmlFile.replaceAll(/(?s)<select id="files">.*<\/select>/, '')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="topbar">', '<!-- Removed topbar -->')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="nav">', '<!-- Removed nav -->')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', "<style>\n${cssStyles}\n</style>\n</head>")
-    updatedHtmlFile = updatedHtmlFile.replace('<div id="tracked-not-covered-covered">', '<div id="tracked-not-covered-covered">\n' + tableHtml + '\n</div>')
-    updatedHtmlFile = updatedHtmlFile.replace('</body>', scriptHtml + '\n</body>')
+    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + '\n' + scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
