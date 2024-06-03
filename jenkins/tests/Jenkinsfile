@@ -159,25 +159,7 @@ script {
         }
     """.stripIndent()
 
-    // Step 4: Prepare the header section for not tracked, not covered, and covered percentages
-    def headerSection = """
-        <div id="legend">
-            <table border="1" style="width: 100%; margin-bottom: 10px;">
-                <tr>
-                    <th style="background-color: #fff;">Not Tracked</th>
-                    <th style="background-color: #ffcdd2;">Not Covered</th>
-                    <th style="background-color: #c8e6c9;">Covered</th>
-                </tr>
-                <tr>
-                    <td style="background-color: #fff;">0%</td>
-                    <td style="background-color: #ffcdd2;">0-50%</td>
-                    <td style="background-color: #c8e6c9;">50-100%</td>
-                </tr>
-            </table>
-        </div>
-    """.stripIndent()
-
-    // Step 5: Prepare the HTML content
+    // Step 4: Prepare the HTML content
     def tableHtml = """
         <div id="packageCoverageTable">
             <table border="1" style="width: 100%;">
@@ -211,12 +193,12 @@ script {
         </script>
     """.stripIndent()
 
-    // Step 6: Remove the dropdown and insert the new table, script, and styles into the HTML file
+    // Step 5: Remove the dropdown and insert the new table, script, and styles into the HTML file
     def updatedHtmlFile = htmlFile.replaceAll(/(?s)<select id="files">.*<\/select>/, '')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="topbar">', '<!-- Removed topbar -->')
     updatedHtmlFile = updatedHtmlFile.replace('<div id="nav">', '<!-- Removed nav -->')
     updatedHtmlFile = updatedHtmlFile.replace('</head>', "<style>\n${cssStyles}\n</style>\n</head>")
-    updatedHtmlFile = updatedHtmlFile.replace('</body>', headerSection + '\n' + tableHtml + '\n' + scriptHtml + '\n</body>')
+    updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + '\n' + scriptHtml + '\n</body>')
 
     writeFile file: 'jenkins/tests/coverageAcceptance.html', text: updatedHtmlFile
 }
