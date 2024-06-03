@@ -102,15 +102,16 @@ script {
     def packageCoverageRows = packageCoverage.collect { packageName, totalPercentage ->
         def averagePercentage = totalPercentage / packageFiles[packageName].size()
         def colorClass = averagePercentage < 50 ? 'light-red' : 'light-green'
+        def textColor = averagePercentage < 50 ? 'red' : 'green'
         def fileRows = packageFileMap[packageName].collect { fileEntry ->
             def fileContent = htmlFile.substring(htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\""), htmlFile.indexOf("</pre>", htmlFile.indexOf("<pre class=\"file\" id=\"${fileEntry.fileNumber}\"")) + 6)
             fileContent = fileContent.replaceAll(/style="display: none"/, 'style="display: table-row"')
 
-            def textColor = fileEntry.percentage < 50 ? 'red' : 'green'
+            def fileTextColor = fileEntry.percentage < 50 ? 'red' : 'green'
 
             return """
                 <tr class='fileRow ${packageName}' style='display: none; cursor: pointer;' onclick='toggleFileContent("${fileEntry.fileNumber}")'>
-                    <td style="color: ${textColor};">${fileEntry.filePath}</td>
+                    <td style="color: ${fileTextColor};">${fileEntry.filePath}</td>
                     <td>${String.format('%.1f', fileEntry.percentage)}%</td>
                 </tr>
                 <tr id='content_${fileEntry.fileNumber}' class='fileContentRow' style='display: none;'>
@@ -132,7 +133,7 @@ script {
         return """
             <tr class='${colorClass}' style='cursor: pointer;' onclick='${toggleAction}'>
                 <td>${packageName}</td>
-                <td>${String.format('%.1f', averagePercentage)}%</td>
+                <td style="color: ${textColor};">${String.format('%.1f', averagePercentage)}%</td>
             </tr>
             ${fileRows}
         """
