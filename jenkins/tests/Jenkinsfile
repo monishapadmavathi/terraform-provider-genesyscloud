@@ -67,6 +67,8 @@ pipeline {
 
             environment {
                 TF_UNIT=1
+                ENABLE_STANDALONE_EMAIL_ADDRESS=1
+                ENABLE_STANDALONE_CGR=1
             }
 
             steps {
