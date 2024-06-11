@@ -77,7 +77,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
                     {
                         echo 'Loading Genesys OAuth Credentials'
-                          sh 'gotestsum --junitfile test-results.xml --format standard-verbose ./genesyscloud/...  -run TestUnit -v -timeout 30m -count=1 -cover -coverprofile=coverageUnit.out'
+                          sh 'gotestsum --junitfile unit.xml --format standard-verbose ./genesyscloud/...  -run TestUnit -v -timeout 30m -count=1 -cover -coverprofile=coverageUnit.out'
 
                     }
                 }
@@ -451,7 +451,7 @@ stage('Generate & Upload Report') {
                 // Optionally, print the location of the HTML report
                     echo "HTML report generated: \${env.WORKSPACE}/test-report.html"
                 }
-                archiveArtifacts artifacts: 'coverageUnit.html,test-report.html,test-results.xml', allowEmptyArchive: true   
+                archiveArtifacts artifacts: 'unit.xml, idp.xml, coverageUnit.out, coverageIdp.out, coverageUnit.html,test-report.html,test-results.xml', allowEmptyArchive: true   
            }
         }
     }
