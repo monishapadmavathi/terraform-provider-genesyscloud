@@ -70,7 +70,7 @@ stage('Generate & Upload Report') {
         sh 'GOBIN=$HOME/bin go install github.com/wadey/gocovmerge@latest'
         
         // Generate merged coverage report
-        sh '$HOME/bin/gocovmerge jenins/tests/coverageUnit.out jenkins/tests/coverageIdp.out  > merged_coverage.out'
+        sh '$HOME/bin/gocovmerge jenkins/tests/coverageUnit.out jenkins/tests/coverageIdp.out  > merged_coverage.out'
 
         // Convert merged coverage report to HTML
         sh 'go tool cover -html merged_coverage.out -o coverageUnit.html'
