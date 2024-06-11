@@ -103,8 +103,16 @@ pipeline {
 stage('Generate & Upload Report') {
             
             steps {
-         sh 'go tool cover -html coverageUnit.out -o coverageUnit.html'
+        sh 'GOBIN=$HOME/bin go install github.com/wadey/gocovmerge@latest'
+        
+        // Generate merged coverage report
+        sh '$HOME/bin/gocovmerge coverageUnit.out coverageIdp.out  > merged_coverage.out'
 
+        // Convert merged coverage report to HTML
+        sh 'go tool cover -html merged_coverage.out -o coverageUnit.html'
+
+        sh 'junit-merger -o test-results.xml unit.xml idp.xml'
+      
   script {
     // Read the generated HTML file
     def htmlFile = readFile 'coverageUnit.html'
