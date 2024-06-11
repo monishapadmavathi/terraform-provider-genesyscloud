@@ -77,28 +77,28 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
                     {
                         echo 'Loading Genesys OAuth Credentials'
-                          sh 'gotestsum --junitfile test-results.xml --format standard-verbose ./genesyscloud/...  -run TestUnit -v -timeout 30m -count=1 -cover -coverprofile=merged_coverage.out'
+                          sh 'gotestsum --junitfile unit.xml --format standard-verbose ./genesyscloud/...  -run TestUnit -v -timeout 30m -count=1 -cover -coverprofile=coverageUnit.out'
 
                     }
                 }
             }
         }
 
-        //         stage('Idp Tests') {
-        //     environment {
-        //         TF_ACC=1
-        //         TF_LOG="DEBUG"
-        //     }
-        //     steps {
-        //         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-        //             echo 'Attempting to Run Idp Tests'
-        //             withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
-        //                 echo 'Loading Genesys OAuth Credentials'
-        //                 sh 'gotestsum --junitfile idp.xml --format standard-verbose ./genesyscloud/... -run TestAcc.*Idp -v -count=1 -timeout 120m -cover -coverprofile=coverageIdp.out'
-        //             }
-        //         }
-        //     }
-        // }
+                stage('Idp Tests') {
+            environment {
+                TF_ACC=1
+                TF_LOG="DEBUG"
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    echo 'Attempting to Run Idp Tests'
+                    withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
+                        echo 'Loading Genesys OAuth Credentials'
+                        sh 'gotestsum --junitfile idp.xml --format standard-verbose ./genesyscloud/... -run TestAcc.*Idp -v -count=1 -timeout 120m -cover -coverprofile=coverageIdp.out'
+                    }
+                }
+            }
+        }
         
 stage('Generate & Upload Report') {
             
@@ -106,12 +106,12 @@ stage('Generate & Upload Report') {
         sh 'GOBIN=$HOME/bin go install github.com/wadey/gocovmerge@latest'
         
         // Generate merged coverage report
-        //sh '$HOME/bin/gocovmerge jenins/tests/coverageUnit.out jenkins/tests/coverageIdp.out  > merged_coverage.out'
+        sh '$HOME/bin/gocovmerge coverageUnit.out coverageIdp.out  > merged_coverage.out'
 
         // Convert merged coverage report to HTML
         sh 'go tool cover -html merged_coverage.out -o coverageUnit.html'
 
-       // sh 'junit-merger -o test-results.xml jenkins/tests/unit.xml jenkins/tests/idp.xml'
+        sh 'junit-merger -o test-results.xml unit.xml idp.xml'
       
   script {
     // Read the generated HTML file
