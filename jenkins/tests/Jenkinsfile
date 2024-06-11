@@ -63,42 +63,6 @@ pipeline {
             }
         }
 
- stage('Unit Tests') {
-
-            environment {
-                TF_UNIT=1
-                ENABLE_STANDALONE_EMAIL_ADDRESS=1
-                ENABLE_STANDALONE_CGR=1
-            }
-
-            steps {
-            catchError(buildResult: 'FAILURE', stageResult:'FAILURE'){
-                echo 'Attempting to Run Unit Tests'
-                withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID',passwordVariable:'GENESYSCLOUD_OAUTHCLIENT_SECRET')])
-                    {
-                        echo 'Loading Genesys OAuth Credentials'
-                          sh 'gotestsum --junitfile unit.xml --format standard-verbose ./genesyscloud/...  -run TestUnit -v -timeout 30m -count=1 -cover -coverprofile=coverageUnit.out'
-
-                    }
-                }
-            }
-        }
-
-                stage('Idp Tests') {
-            environment {
-                TF_ACC=1
-                TF_LOG="DEBUG"
-            }
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    echo 'Attempting to Run Idp Tests'
-                    withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
-                        echo 'Loading Genesys OAuth Credentials'
-                        sh 'gotestsum --junitfile idp.xml --format standard-verbose ./genesyscloud/... -run TestAcc.*Idp -v -count=1 -timeout 120m -cover -coverprofile=coverageIdp.out'
-                    }
-                }
-            }
-        }
         
 stage('Generate & Upload Report') {
             
@@ -106,12 +70,12 @@ stage('Generate & Upload Report') {
         sh 'GOBIN=$HOME/bin go install github.com/wadey/gocovmerge@latest'
         
         // Generate merged coverage report
-        sh '$HOME/bin/gocovmerge coverageUnit.out coverageIdp.out  > merged_coverage.out'
+        sh '$HOME/bin/gocovmerge jenins/tests/coverageUnit.out jenkins/tests/coverageIdp.out  > merged_coverage.out'
 
         // Convert merged coverage report to HTML
         sh 'go tool cover -html merged_coverage.out -o coverageUnit.html'
 
-        sh 'junit-merger -o test-results.xml unit.xml idp.xml'
+        sh 'junit-merger -o test-results.xml jenkins/tests/unit.xml jenkins/tests/idp.xml'
       
   script {
     // Read the generated HTML file
@@ -270,7 +234,7 @@ stage('Generate & Upload Report') {
     updatedHtmlFile = updatedHtmlFile.replace('</head>', "<style>\n${cssStyles}\n</style>\n</head>")
     updatedHtmlFile = updatedHtmlFile.replace('</body>', tableHtml + '\n' + scriptHtml + '\n</body>')
 
-    writeFile file: 'coverageAcceptance.html', text: updatedHtmlFile
+    writeFile file: 'coverageUnit.html', text: updatedHtmlFile
 
                     // Generate manual report
                     def xmlContent = readFile 'test-results.xml'
@@ -451,7 +415,7 @@ stage('Generate & Upload Report') {
                 // Optionally, print the location of the HTML report
                     echo "HTML report generated: \${env.WORKSPACE}/test-report.html"
                 }
-                archiveArtifacts artifacts: 'unit.xml, idp.xml, coverageUnit.out, coverageIdp.out, coverageUnit.html,test-report.html,test-results.xml', allowEmptyArchive: true   
+                archiveArtifacts artifacts: 'coverageUnit.html,test-report.html,test-results.xml', allowEmptyArchive: true   
            }
         }
     }
