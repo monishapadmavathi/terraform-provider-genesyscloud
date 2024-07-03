@@ -105,12 +105,12 @@ stage('Generate & Upload Report') {
         sh 'GOBIN=$HOME/bin go install github.com/wadey/gocovmerge@latest'
         
         // Generate merged coverage report
-        sh '$HOME/bin/gocovmerge coverageArchitect.out coverageIdp.out coverageUnit.out  > merged_coverage.out'
+        sh '$HOME/bin/gocovmerge coverageArchitect.out coverageUnit.out  > merged_coverage.out'
 
         // Convert merged coverage report to HTML
         sh 'go tool cover -html merged_coverage.out -o coverageUnit.html'
 
-        sh 'junit-merger -o test-results.xml idp.xml architect.xml unit.xml'
+        sh 'junit-merger -o test-results.xml architect.xml unit.xml'
       
   script {
     // Read the generated HTML file
