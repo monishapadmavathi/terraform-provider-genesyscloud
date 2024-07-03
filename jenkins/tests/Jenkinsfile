@@ -318,16 +318,6 @@ while (matcher.find()) {
     testCases << result
 }
 
-// Function to extract reason from the log for failed tests
-def extractReason(String log) {
-    def reason = ""
-    def reasonPattern = /message="([^"]*)">/
-    def matcher = log =~ reasonPattern
-    if (matcher.find()) {
-        reason = matcher.group(1).trim()
-    }
-    return reason
-}
 
 // Generate HTML report
 def html = new StringBuilder()
@@ -467,7 +457,15 @@ writeFile file: 'test-report.html', text: html.toString()
         }
     }
 }
- 
+ def extractReason(String log) {
+    def reason = ""
+    def reasonPattern = /message="([^"]*)">/
+    def matcher = log =~ reasonPattern
+    if (matcher.find()) {
+        reason = matcher.group(1).trim()
+    }
+    return reason
+}
 
 
 
