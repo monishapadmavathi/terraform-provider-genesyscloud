@@ -5,9 +5,13 @@ final def CREDENTIALS_MAP = [
   'us-east-1': 'GENESYSCLOUD_OAUTHCLIENT_ID_AND_SECRET'
 ]
 
-final def region = REGION
+final def ENVIRONMENT_MAP = [
+    'tca':'test',
+    'us-east-1':'prod'
+]
+final def region = ENVIRONMENT_MAP.get(region,'test')
 def credentials = CREDENTIALS_MAP.get(region, 'GENESYSCLOUD_OAUTHCLIENT_ID_AND_SECRET')
-
+def environment= 
 pipeline {
     agent {
         node {
@@ -444,35 +448,45 @@ html.append("""
 </html>
 """)
 
-// Save the HTML report to a file
+/// Save the HTML report to a file
 writeFile file: 'test-report.html', text: html.toString()
 
 
-                // Optionally, print the location of the HTML report
+                    // Optionally, print the location of the HTML report
                     echo "HTML report generated: \${env.WORKSPACE}/test-report.html"
-                }
-                archiveArtifacts artifacts: 'coverageUnit.html,test-report.html,test-results.xml', allowEmptyArchive: true   
+}
+                archiveArtifacts artifacts: 'coverageReport.html,test-report.html,test-results.xml', allowEmptyArchive: true   
            }
         }
+
+
+    }
+
+     post {
+
+        always {
+                    script {
+                        echo "Sending acceptance to UTR..."
+                        testResultToKnex {
+                            files = 'terraform-provider-genesyscloud/jenkins/tests/*.xml'
+                            aut = 'cx-as-a-code'
+                            environment = region
+                            type = 'acceptance'
+                            platform = 'go'
+                        }
+                    }
+                }
     }
 }
-// Function to extract reason from the log for failed and skipped tests
+ 
+// Function to extract reason from the log for failed tests
 def extractReason(String log) {
     def reason = ""
-    // Extract the relevant part of the skipped message
-    def reasonPattern = /resource_genesyscloud_architect_emergencygroup_test\.go:\d+: (.*?)&#xA;---/
+    // Extract the relevant part of the failed message
+    def reasonPattern = /_genesyscloud_.*?\.go:\d+: (.*?) ---/
     def matcher = log =~ reasonPattern
     if (matcher.find()) {
         reason = matcher.group(1).trim()
     }
     return reason
 }
-
- 
-
-
-
-    
-
-
-
