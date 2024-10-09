@@ -469,7 +469,7 @@ writeFile file: 'test-report.html', text: html.toString()
                     script {
                         echo "Sending acceptance to UTR..."
                         testResultToKnex {
-                            files = '*.xml'
+                            files = 'test-results.xml'
                             aut = 'cx-as-a-code'
                             environment = env
                             type = 'acceptance'
