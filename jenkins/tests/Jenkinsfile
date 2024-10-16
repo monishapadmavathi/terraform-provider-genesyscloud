@@ -88,21 +88,6 @@ pipeline {
                 }
             }
         }
-    stage('Architect Tests') {
-            environment {
-                TF_ACC=1
-                TF_LOG="DEBUG"
-            }
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    echo 'Attempting to Run Architect Tests'
-                    withCredentials([usernamePassword(credentialsId: CREDENTIALS_ID, usernameVariable: 'GENESYSCLOUD_OAUTHCLIENT_ID', passwordVariable: 'GENESYSCLOUD_OAUTHCLIENT_SECRET')]) {
-                        echo 'Loading Genesys OAuth Credentials'
-                        sh 'gotestsum --junitfile architect.xml --format standard-verbose ./genesyscloud/... -run "TestAcc.*Architect|IvrConfig" -v -count=1 -timeout 120m -cover -coverprofile=coverageArchitect.out'
-                    }
-                }
-            }
-        }
         
 stage('Generate & Upload Report') {
             
@@ -467,6 +452,7 @@ writeFile file: 'test-report.html', text: html.toString()
 
         always {
                     script {
+                        if(triggerUTR){
                         echo "Sending acceptance to UTR..."
                         testResultToKnex {
                             files = 'test-results.xml'
@@ -474,10 +460,17 @@ writeFile file: 'test-report.html', text: html.toString()
                             environment = env
                             type = 'acceptance'
                             platform = 'go'
+                            }
+                        echo "Sending Taneleer acceptance to UTR..."    
+                        testJobResultToTaneleer {
+                            aut = "CXasCodeTests"
+                            environment = env
+                            }    
+                        echo "Done sending results to Knex & Taneleer"        
                         }
                     }
                 }
-    }
+          }
 }
  
 // Function to extract reason from the log for failed tests
