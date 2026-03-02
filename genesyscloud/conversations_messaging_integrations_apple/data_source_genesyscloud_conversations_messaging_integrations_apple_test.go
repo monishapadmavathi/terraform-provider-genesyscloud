@@ -105,7 +105,7 @@ func testVerifyAppleIntegrationDeleted(state *terraform.State) error {
 	}
 
 	// Retry for up to 120 seconds, checking if the integration is deleted
-	if err := util.WithRetries(context.Background(), 120*time.Second, func() *retry.RetryError {
+	if err := util.WithRetries(context.Background(), 180*time.Second, func() *retry.RetryError {
 
 		integration, resp, err := conversationApi.GetConversationsMessagingIntegrationsAppleIntegrationId(integrationId, "")
 

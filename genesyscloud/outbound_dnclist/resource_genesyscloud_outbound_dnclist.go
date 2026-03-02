@@ -229,16 +229,19 @@ func readOutboundDncList(ctx context.Context, d *schema.ResourceData, meta inter
 
 		if sdkDncList.DncSourceType != nil && *sdkDncList.DncSourceType == "rds" {
 			entries := d.Get("entries").([]interface{})
-			apiEntries, err := getOutboundDnclistEntriesWithRetries(ctx, proxy, d.Id())
-			if err != nil {
-				return retry.NonRetryableError(fmt.Errorf("Failed to get entries for Outbound DNC list %s: %v", d.Id(), err))
-			}
+			// Only fetch entries if they were specified in the configuration
+			if len(entries) > 0 {
+				apiEntries, err := getOutboundDnclistEntriesWithRetries(ctx, proxy, d.Id())
+				if err != nil {
+					return retry.NonRetryableError(fmt.Errorf("Failed to get entries for Outbound DNC list %s: %v", d.Id(), err))
+				}
 
-			// preserve ordering and avoid a plan not empty error
-			if areEntriesEquivalent(apiEntries, entries) {
-				_ = d.Set("entries", entries)
-			} else {
-				_ = d.Set("entries", apiEntries)
+				// preserve ordering and avoid a plan not empty error
+				if areEntriesEquivalent(apiEntries, entries) {
+					_ = d.Set("entries", entries)
+				} else {
+					_ = d.Set("entries", apiEntries)
+				}
 			}
 		}
 
