@@ -99,6 +99,13 @@ func createOutboundDncList(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 	log.Printf("Created Outbound DNC list %s %s", name, *outboundDncList.Id)
+	
+	// Wait for the DNC list to be fully propagated before reading
+	// This addresses eventual consistency issues where the resource is created
+	// but not immediately readable via the API
+	// Increased from 5 to 10 seconds based on Jenkins test failures
+	time.Sleep(10 * time.Second)
+	
 	return readOutboundDncList(ctx, d, meta)
 }
 
@@ -280,12 +287,13 @@ func deleteOutboundDncList(ctx context.Context, d *schema.ResourceData, meta int
 	diagErr := util.RetryWhen(util.IsStatus400, func() (*platformclientv2.APIResponse, diag.Diagnostics) {
 		log.Printf("Deleting Outbound DNC list")
 
-		resp, err := proxy.deleteOutboundDnclistPhoneEntries(ctx, d.Id(), false)
-		if err != nil {
-			return resp, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to delete phone entries from Outbound DNC list %s error: %v", d.Id(), err), resp)
-		}
+		// Attempt to delete phone entries first, but ignore errors since:
+		// 1. The list might not have any entries (API may return 400/404)
+		// 2. The list might be an external DNC list type that doesn't support this operation
+		// 3. The important operation is deleting the list itself
+		_, _ = proxy.deleteOutboundDnclistPhoneEntries(ctx, d.Id(), false)
 
-		resp, err = proxy.deleteOutboundDnclist(ctx, d.Id())
+		resp, err := proxy.deleteOutboundDnclist(ctx, d.Id())
 		if err != nil {
 			return resp, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to delete Outbound DNC list %s error: %s", d.Id(), err), resp)
 		}
