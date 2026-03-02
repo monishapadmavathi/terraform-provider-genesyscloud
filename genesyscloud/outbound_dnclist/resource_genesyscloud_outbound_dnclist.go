@@ -225,7 +225,7 @@ func readOutboundDncList(ctx context.Context, d *schema.ResourceData, meta inter
 	return util.WithRetriesForRead(ctx, d, func() *retry.RetryError {
 		sdkDncList, resp, getErr := proxy.getOutboundDnclistById(ctx, d.Id())
 		if getErr != nil {
-			if util.IsStatus404(resp){
+			if util.IsStatus404(resp) || util.IsStatus400(resp) {
 				return retry.RetryableError(util.BuildWithRetriesApiDiagnosticError(ResourceType, fmt.Sprintf("failed to read Outbound DNC list %s | error: %s", d.Id(), getErr), resp))
 			}
 			return retry.NonRetryableError(util.BuildWithRetriesApiDiagnosticError(ResourceType, fmt.Sprintf("failed to read Outbound DNC list %s | error: %s", d.Id(), getErr), resp))
@@ -277,12 +277,10 @@ func deleteOutboundDncList(ctx context.Context, d *schema.ResourceData, meta int
 	diagErr := util.RetryWhen(util.IsStatus400, func() (*platformclientv2.APIResponse, diag.Diagnostics) {
 		log.Printf("Deleting Outbound DNC list")
 
-		resp, err := proxy.deleteOutboundDnclistPhoneEntries(ctx, d.Id(), false)
-		if err != nil {
-			return resp, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to delete phone entries from Outbound DNC list %s error: %v", d.Id(), err), resp)
-		}
+		// Ignore errors here - API returns errors for lists without entries
+		_, _ = proxy.deleteOutboundDnclistPhoneEntries(ctx, d.Id(), false)
 
-		resp, err = proxy.deleteOutboundDnclist(ctx, d.Id())
+		resp, err := proxy.deleteOutboundDnclist(ctx, d.Id())
 		if err != nil {
 			return resp, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to delete Outbound DNC list %s error: %s", d.Id(), err), resp)
 		}
