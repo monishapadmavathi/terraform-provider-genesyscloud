@@ -243,16 +243,19 @@ func readOutboundDncList(ctx context.Context, d *schema.ResourceData, meta inter
 
 		if sdkDncList.DncSourceType != nil && *sdkDncList.DncSourceType == "rds" {
 			entries := d.Get("entries").([]interface{})
-			apiEntries, err := getOutboundDnclistEntriesWithRetries(ctx, proxy, d.Id())
-			if err != nil {
-				return retry.NonRetryableError(fmt.Errorf("Failed to get entries for Outbound DNC list %s: %v", d.Id(), err))
-			}
+			// Only fetch entries if they were specified in the configuration
+			if len(entries) > 0 {
+				apiEntries, err := getOutboundDnclistEntriesWithRetries(ctx, proxy, d.Id())
+				if err != nil {
+					return retry.NonRetryableError(fmt.Errorf("Failed to get entries for Outbound DNC list %s: %v", d.Id(), err))
+				}
 
-			// preserve ordering and avoid a plan not empty error
-			if areEntriesEquivalent(apiEntries, entries) {
-				_ = d.Set("entries", entries)
-			} else {
-				_ = d.Set("entries", apiEntries)
+				// preserve ordering and avoid a plan not empty error
+				if areEntriesEquivalent(apiEntries, entries) {
+					_ = d.Set("entries", entries)
+				} else {
+					_ = d.Set("entries", apiEntries)
+				}
 			}
 		}
 
@@ -277,10 +280,12 @@ func deleteOutboundDncList(ctx context.Context, d *schema.ResourceData, meta int
 	diagErr := util.RetryWhen(util.IsStatus400, func() (*platformclientv2.APIResponse, diag.Diagnostics) {
 		log.Printf("Deleting Outbound DNC list")
 
-		// Ignore errors here - API returns errors for lists without entries
-		_, _ = proxy.deleteOutboundDnclistPhoneEntries(ctx, d.Id(), false)
+		resp, err := proxy.deleteOutboundDnclistPhoneEntries(ctx, d.Id(), false)
+		if err != nil {
+			return resp, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to delete phone entries from Outbound DNC list %s error: %v", d.Id(), err), resp)
+		}
 
-		resp, err := proxy.deleteOutboundDnclist(ctx, d.Id())
+		resp, err = proxy.deleteOutboundDnclist(ctx, d.Id())
 		if err != nil {
 			return resp, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to delete Outbound DNC list %s error: %s", d.Id(), err), resp)
 		}
