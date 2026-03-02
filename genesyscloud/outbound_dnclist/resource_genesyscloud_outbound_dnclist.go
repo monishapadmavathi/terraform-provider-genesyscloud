@@ -38,7 +38,6 @@ func getAllOutboundDncLists(ctx context.Context, clientConfig *platformclientv2.
 }
 
 func createOutboundDncList(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	time.Sleep(5 * time.Second)
 	name := d.Get("name").(string)
 	contactMethod := d.Get("contact_method").(string)
 	customExclusionColumn, _ := d.Get("custom_exclusion_column").(string)
