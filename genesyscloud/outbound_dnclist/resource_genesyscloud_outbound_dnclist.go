@@ -211,7 +211,7 @@ func readOutboundDncList(ctx context.Context, d *schema.ResourceData, meta inter
 	return util.WithRetriesForRead(ctx, d, func() *retry.RetryError {
 		sdkDncList, resp, getErr := proxy.getOutboundDnclistById(ctx, d.Id())
 		if getErr != nil {
-			if util.IsStatus404(resp) {
+			if util.IsStatus404(resp) || util.IsStatus400(resp) {
 				return retry.RetryableError(util.BuildWithRetriesApiDiagnosticError(ResourceType, fmt.Sprintf("failed to read Outbound DNC list %s | error: %s", d.Id(), getErr), resp))
 			}
 			return retry.NonRetryableError(util.BuildWithRetriesApiDiagnosticError(ResourceType, fmt.Sprintf("failed to read Outbound DNC list %s | error: %s", d.Id(), getErr), resp))
