@@ -178,13 +178,27 @@ func updateOutboundDncList(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func getOutboundDnclistEntriesWithRetries(ctx context.Context, proxy *outboundDnclistProxy, dncListId string) ([]interface{}, diag.Diagnostics) {
-	_, resp, err := proxy.initiateOutboundDnclistExport(ctx, dncListId)
-	if err != nil {
-		return nil, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to initiate export for Outbound DNC list %s: %s", dncListId, err), resp)
+	// Retry initiating the export in case the DNC list isn't fully propagated yet
+	var exportResp *platformclientv2.APIResponse
+	var exportErr error
+	diagErr := util.WithRetries(ctx, 30*time.Second, func() *retry.RetryError {
+		_, resp, err := proxy.initiateOutboundDnclistExport(ctx, dncListId)
+		exportResp = resp
+		exportErr = err
+		if err != nil {
+			if util.IsStatus404(resp) || util.IsStatus400(resp) {
+				return retry.RetryableError(err)
+			}
+			return retry.NonRetryableError(err)
+		}
+		return nil
+	})
+	if diagErr != nil {
+		return nil, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to initiate export for Outbound DNC list %s: %s", dncListId, exportErr), exportResp)
 	}
 
 	entries := make([]interface{}, 0)
-	diagErr := util.WithRetries(ctx, 30*time.Second, func() *retry.RetryError {
+	diagErr = util.WithRetries(ctx, 30*time.Second, func() *retry.RetryError {
 		entriesList, resp, err := proxy.getOutboundDnclistEntries(ctx, dncListId)
 		if util.IsStatus400(resp) {
 			return retry.RetryableError(err)
