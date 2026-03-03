@@ -216,7 +216,7 @@ func getOutboundDnclistEntriesWithRetries(ctx context.Context, proxy *outboundDn
 }
 
 func readOutboundDncList(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	time.Sleep(10*time.Second)
+	time.Sleep(30*time.Second)
 	sdkConfig := meta.(*provider.ProviderMeta).ClientConfig
 	proxy := getOutboundDnclistProxy(sdkConfig)
 	cc := consistency_checker.NewConsistencyCheck(ctx, d, meta, ResourceOutboundDncList(), constants.ConsistencyChecks(), ResourceType)
