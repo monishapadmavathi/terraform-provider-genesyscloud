@@ -178,13 +178,27 @@ func updateOutboundDncList(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func getOutboundDnclistEntriesWithRetries(ctx context.Context, proxy *outboundDnclistProxy, dncListId string) ([]interface{}, diag.Diagnostics) {
-	_, resp, err := proxy.initiateOutboundDnclistExport(ctx, dncListId)
-	if err != nil {
-		return nil, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to initiate export for Outbound DNC list %s: %s", dncListId, err), resp)
+	// Retry initiating the export in case the DNC list isn't fully propagated yet
+	var exportResp *platformclientv2.APIResponse
+	var exportErr error
+	diagErr := util.WithRetries(ctx, 30*time.Second, func() *retry.RetryError {
+		_, resp, err := proxy.initiateOutboundDnclistExport(ctx, dncListId)
+		exportResp = resp
+		exportErr = err
+		if err != nil {
+			if util.IsStatus404(resp) {
+				return retry.RetryableError(err)
+			}
+			return retry.NonRetryableError(err)
+		}
+		return nil
+	})
+	if diagErr != nil {
+		return nil, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to initiate export for Outbound DNC list %s: %s", dncListId, exportErr), exportResp)
 	}
 
 	entries := make([]interface{}, 0)
-	diagErr := util.WithRetries(ctx, 30*time.Second, func() *retry.RetryError {
+	diagErr = util.WithRetries(ctx, 30*time.Second, func() *retry.RetryError {
 		entriesList, resp, err := proxy.getOutboundDnclistEntries(ctx, dncListId)
 		if util.IsStatus400(resp) {
 			return retry.RetryableError(err)
@@ -229,16 +243,18 @@ func readOutboundDncList(ctx context.Context, d *schema.ResourceData, meta inter
 
 		if sdkDncList.DncSourceType != nil && *sdkDncList.DncSourceType == "rds" {
 			entries := d.Get("entries").([]interface{})
-			apiEntries, err := getOutboundDnclistEntriesWithRetries(ctx, proxy, d.Id())
-			if err != nil {
-				return retry.NonRetryableError(fmt.Errorf("Failed to get entries for Outbound DNC list %s: %v", d.Id(), err))
-			}
+			if len(entries) > 0 {
+				apiEntries, err := getOutboundDnclistEntriesWithRetries(ctx, proxy, d.Id())
+				if err != nil {
+					return retry.NonRetryableError(fmt.Errorf("Failed to get entries for Outbound DNC list %s: %v", d.Id(), err))
+				}
 
-			// preserve ordering and avoid a plan not empty error
-			if areEntriesEquivalent(apiEntries, entries) {
-				_ = d.Set("entries", entries)
-			} else {
-				_ = d.Set("entries", apiEntries)
+				// preserve ordering and avoid a plan not empty error
+				if areEntriesEquivalent(apiEntries, entries) {
+					_ = d.Set("entries", entries)
+				} else {
+					_ = d.Set("entries", apiEntries)
+				}
 			}
 		}
 
