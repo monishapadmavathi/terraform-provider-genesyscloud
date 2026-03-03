@@ -178,31 +178,14 @@ func updateOutboundDncList(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func getOutboundDnclistEntriesWithRetries(ctx context.Context, proxy *outboundDnclistProxy, dncListId string) ([]interface{}, diag.Diagnostics) {
-	// Retry initiating the export in case the DNC list isn't fully propagated yet
-	var exportResp *platformclientv2.APIResponse
-	var exportErr error
-	diagErr := util.WithRetries(ctx, 30*time.Second, func() *retry.RetryError {
-		_, resp, err := proxy.initiateOutboundDnclistExport(ctx, dncListId)
-		exportResp = resp
-		exportErr = err
-		if err != nil {
-			if util.IsStatus404(resp) {
-				return retry.RetryableError(err)
-			}
-			return retry.NonRetryableError(err)
-		}
-		return nil
-	})
-	if diagErr != nil {
-		return nil, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to initiate export for Outbound DNC list %s: %s", dncListId, exportErr), exportResp)
+	_, resp, err := proxy.initiateOutboundDnclistExport(ctx, dncListId)
+	if err != nil {
+		return nil, util.BuildAPIDiagnosticError(ResourceType, fmt.Sprintf("Failed to initiate export for Outbound DNC list %s: %s", dncListId, err), resp)
 	}
 
 	entries := make([]interface{}, 0)
-	diagErr = util.WithRetries(ctx, 30*time.Second, func() *retry.RetryError {
-		entriesList, resp, err := proxy.getOutboundDnclistEntries(ctx, dncListId)
-		if util.IsStatus400(resp) {
-			return retry.RetryableError(err)
-		}
+	diagErr := util.WithRetries(ctx, 30*time.Second, func() *retry.RetryError {
+		entriesList, _, err := proxy.getOutboundDnclistEntries(ctx, dncListId)
 		if err != nil {
 			return retry.NonRetryableError(err)
 		}
@@ -243,7 +226,6 @@ func readOutboundDncList(ctx context.Context, d *schema.ResourceData, meta inter
 
 		if sdkDncList.DncSourceType != nil && *sdkDncList.DncSourceType == "rds" {
 			entries := d.Get("entries").([]interface{})
-			if len(entries) > 0 {
 				apiEntries, err := getOutboundDnclistEntriesWithRetries(ctx, proxy, d.Id())
 				if err != nil {
 					return retry.NonRetryableError(fmt.Errorf("Failed to get entries for Outbound DNC list %s: %v", d.Id(), err))
@@ -255,7 +237,6 @@ func readOutboundDncList(ctx context.Context, d *schema.ResourceData, meta inter
 				} else {
 					_ = d.Set("entries", apiEntries)
 				}
-			}
 		}
 
 		resourcedata.SetNillableValue(d, "name", sdkDncList.Name)
