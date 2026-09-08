@@ -2,6 +2,7 @@ package journey_views
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -14,6 +15,11 @@ import (
 )
 
 func TestAccResourceJourneyViewsBasic(t *testing.T) {
+	// The journey/views create API is not reliably available in the eusc region
+	// (POST /api/v2/journey/views gives up after retries), so skip there.
+	if strings.Contains(os.Getenv("GENESYSCLOUD_REGION"), "eusc") {
+		t.Skip("Skipping: genesyscloud_journey_views create is not supported/reliable in the eusc region")
+	}
 	var (
 		name                        = "test journey from tf Nicolas"
 		nameUpdated                 = "test journey from tf 1 updated"

@@ -18,6 +18,14 @@ func TestAccResourceAppleIntegrationBasic(t *testing.T) {
 	if !checkAppleIntegrationEndpointsEnabled() {
 		t.Skip("Skipping test as apple integration endpoints are not enabled")
 	}
+	// With a fake business ID the integration's async creation never completes, which makes
+	// both the "expected update error" and the post-test delete non-deterministic: the update
+	// sometimes succeeds before the failure is observed, and the delete fails with
+	// "Create integration status is still in progress. Try to delete later", leaving a
+	// dangling resource. Only run the full CRUD flow when a real business ID is supplied.
+	if !isUsingRealBusinessId() {
+		t.Skip("Skipping test: APPLE_MESSAGES_BUSINESS_ID is not set; the fake-business-id error path is non-deterministic and leaves undeletable integrations")
+	}
 	var (
 		resourceLabel   = "test-apple-integration"
 		randomString    = uuid.NewString()
