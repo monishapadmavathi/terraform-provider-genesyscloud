@@ -3,6 +3,7 @@ package conversations_messaging_integrations_apple
 import (
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,17 +16,9 @@ import (
 // - With fake ID: Tests error handling (update fails due to incomplete async creation)
 // - With real ID: Tests full CRUD operations (update succeeds)
 func TestAccResourceAppleIntegrationBasic(t *testing.T) {
-	if !checkAppleIntegrationEndpointsEnabled() {
-		t.Skip("Skipping test as apple integration endpoints are not enabled")
-	}
-	// With a fake business ID the integration's async creation never completes, which makes
-	// both the "expected update error" and the post-test delete non-deterministic: the update
-	// sometimes succeeds before the failure is observed, and the delete fails with
-	// "Create integration status is still in progress. Try to delete later", leaving a
-	// dangling resource. Only run the full CRUD flow when a real business ID is supplied.
-	if !isUsingRealBusinessId() {
-		t.Skip("Skipping test: APPLE_MESSAGES_BUSINESS_ID is not set; the fake-business-id error path is non-deterministic and leaves undeletable integrations")
-	}
+	// if !checkAppleIntegrationEndpointsEnabled() {
+	// 	t.Skip("Skipping test as apple integration endpoints are not enabled")
+	// }
 	var (
 		resourceLabel   = "test-apple-integration"
 		randomString    = uuid.NewString()
@@ -58,6 +51,14 @@ func TestAccResourceAppleIntegrationBasic(t *testing.T) {
 					// Update - Behavior depends on business ID type:
 					// - Fake ID: Expects error (async creation incomplete)
 					// - Real ID: Expects success (full CRUD validation)
+					// Wait for the async creation to reach a terminal state before updating.
+					// With a fake business ID this lets creation settle into its validation-failed
+					// state so the expected update error fires deterministically and, importantly,
+					// so the integration is deletable at teardown (deleting while creation is still
+					// "in progress" returns a 400 and leaves a dangling resource).
+					PreConfig: func() {
+						time.Sleep(30 * time.Second)
+					},
 					Config: generateBasicAppleIntegrationResource(
 						resourceLabel,
 						updatedName,

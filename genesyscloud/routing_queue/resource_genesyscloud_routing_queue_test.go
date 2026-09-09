@@ -661,7 +661,7 @@ func TestAccResourceRoutingQueueFlows(t *testing.T) {
 	// wrong type or is not published". This propagation delay is outside the test's control
 	// and cannot be made reliable with sleeps (multiple sleep durations were tried and still
 	// failed). Skipping until the provider retries the queue update on this transient 400.
-	t.Skip("Skipping: flaky due to architect-flow publish -> routing-service propagation lag that a test-level sleep cannot reliably cover")
+	//t.Skip("Skipping: flaky due to architect-flow publish -> routing-service propagation lag that a test-level sleep cannot reliably cover")
 	var (
 		queueResourceLabel1   = "test-queue"
 		queueName1            = "Terraform Test Queue1-" + uuid.NewString()
