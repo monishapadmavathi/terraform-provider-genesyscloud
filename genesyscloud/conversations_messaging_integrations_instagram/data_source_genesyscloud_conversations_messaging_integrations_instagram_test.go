@@ -68,9 +68,6 @@ func TestAccDataSourceConversationsMessagingIntegrationsInstagram(t *testing.T) 
 						appId,
 						appSecret,
 					) +
-					// The data source block was missing, so the data source was never created and
-					// the check failed with "Not found". Declare it here, looking the integration
-					// up by name and depending on the resource so it exists before the lookup.
 					generateInstagramIntegrationDataSource(
 						testDataSourceLabel,
 						name1,
