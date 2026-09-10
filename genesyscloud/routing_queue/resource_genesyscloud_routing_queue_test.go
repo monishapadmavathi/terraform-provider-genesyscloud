@@ -660,8 +660,7 @@ func TestAccResourceRoutingQueueFlows(t *testing.T) {
 	// producing: 400 "The specified in-queue call flow [...] is either not active, of the
 	// wrong type or is not published". This propagation delay is outside the test's control
 	// and cannot be made reliable with sleeps (multiple sleep durations were tried and still
-	// failed). Skipping until the provider retries the queue update on this transient 400.
-	//t.Skip("Skipping: flaky due to architect-flow publish -> routing-service propagation lag that a test-level sleep cannot reliably cover")
+	// failed).
 	var (
 		queueResourceLabel1   = "test-queue"
 		queueName1            = "Terraform Test Queue1-" + uuid.NewString()
@@ -839,8 +838,10 @@ func TestAccResourceRoutingQueueFlows(t *testing.T) {
 				// publish state to propagate to the routing service.
 				PreConfig: func() {
 					// Wait for the newly created flows to be fully published and active
-					// (propagated to the routing service) before referencing them.
-					time.Sleep(45 * time.Second)
+					// (propagated to the routing service) before referencing them. The
+					// publish -> routing-service propagation delay is variable and has been
+					// observed to exceed 45-60s, so wait longer here.
+					time.Sleep(90 * time.Second)
 				},
 				Config: architectFlow.GenerateFlowResource(
 					queueFlowResourceLabel2,

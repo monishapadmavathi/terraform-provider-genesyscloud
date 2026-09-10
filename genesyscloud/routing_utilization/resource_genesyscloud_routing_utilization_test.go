@@ -20,7 +20,9 @@ import (
 )
 
 func TestAccResourceRoutingUtilizationBasic(t *testing.T) {
-	t.Parallel()
+	// NOTE: genesyscloud_routing_utilization is a single org-wide (singleton) resource. Running
+	// utilization tests in parallel lets them clobber each other's org state between apply and
+	// import, producing spurious ImportStateVerify diffs. Do not run these in parallel.
 	var (
 		maxCapacity1  = "3"
 		maxCapacity2  = "4"
@@ -281,7 +283,7 @@ func generateRoutingUtilizationResource(attributes ...string) string {
 }
 
 func TestAccResourceRoutingUtilizationMaxInboundCalls(t *testing.T) {
-	t.Parallel()
+	// Singleton org-wide resource; must not run in parallel with other utilization tests.
 	var (
 		maxCapacity         = "1"
 		maxInboundCalls1    = "1"
