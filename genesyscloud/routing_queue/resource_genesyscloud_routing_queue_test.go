@@ -165,7 +165,14 @@ func TestAccResourceRoutingQueueBasic(t *testing.T) {
 			},
 			{
 				// Update
-				Config: GenerateRoutingQueueResource(
+				// Keep the skill resource in the config here even though the updated queue no
+				// longer references it in a bullseye ring. When clearing member_groups, the
+				// provider re-sends the bullseye ring (which still carried the skill id) before
+				// the ring is fully cleared; if the skill resource is removed from config in the
+				// same apply, Terraform deletes it first and the queue update fails with
+				// "Skill ... specified in bullseye ring 1 does not exist". Retaining the skill
+				// resource avoids that delete-vs-update ordering race.
+				Config: routingSkill.GenerateRoutingSkillResource(queueSkillResourceLabel, queueSkillName) + GenerateRoutingQueueResource(
 					queueResourceLabel1,
 					queueName2,
 					queueDesc2,
@@ -646,6 +653,14 @@ func TestAccResourceRoutingQueueParToCGR(t *testing.T) {
 }
 
 func TestAccResourceRoutingQueueFlows(t *testing.T) {
+	// This test re-creates architect flows and then references them from the queue in the
+	// same run. Even though the provider waits for the flow deploy job to report "Success",
+	// the routing service's view of the flow's published/active state lags behind Architect
+	// by an unbounded amount (observed especially in slower regions such as eusc-de-east-1),
+	// producing: 400 "The specified in-queue call flow [...] is either not active, of the
+	// wrong type or is not published". This propagation delay is outside the test's control
+	// and cannot be made reliable with sleeps (multiple sleep durations were tried and still
+	// failed).
 	var (
 		queueResourceLabel1   = "test-queue"
 		queueName1            = "Terraform Test Queue1-" + uuid.NewString()
@@ -783,10 +798,50 @@ func TestAccResourceRoutingQueueFlows(t *testing.T) {
 				),
 			},
 			{
-				// Update the flows
+				// Create the new (v2) flows first, but keep the queue flow references null.
+				// This lets the flows finish publishing and propagate to the routing service
+				// before the queue tries to reference them. Referencing a flow in the same
+				// apply that creates it causes a 400 "flow is not active/published" error
+				// due to publish -> routing-service propagation lag.
+				Config: architectFlow.GenerateFlowResource(
+					queueFlowResourceLabel2,
+					queueFlowFilePath1,
+					queueFlowInqueueCallConfig,
+					false,
+				) + architectFlow.GenerateFlowResource(
+					emailInQueueFlowResourceLabel2,
+					queueFlowFilePath2,
+					emailInQueueFlowInboundcallConfig2,
+					false,
+				) + architectFlow.GenerateFlowResource(
+					messageInQueueFlowResourceLabel2,
+					queueFlowFilePath3,
+					inQueueShortMessageFlowConfig,
+					false,
+				) + architect_user_prompt.GenerateUserPromptResource(&architect_user_prompt.UserPromptStruct{
+					ResourceLabel: userPromptResourceLabel1,
+					Name:          userPromptName1,
+					Description:   strconv.Quote(userPromptDescription1),
+					Resources:     userPromptResources2,
+				}) + GenerateRoutingQueueResourceBasic(
+					queueResourceLabel1,
+					queueName1,
+					"queue_flow_id = null",
+					"email_in_queue_flow_id = null",
+					"message_in_queue_flow_id = null",
+					"on_hold_prompt_id = null",
+				),
+			},
+			{
+				// Now that the v2 flows exist and have had time to become active/published,
+				// update the queue to reference them. The PreConfig sleep waits for the
+				// publish state to propagate to the routing service.
 				PreConfig: func() {
-					// Wait for flows to be fully published and active before updating the queue
-					time.Sleep(45 * time.Second)
+					// Wait for the newly created flows to be fully published and active
+					// (propagated to the routing service) before referencing them. The
+					// publish -> routing-service propagation delay is variable and has been
+					// observed to exceed 45-60s, so wait longer here.
+					time.Sleep(90 * time.Second)
 				},
 				Config: architectFlow.GenerateFlowResource(
 					queueFlowResourceLabel2,
@@ -821,10 +876,6 @@ func TestAccResourceRoutingQueueFlows(t *testing.T) {
 					resource.TestCheckResourceAttrPair(queueResourceFullPath, "email_in_queue_flow_id", "genesyscloud_flow."+emailInQueueFlowResourceLabel2, "id"),
 					resource.TestCheckResourceAttrPair(queueResourceFullPath, "message_in_queue_flow_id", "genesyscloud_flow."+messageInQueueFlowResourceLabel2, "id"),
 					resource.TestCheckResourceAttrPair(queueResourceFullPath, "on_hold_prompt_id", "genesyscloud_architect_user_prompt."+userPromptResourceLabel1, "id"),
-					func(s *terraform.State) error {
-						time.Sleep(45 * time.Second) // Wait for 45 seconds for proper deletion of user
-						return nil
-					},
 				),
 			},
 			{

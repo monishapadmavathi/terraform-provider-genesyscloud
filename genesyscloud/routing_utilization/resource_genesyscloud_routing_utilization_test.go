@@ -20,7 +20,9 @@ import (
 )
 
 func TestAccResourceRoutingUtilizationBasic(t *testing.T) {
-	t.Parallel()
+	// NOTE: genesyscloud_routing_utilization is a single org-wide (singleton) resource. Running
+	// utilization tests in parallel lets them clobber each other's org state between apply and
+	// import, producing spurious ImportStateVerify diffs. Do not run these in parallel.
 	var (
 		maxCapacity1  = "3"
 		maxCapacity2  = "4"
@@ -281,11 +283,12 @@ func generateRoutingUtilizationResource(attributes ...string) string {
 }
 
 func TestAccResourceRoutingUtilizationMaxInboundCalls(t *testing.T) {
-	t.Parallel()
+	// Singleton org-wide resource; must not run in parallel with other utilization tests.
 	var (
-		maxCapacity      = "1"
-		maxInboundCalls1 = "1"
-		maxInboundCalls2 = "2"
+		maxCapacity         = "1"
+		maxInboundCalls1    = "1"
+		maxInboundCalls2    = "2"
+		maxInboundCallsZero = "0"
 	)
 
 	resource.Test(t, resource.TestCase{
@@ -308,7 +311,24 @@ func TestAccResourceRoutingUtilizationMaxInboundCalls(t *testing.T) {
 				),
 			},
 			{
-				// Update max_inbound_calls
+				// Update max_inbound_calls to an explicit 0 (means "no limit"). Verify the apply
+				// succeeds with 0 in state. Note: the API omits maxInboundCalls when it is 0, so a
+				// 0 value does not round-trip on import — hence no ImportState check is done here,
+				// and the final import step below runs against a non-zero value.
+				Config: generateRoutingUtilizationResource(
+					GenerateRoutingUtilMediaType("call", maxCapacity, util.TrueValue),
+					GenerateRoutingUtilMediaType("callback", maxCapacity, util.FalseValue),
+					GenerateRoutingUtilMediaType("chat", maxCapacity, util.FalseValue),
+					GenerateRoutingUtilMediaType("email", maxCapacity, util.FalseValue),
+					GenerateRoutingUtilMediaType("message", maxCapacity, util.FalseValue),
+					fmt.Sprintf("max_inbound_calls = %s", maxInboundCallsZero),
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("genesyscloud_routing_utilization.routing-util", "max_inbound_calls", maxInboundCallsZero),
+				),
+			},
+			{
+				// Update max_inbound_calls to a non-zero value
 				Config: generateRoutingUtilizationResource(
 					GenerateRoutingUtilMediaType("call", maxCapacity, util.TrueValue),
 					GenerateRoutingUtilMediaType("callback", maxCapacity, util.FalseValue),

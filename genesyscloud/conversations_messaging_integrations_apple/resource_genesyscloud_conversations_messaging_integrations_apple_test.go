@@ -3,6 +3,7 @@ package conversations_messaging_integrations_apple
 import (
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,9 +16,9 @@ import (
 // - With fake ID: Tests error handling (update fails due to incomplete async creation)
 // - With real ID: Tests full CRUD operations (update succeeds)
 func TestAccResourceAppleIntegrationBasic(t *testing.T) {
-	if !checkAppleIntegrationEndpointsEnabled() {
-		t.Skip("Skipping test as apple integration endpoints are not enabled")
-	}
+	// if !checkAppleIntegrationEndpointsEnabled() {
+	// 	t.Skip("Skipping test as apple integration endpoints are not enabled")
+	// }
 	var (
 		resourceLabel   = "test-apple-integration"
 		randomString    = uuid.NewString()
@@ -50,6 +51,14 @@ func TestAccResourceAppleIntegrationBasic(t *testing.T) {
 					// Update - Behavior depends on business ID type:
 					// - Fake ID: Expects error (async creation incomplete)
 					// - Real ID: Expects success (full CRUD validation)
+					// Wait for the async creation to reach a terminal state before updating.
+					// With a fake business ID this lets creation settle into its validation-failed
+					// state so the expected update error fires deterministically and, importantly,
+					// so the integration is deletable at teardown (deleting while creation is still
+					// "in progress" returns a 400 and leaves a dangling resource).
+					PreConfig: func() {
+						time.Sleep(30 * time.Second)
+					},
 					Config: generateBasicAppleIntegrationResource(
 						resourceLabel,
 						updatedName,
