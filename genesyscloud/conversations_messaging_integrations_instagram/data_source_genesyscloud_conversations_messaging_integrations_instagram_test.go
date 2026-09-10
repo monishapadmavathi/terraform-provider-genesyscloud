@@ -18,7 +18,6 @@ Test Class for the conversations messaging integrations instagram Data Source
 */
 
 func TestAccDataSourceConversationsMessagingIntegrationsInstagram(t *testing.T) {
-	// TEMP: skip removed to observe real result
 	t.Parallel()
 	var (
 		testResourceLabel1  = "test_sample"

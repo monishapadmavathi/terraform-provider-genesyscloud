@@ -165,13 +165,6 @@ func TestAccResourceRoutingQueueBasic(t *testing.T) {
 			},
 			{
 				// Update
-				// Keep the skill resource in the config here even though the updated queue no
-				// longer references it in a bullseye ring. When clearing member_groups, the
-				// provider re-sends the bullseye ring (which still carried the skill id) before
-				// the ring is fully cleared; if the skill resource is removed from config in the
-				// same apply, Terraform deletes it first and the queue update fails with
-				// "Skill ... specified in bullseye ring 1 does not exist". Retaining the skill
-				// resource avoids that delete-vs-update ordering race.
 				Config: routingSkill.GenerateRoutingSkillResource(queueSkillResourceLabel, queueSkillName) + GenerateRoutingQueueResource(
 					queueResourceLabel1,
 					queueName2,
@@ -653,14 +646,6 @@ func TestAccResourceRoutingQueueParToCGR(t *testing.T) {
 }
 
 func TestAccResourceRoutingQueueFlows(t *testing.T) {
-	// This test re-creates architect flows and then references them from the queue in the
-	// same run. Even though the provider waits for the flow deploy job to report "Success",
-	// the routing service's view of the flow's published/active state lags behind Architect
-	// by an unbounded amount (observed especially in slower regions such as eusc-de-east-1),
-	// producing: 400 "The specified in-queue call flow [...] is either not active, of the
-	// wrong type or is not published". This propagation delay is outside the test's control
-	// and cannot be made reliable with sleeps (multiple sleep durations were tried and still
-	// failed).
 	var (
 		queueResourceLabel1   = "test-queue"
 		queueName1            = "Terraform Test Queue1-" + uuid.NewString()

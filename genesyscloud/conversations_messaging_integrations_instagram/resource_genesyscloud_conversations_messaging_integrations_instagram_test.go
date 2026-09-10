@@ -23,7 +23,6 @@ tests for conversations_messaging_integrations_instagram.
 */
 
 func TestAccResourceConversationsMessagingIntegrationsInstagram(t *testing.T) {
-	// TEMP: skip removed to observe real result
 	t.Parallel()
 
 	var (

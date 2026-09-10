@@ -22,7 +22,6 @@ tests for integration_facebook.
 */
 
 func TestAccResourceIntegrationFacebook(t *testing.T) {
-	// TEMP: skip removed to observe real result
 	t.Parallel()
 	var (
 		testResourceLabel1 = "test_sample"

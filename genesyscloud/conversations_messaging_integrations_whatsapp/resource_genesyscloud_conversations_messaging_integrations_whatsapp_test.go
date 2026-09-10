@@ -24,7 +24,6 @@ tests for conversations_messaging_integrations_whatsapp.
 */
 
 func TestAccResourceConversationsMessagingIntegrationsWhatsapp(t *testing.T) {
-	// TEMP: skip removed to observe real result
 	var (
 		resourceLabel                 = "test_messaging_whatsapp"
 		resourceName                  = "TestTerraformMessagingWhatsapp-" + uuid.NewString()

@@ -2332,12 +2332,6 @@ resource "%s" "%s" {
 				),
 			},
 			{
-				// Step 2: Export the flow after it has been fully published.
-				// The Archy exporter authenticates a separate session and reads the flow
-				// through a different path than the provider's create/publish call. A short
-				// wait is not always enough for the freshly-published flow to propagate to
-				// Archy's read path, which surfaces as "could not find the flow with id ...".
-				// Wait longer here to let the flow become visible to Archy before exporting.
 				PreConfig: func() {
 					time.Sleep(60 * time.Second)
 				},

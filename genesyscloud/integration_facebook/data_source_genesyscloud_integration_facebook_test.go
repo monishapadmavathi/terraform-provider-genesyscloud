@@ -19,7 +19,6 @@ Test Class for the integration facebook Data Source
 */
 
 func TestAccDataSourceIntegrationFacebook(t *testing.T) {
-	// TEMP: skip removed to observe real result
 	t.Parallel()
 	var (
 		testResourceLabel1 = "test_sample"

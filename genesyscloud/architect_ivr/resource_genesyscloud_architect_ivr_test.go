@@ -212,14 +212,10 @@ func TestAccResourceArchitectIvrConfigDnisOverload(t *testing.T) {
 
 		didRangeLength       = 100 // Should be at least 50 to avoid index out of bounds errors below
 		didPoolResourceLabel = "did_pool"
-		// Randomize the base of the fallback range so leftover DID pools / IVR configs from a
-		// previous (possibly failed) run cannot collide with this run's addresses. A fixed
-		// hardcoded range caused "The addresses '+...' is already assigned to the IVRConfig"
-		// (DUPLICATE_VALUE) when a prior run's IVR config still held numbers in the same range.
-		startNumber    = 4219550000 + (rand.Intn(400) * 1000)
-		endNumber      = startNumber + didRangeLength
-		startNumberStr = fmt.Sprintf("+%v", startNumber)
-		endNumberStr   = fmt.Sprintf("+%v", endNumber)
+		startNumber          = 4219550000 + (rand.Intn(400) * 1000)
+		endNumber            = startNumber + didRangeLength
+		startNumberStr       = fmt.Sprintf("+%v", startNumber)
+		endNumberStr         = fmt.Sprintf("+%v", endNumber)
 	)
 
 	/*
